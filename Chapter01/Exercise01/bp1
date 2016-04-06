@@ -1,0 +1,20 @@
+#!/bin/bash
+#: Title       : bp1
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : a. Creates a directory inside $HOME
+#:             : b. Populates it with two subdirectories, bin and scripts
+#: Options     : N/A
+
+# The main function declaration
+main() {
+    # Parameter declaration section (header)
+    shift $#
+    
+    # Function's body section
+    mkdir -p $HOME/bp1/{bin,scripts}
+}
+
+# Run the script by issuing the main funciton passing all pars to it
+main "$@"

@@ -1,0 +1,46 @@
+#!/bin/bash
+#: Title       : chw
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : a. Writes a script that creates the "Hello, World!" script file called "hw"
+#:             : b. Creates it inside $HOME/bp1/bin
+#:             : c. Makes it executable
+#:             : d. And then executes it
+#: Options     : N/A
+
+main() {
+    shift $#
+    
+    # Variable declaration section
+    declare script=$HOME/bp1/bin/hw
+    declare code="#!/bin/bash\n"
+
+    # Write all hw code
+    code+="#: Title       : hw\n"
+    code+="#: Date        : 2016-04-06\n"
+    code+="#: Author      : \"Kybernetes\" <correodelkybernetes@gmail.com>\n"
+    code+="#: Version     : 1.0\n"
+    code+="#: Description : Print \"Hello, World!\"\n"
+    code+="#: Options     : N/A\n"
+    code+="\n"
+    code+="# The main function declaration\n"
+    code+="main() {\n"
+    code+="\t# Parameter handling section\n"
+    code+="\tshift $#                      # Nothing to do, just discard any\n"
+    code+="\n"
+    code+="\t# Function's body section\n"
+    code+="\tprintf \"%s\\\n\" \"Hello, World!\" # Output the message\n"
+    code+="}\n"
+    code+="\n"
+    code+="# Run the script by issuing the main funciton\n"
+    code+="main \"\$@\"\n"
+    # Put it into scipt file
+    printf "%b" "$code" >$script 2>/dev/null
+    # Make script file executable
+    chmod u+x $script 2>/dev/null
+    # Execute it in current shell's environment
+    source $script
+}
+
+main "$@"

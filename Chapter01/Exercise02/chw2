@@ -1,0 +1,31 @@
+#!/bin/bash
+#: Title       : chw
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 2.0 (a simpler version)
+#: Description : a. Writes a script that creates the "Hello, World!" script file called "hw"
+#:             : b. Creates it inside $HOME/bp1/bin
+#:             : c. Makes it executable
+#:             : d. And then executes it
+#: Options     : N/A
+
+main() {
+    shift $#
+    
+    # Variable declaration section
+    declare script=$HOME/bp1/bin/hw
+    declare code=""
+    declare hwscript=$HOME/Workspaces/ProBashProgramming/hw
+
+    # Get code from hw script
+    code=$(< $hwscript )
+
+    # Put it into scipt file
+    printf "%s\n" "$code" >$script 2>/dev/null
+    # Make script file executable
+    chmod u+x $script 2>/dev/null
+    # Execute it in current shell's environment
+    source $script
+}
+
+main "$@"

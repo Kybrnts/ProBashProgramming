@@ -1,0 +1,19 @@
+#!/bin/bash
+#: Title       : hw
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Print "Hello, World!"
+#: Options     : N/A
+
+# The main function declaration
+main() {
+    # Parameter declaration section (header)
+    shift $#                      # Nothing to do, just discard any
+
+    # Function's body section
+    printf "%s\n" "Hello, World!" # Output the message
+}
+
+# Run the script by issuing the main funciton
+main "$@"
