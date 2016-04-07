@@ -1,0 +1,20 @@
+#!/bin/bash
+#: Title       : hello
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 2.0 (improved)
+#: Description : Writes greeting message to a name passed through $1
+#: Options     : N/A
+
+main() {
+    # Argument declaration section
+    declare name="${1:-Unknown}" # Declare a variable and store $1 value on it
+                                 # Also define a default value (Unknown) in case $1 is empty
+    shift $#                     # Discard any other positional parameters
+    
+    # Function body section
+    printf "Hello, %s!\n" "$name" # Output greeting message to specified name
+}
+
+# Call main function with all its parameters
+main "$@"

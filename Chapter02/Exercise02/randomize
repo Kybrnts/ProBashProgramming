@@ -1,0 +1,26 @@
+#!/bin/bash
+#: Title       : Report
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Prints formated random numbers to file and to variable
+#: Options     : N/A
+
+main() {
+    # Function arguments declaration section
+    shift $#   # Discard all positional parameters
+
+    # Variables declaration section
+    declare -i digits=5                           # Digits per random number to display
+    declare format=" %${digits}d.%-5${digits}d\n" # Single line output format
+    declare outputfile=$HOME/randoms              # File to print output
+    declare outputvar=""                          # Variable to print output
+
+    # Main function's body
+    outputvar=$(printf "$format" $RANDOM $RANDOM\
+                                 $RANDOM $RANDOM\
+                                 $RANDOM $RANDOM\
+                                 $RANDOM $RANDOM | tee $outputfile)
+}
+
+main "$@"

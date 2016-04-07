@@ -1,0 +1,16 @@
+#: Title       : Wrongcommand.txt
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Response to Exercise #1 Chapter 2
+#: Options     : N/A
+
+Redirection is performed before command execution so in "tr A Z < $HOME/temp > $HOME/temp", file "$HOME/tmp" is first
+truncated, then "tr" will attempt to read from it, but nothing is there, since it has already been truncated. Therefore
+nothing will be translated, and that is wrong.
+
+As it is stated in page 14:
+   "If you redirect to the same file you are reading from, that file will be truncated, and the command will have
+   nothing to read."
+
+Mentioned command does exactly that, and that is what it is wrong with it.

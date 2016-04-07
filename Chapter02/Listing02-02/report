@@ -1,0 +1,35 @@
+#!/bin/bash
+#: Title       : Report
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Prints formated sales report
+#: Options     : N/A
+
+main() {
+    # Function arguments declaration section
+    shift $#  # Discard all positional parameters
+    
+    # Variables declaration section    
+    declare divider===================================== # Build a long string of equals signs
+    declare header="\n %-10s %11s %8s %10s\n"            # Format strings for printf
+    declare format=" %-10s %11.2f %8d %10.2f\n"          #
+    declare totalwidth=44                                # With of divider
+    
+    # Extend divider
+    divider=$divider$divider
+    
+    # Print categories
+    printf "$header" ITEM "PER UNIT" NUM TOTAL
+    
+    # Print divider to match width of report
+    printf "%$totalwidth.${totalwidth}s\n" "$divider"
+    
+    # Print lines of report
+    printf "$format" \
+	   Chair 79,95 4 3198,8 \
+	   Table 209,99 1 209,99 \
+	   Armchair 315,49 2 630,98
+}
+
+main "$@"

@@ -1,0 +1,18 @@
+#!/bin/bash
+#: Title       : hello
+#: Date        : 2016-04-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 2.0 (improved)
+#: Description : Writes greeting message to a name passed through $1
+#: Options     : N/A
+
+main() {
+    # Argument declaration section
+    #shift $#
+    
+    # Function body section
+    printf "Hello, %s!\n" "$1" # Output greeting message to specified name
+}
+
+# Call main function with all its parameters
+main "$@"
