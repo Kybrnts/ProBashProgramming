@@ -1,0 +1,32 @@
+#!/bin/bash
+#: Title       : Enterinrange
+#: Date        : 2016-04-08
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Asks the user to enter a number between 20 and 30. If the user enters an invalid number or a
+#:             : non-number, ask again. Repeat until a satisfactory number is entered.
+#: Options     : N/A
+
+main() {
+    shift $#
+    
+    declare -i MIN=20 MAX=30
+
+    # Keep reading with input constraints in prompt
+    # "-r" Option disables input backslash escaping
+    while read -rp "Enter an integer number between 20 and 30: "; do
+	case $REPLY in    # REPLY is bash internal var for read input response
+	    *[^0-9]*) ;;  # Non numeric chars on input? Go to the next error message execution line.
+	    *)            # Else, perform the withing MIN-MAX range check.
+		if [ $REPLY -ge $MIN -a $REPLY -le $MAX ]; then 
+		          # Display user's correct input
+		    printf "%s\n" "You entered $REPLY." >&2
+		    break # Stop loop execution only when both numeric input ADN within range are verified
+		fi ;;
+	esac
+	                  # Display generic error message before prompting again
+	printf "%s\n" "Wrong entry provided. Try again." >&2
+    done
+}
+
+main "$@"

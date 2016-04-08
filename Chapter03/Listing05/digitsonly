@@ -1,0 +1,22 @@
+#!/bin/bash
+#: Title       : Digitsonly
+#: Date        : 2016-04-07
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : 
+#: Options     : N/A
+
+main() {    
+    declare string="${1:-NULL}" # First argument stores string to test
+    shift $#
+
+    case $string in
+	*[^0-9]*) return 1 ;;   # Does string contain non-numerical characters?
+	*) return 0 ;;          # In any other case..
+    esac
+   # Previous case test, works in every case, except when $1 is empty or set to the null string.
+   # For both cases we defined the default "NULL" value at the begining of the function, so that
+   # Later both cases will be tested as false.
+}
+
+main "$@"

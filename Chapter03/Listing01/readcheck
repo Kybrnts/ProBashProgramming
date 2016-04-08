@@ -1,0 +1,24 @@
+#!/bin/bash
+#: Title       : Readcheck
+#: Date        : 2016-04-07
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Read and check input
+#: Options     : N/A
+
+main() {
+    # Function arguments declaration section
+    shift $#   # Discard all positional parameters
+
+    # Variables declaration section
+    declare name=""
+
+    # Function's body
+    read name                      # Read one line of input and store in "name" variable
+    if [ -z "$name" ]; then        # Check if "name" content is empty
+	echo "No name entered" >&2 # Send error message to STDERR
+	return 1                   # Set a failed return code
+    fi
+}
+
+main "$@"

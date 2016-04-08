@@ -1,0 +1,25 @@
+#!/bin/bash
+#: Title       : Substring
+#: Date        : 2016-04-07
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Does one string contain another
+#: Options     : N/A
+
+main() {
+    # Function arguments declaration section
+    declare superstring="$1" # First argument stores container string
+    declare string="$2"      # Second stores contained string to test
+    shift $#                 # Discard all positional parameters
+
+    case $superstring in
+	*"$string"*)         # Superstring matches string w/additional left or right chars;
+	    return 0 ;;
+	*)                   # Superstring will always match with "*", but match will not be tested if the previous
+	                     # match tested OK
+	    return 1 ;;
+
+    esac
+}
+
+main "$@"

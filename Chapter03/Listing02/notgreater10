@@ -1,0 +1,25 @@
+#!/bin/bash
+#: Title       : Notgreater10
+#: Date        : 2016-04-07
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Prompt for a Number and Check That It Is No Greater Than Ten
+#: Options     : N/A
+
+main() {
+    # Function arguments declaration section
+    shift $#   # Discard all positional parameters
+
+    # Variables declaration section
+    declare -i number=0 # Declare a integer variable to store input number
+
+    read number
+    if [ $number -gt 10 ]; then
+	printf "%d is too big\n" $number >&2
+	return 1
+    else
+	printf "You entered %d\n" $number
+    fi
+}
+
+main "$@"

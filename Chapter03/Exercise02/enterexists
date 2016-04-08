@@ -1,0 +1,26 @@
+#!/bin/bash
+#: Title       : Enterexists
+#: Date        : 2016-04-08
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Prompts user to enter the name of a file. Repeat untill the user enters a file that exists.
+#: Options     : N/A
+
+main() {
+    shift $#
+    
+    # Keep reading with input constraints in prompt
+    # Allow backslash to escape characters (useful for file names w/spaces)
+    while read -p "Enter path of an existing file: "; do
+	# Is input a non-empty string that points to an existing file?
+	if [ -n "$REPLY" -a -e "$REPLY" ]; then
+	    # Yes, so print file name without any other path's component
+	    printf "%s\n" "File \"$( basename $REPLY )\" exists."
+	    break
+	fi
+	# Display error message before prompting again
+	printf "%s\n" "Wrong entry provided. Try again." >&2
+    done
+}
+
+main "$@"
