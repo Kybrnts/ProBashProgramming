@@ -15,8 +15,8 @@ main() {
 	*) return 0 ;;          # In any other case..
     esac
    # Previous case test, works in every case, except when $1 is empty or set to the null string.
-   # For both cases we defined the default "NULL" value at the begining of the function, so that
-   # Later both cases will be tested as false.
+   # In both cases we defined the default "NULL" value at the begining of the function, so that
+   # later they will be tested as false.
 }
 
 main "$@"

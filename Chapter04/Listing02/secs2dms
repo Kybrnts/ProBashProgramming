@@ -1,0 +1,24 @@
+#!/bin/bash
+#: Title       : Secs2dms
+#: Date        : 2016-04-11
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Convert Seconds (in Argument $1) to Days, Hours, Minutes and Seconds
+#: Options     : N/A
+
+main() {
+    declare -i seconds="$1"
+    shift $#
+
+    declare -ri secs_in_day=86400 secs_in_hour=3600\
+                mins_in_hour=60 secs_in_min=60
+    
+    days=$(( $seconds / $secs_in_day ))
+    secs=$(( $seconds % $secs_in_day ))
+    printf "%d:%02d:%02d:%02d\n"  "$days" \
+                                  "$(( $secs / $secs_in_hour ))" \
+                                  "$(( ($secs / $mins_in_hour) % $mins_in_hour ))" \
+                                  "$(( $secs % $secs_in_min ))"
+}
+
+main "$@"

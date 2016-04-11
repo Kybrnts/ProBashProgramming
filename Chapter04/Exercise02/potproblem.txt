@@ -1,0 +1,6 @@
+#: Title       : Potprob.txt
+#: Date        : 2016-04-11
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Response to Exercise #2 Chapter 4
+#: Options     : N/A

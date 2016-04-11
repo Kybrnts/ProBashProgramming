@@ -1,0 +1,29 @@
+#: Title       : Manyargs.txt
+#: Date        : 2016-04-11
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Response to Exercise #1 Chapter 4
+#: Options     : N/A
+
+Question: 
+  How many arguments are there on this command line? 
+  sa $# $(date "+%Y %m %d") John\ Doe
+
+Quotes: 
+  a. "When a line is executed, whether at the command prompt or in a script, the shell splits the line into
+     words wherever there is unquoted white space. Then bash examines the resulting words, performing up
+     to eight types of expansion on them as appropriate. The results of the expansions are passed to the
+     command as its arguments."
+
+0. sa $# $(date "+%Y %m %d") John\ Doe <- Four words available ("\" escapes space between "John" and "Doe");
+2. No braces available, nothing to expand upon brace expansion;
+3. No tilde character present, nothing to expand upon tilde expansion;
+4. After parameter expansion $# Expands to 0;
+5. No arithmetic expression available, nothing to expand upon arithmetic expansion;
+6. After command substitution $(date "+Y %m %d") is expanded to current YYYY mm dd (3 words);
+7. After word splitting upon arguments, we have: 0 YYYY mm dd John\ Doe;
+8. No file globbing patterns available, nothing to expand upon pathname expansion;
+9. No temporary filename-for-command allocated, nothing to expand upon process substitution;
+
+Therefore After expansion is completed we remain with the following arguments: 0 YYYY mm dd John\ Doe;
+Total: 5.
