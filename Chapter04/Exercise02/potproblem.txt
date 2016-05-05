@@ -4,3 +4,24 @@
 #: Version     : 1.0
 #: Description : Response to Exercise #2 Chapter 4
 #: Options     : N/A
+
+Question: 
+  What potential problem exists with the following snippet?
+
+  year=$( date +%Y )
+  month=$( date +%m )
+  day=$( date +%d )
+  hour=$( date +%H )
+  minute=$( date +%M )
+  second=$( date +%S )
+
+Quote: 
+  "If teh command substitution is not quoted, word splitting and pathname expansion are performed on the results."
+
+Answer:
+  Therefore the potential problem may be the result of undesired subsecuent word splitting and pathname expansion of
+  proposed command substitutions.
+  A better example would be to contrast the execution of the following two sinppets:
+  # echo $( echo './*' )
+  # echo "$( echo './*' )"
+

@@ -1,0 +1,23 @@
+#!/bin/bash
+#: Title       : Checkarg
+#: Date        : 2016-04-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Exit If Parameters Are Unset Or Empty
+#: Options     : NA
+
+main() {
+
+    ## Check for unset arguments
+    declare firstarg=${1?An argument is required} \
+            secondarg=${2?Two arguments are required}
+
+    firstarg=${firstarg:?A non-empty argument is required} \
+    secondarg=${secondarg:?Two non-empty arguments are required}
+
+    shift $#
+
+    echo "Thank you."
+}
+
+main "$@"

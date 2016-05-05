@@ -1,0 +1,24 @@
+#!/bin/bash
+#: Title       : Showvar1
+#: Date        : 2016-04-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Print value of Variable x (somewhat improved)
+#: Options     : NA
+
+main() {
+    shift $#
+
+    ## The x variable is not mean to be local, we won't "declare" it.
+    if [[ ${x+X} = X ]]; then                ## If $x is set
+	if [[ -n $x ]]; then                 ## If $x is NOT empty
+	    printf " \$x = %s\n" "$x"
+	else
+	    printf " \$x is set but empty\n"
+	fi
+    else
+	printf " %s is not set\n" "\$x"
+    fi
+}
+
+main "$@"
