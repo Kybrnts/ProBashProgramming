@@ -1,0 +1,45 @@
+#!/bin/bash
+#: Title       : Dname
+#: Date        : 2016-05-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Given var=192.168.0.123, uses parameter expansion to extract teh second number, 168.
+#:             : NOTE: We will asume that $var must consist of four integers separated by dots.
+#: Options     : NA
+
+main() {
+    shift $#
+    
+    declare num=""  # Current num container
+    declare -i n=0  # Stripped dots counter
+
+    if [ -z ${var+X} ]; then                                          # Avoid unset variable
+	printf  "Error! \$var is not present in the environment.\n" >&2
+	return 1
+    fi
+    if [ -z "${var}" ]; then                                          # Avoid empty variable
+	printf "Error! \$var is empty.\n" >&2
+	return 2
+    fi
+    while :; do                                                       # Keep processing input
+	case $var in
+	    *.*)                                                      # Are there still any dots?
+		num="${var##*.}"                                      # Store in num everything after the first dot
+		case $num in
+		    *[^0-9]*)                                         # If there are any non-digits in num..
+			printf "Error! \$var value is invalid.\n" >&2 
+			return 3 ;;
+		esac ;;
+	    *) break ;;                                               # There are no more dots, stop processing
+	esac
+	var="${var%.$num}"                                            # Strip current number w/preceeding dot
+	(( n++ ))                                                     # Increase counter
+    done
+    if [ $n -ne 3 ]; then                                             # If we didn't strip exactly 3 dots..
+	printf "Error! \$var value is invalid.\n" >&2                  
+	return 3
+    fi
+    printf "The second number of \$var is $num.\n"                    # Everything is fine, so print output
+}
+
+main "$@"

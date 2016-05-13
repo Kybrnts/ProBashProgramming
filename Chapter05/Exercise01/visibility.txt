@@ -1,0 +1,14 @@
+#: Title       : Visibility.txt
+#: Date        : 2016-05-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Response to Exercise #1 Chapter 5
+#: Options     : N/A
+
+Question:
+  By default, where can a variable assigned in a script be accessed? Select all that apply:
+  * In the current script                        <-- OK
+  * In functions definied in the current script  <-- OK
+  * In the script that called the current script
+  * In scripts called by the current script
+  * In the subshells of the current script       <-- OK

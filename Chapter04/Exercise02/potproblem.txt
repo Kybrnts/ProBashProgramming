@@ -1,4 +1,4 @@
-#: Title       : Potprob.txt
+#: Title       : Problem.txt
 #: Date        : 2016-04-11
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0
@@ -24,4 +24,3 @@ Answer:
   A better example would be to contrast the execution of the following two sinppets:
   # echo $( echo './*' )
   # echo "$( echo './*' )"
-

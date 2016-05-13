@@ -1,0 +1,21 @@
+#: Title       : Advice.txt
+#: Date        : 2016-05-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Response to Exercise #2 Chapter 5
+#: Options     : N/A
+
+Question:
+  I advise against using single-letter variables names but give a couple of places where they are reasonable. Can you
+  think of any other legitimate uses for them?
+
+Quotes:
+  * "Single-letter names should be used rarely. They are appropriate as the index in a loop, where its sole function is
+    as a counter. The letter traditionally used for this purpose is i, but I prefer n."
+  * "The only other place I use single-letter variable names is when reading throwaway material from a file."
+
+Answer:
+  I would argue in favor of using sigle-letter names for:
+  * Math problems, e.g. x, y as coordinates;
+  * Small scope variables;
+  * Short shell snippets for the interactive command line where the shorter the expresion, the merrier.

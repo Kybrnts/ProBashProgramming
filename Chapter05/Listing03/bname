@@ -1,0 +1,18 @@
+#!/bin/bash
+#: Title       : Bname
+#: Date        : 2016-04-12
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Strips the base name from provided path
+#: Options     : NA
+
+main() {
+    declare path="${1?An argument is required}"
+    shift $#
+    # 
+    # Get dname from path and then strip it from the beginning of the string.
+    # Also strip the following slash
+    printf "%s\n" "${path##$(dname "$path")/}"
+}
+
+main "$@"
