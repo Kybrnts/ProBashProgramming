@@ -10,7 +10,7 @@
 main() {
     shift $#
     
-    declare -i MIN=20 MAX=30
+    local -i MIN=20 MAX=30
 
     # Keep reading with input constraints in prompt
     # "-r" Option disables input backslash escaping

@@ -11,10 +11,10 @@ main() {
     shift $#  # Discard all positional parameters
     
     # Variables declaration section    
-    declare divider===================================== # Build a long string of equals signs
-    declare header="\n %-10s %11s %8s %10s\n"            # Format strings for printf
-    declare format=" %-10s %11.2f %8d %10.2f\n"          #
-    declare totalwidth=44                                # With of divider
+    local divider===================================== # Build a long string of equals signs
+    local header="\n %-10s %11s %8s %10s\n"            # Format strings for printf
+    local format=" %-10s %11.2f %8d %10.2f\n"          #
+    local totalwidth=44                                # With of divider
     
     # Extend divider
     divider=$divider$divider

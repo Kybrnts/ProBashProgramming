@@ -4,14 +4,14 @@
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.1
 #: Description : Given var=192.168.0.123, uses parameter expansion to extract teh second number, 168.
-#:             : NOTE: We will asume that $var must consist of four integers separated by dots.
+#:             : NOTE: We will asume that $var must consist of four integers separated by dots, and nothing more.
 #: Options     : NA
 
 main() {
     shift $#
     
-    declare num=""  # Current num container
-    declare -i n=0  # Stripped dots counter
+    local num=""  # Current num container
+    local -i n=0  # Stripped dots counter
 
     if [ -z ${var+X} ]; then                                          # Avoid unset variable
 	printf  "Error! \$var is not present in the environment.\n" >&2

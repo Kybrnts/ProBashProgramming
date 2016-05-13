@@ -8,7 +8,7 @@
 
 main() {
     # Argument declaration section
-    declare name="${1:-Unknown}" # Declare a variable and store $1 value on it
+    local name="${1:-Unknown}"   # Declare a variable and store $1 value on it
                                  # Also define a default value (Unknown) in case $1 is empty
     shift $#                     # Discard any other positional parameters
     

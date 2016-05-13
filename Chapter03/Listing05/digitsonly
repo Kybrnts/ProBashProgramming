@@ -7,12 +7,12 @@
 #: Options     : N/A
 
 main() {    
-    declare string="${1:-NULL}" # First argument stores string to test
+    local string="${1:-NULL}" # First argument stores string to test
     shift $#
 
     case $string in
-	*[^0-9]*) return 1 ;;   # Does string contain non-numerical characters?
-	*) return 0 ;;          # In any other case..
+	*[^0-9]*) return 1 ;; # Does string contain non-numerical characters?
+	*) return 0 ;;        # In any other case..
     esac
    # Previous case test, works in every case, except when $1 is empty or set to the null string.
    # In both cases we defined the default "NULL" value at the begining of the function, so that

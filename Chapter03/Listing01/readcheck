@@ -11,7 +11,7 @@ main() {
     shift $#   # Discard all positional parameters
 
     # Variables declaration section
-    declare name=""
+    local name=""
 
     # Function's body
     read name                      # Read one line of input and store in "name" variable

@@ -7,11 +7,11 @@
 #: Options     : N/A
 
 main() {
-    declare -i seconds="$1"
+    local -i seconds="$1"
     shift $#
 
-    declare -ri secs_in_day=86400 secs_in_hour=3600\
-                mins_in_hour=60 secs_in_min=60
+    local -ri secs_in_day=86400 secs_in_hour=3600\
+              mins_in_hour=60 secs_in_min=60
     
     days=$(( $seconds / $secs_in_day ))
     secs=$(( $seconds % $secs_in_day ))

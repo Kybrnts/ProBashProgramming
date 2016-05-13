@@ -1,1 +1,67 @@
-Chapter04/Listing03/parseopts
+#!/bin/bash
+#: Title       : Parseopts
+#: Date        : 2016-04-11
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Parse command-line options
+#: Options     : -f: Specifies a file name
+#:             : -v: Be verbose
+
+main() {
+    
+    ## Get the name of the script without its path
+    local progname=${0##%/}
+    ## Options arguments storage
+    local -i verbose=0
+    local filename=""
+    ## List of options the program will accept;
+    ## Thise options that take arguments are followed by a colon
+    local optstring=f:v
+    ## Current option storage
+    local opt=""
+    
+    ## The loop calls tegopts untill there are no more options on the command line
+    ## Each option is stored in $opt, any option arguments are stored in OPTARG
+    while getopts $optstring opt; do
+	case $opt in 
+	    f) filename="$OPTARG" ;;
+	    v) (( verbose++ )) ;;
+	    *) return 1 ;;
+	esac
+    done
+    
+    ## Remove options from the command line
+    ## $OPTIND points to the next, unparsed argument by getopts
+    shift "$(( $OPTIND - 1 ))"
+    
+    ## Check wether a filename was entered
+    if [ -n "$filename" ]; then
+	if [ $verbose -gt 0 ]; then
+	    printf "Filename is %s\n" "$filename"
+	fi
+    else
+	if [ $verbose -gt 0 ]; then
+	    printf "No filename entered\n" >&2
+	fi
+	return 1	
+    fi
+    
+    ## Check wheter file exists
+    if [ -f "$filename" ]; then 
+	if [ $verbose -gt 0 ]; then
+	    printf "Filename %s found\n" "$filename"
+	fi
+    else
+	if [ $verbose -gt 0 ]; then
+	    printf "File, %s, does not exist\n" "$filename" >&2
+	fi
+	return 2
+    fi
+    ## If the verbose option is selected,
+    ## print the number of arguments remaining on the command line
+    if [ $verbose -gt 0 ]; then
+	printf "Remaining argument number is %d\n" "$#"
+    fi
+}
+
+main "$@"

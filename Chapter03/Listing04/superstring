@@ -8,9 +8,9 @@
 
 main() {
     # Function arguments declaration section
-    declare superstring="$1" # First argument stores container string
-    declare string="$2"      # Second stores contained string to test
-    shift $#                 # Discard all positional parameters
+    local superstring="$1" # First argument stores container string
+    local string="$2"      # Second stores contained string to test
+    shift $#               # Discard all positional parameters
 
     case $superstring in
 	*"$string"*)         # Superstring matches string w/additional left or right chars;

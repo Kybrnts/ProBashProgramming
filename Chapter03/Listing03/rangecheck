@@ -10,13 +10,13 @@ main() {
     # Function arguments declaration section
     shift $#   # Discard all positional parameters
 
-    declare -i number=0 # Declare a integer variable to store input number
+    local -i number=0 # Declare a integer variable to store input number
 
     printf "Eneter a number between 10 and 20 inclusive: "
     read number
     # NOTE: In real use, a number entered in the previous examples should be checked for invalid characters before its
     #       value is compared. However enabling number's integer attribute causes its value to be assigned as zero when
-    #       non numeric characters are read. This is accomplished through the previous "declare" statement.
+    #       non numeric characters are read. This is accomplished through the previous "local" statement.
     if [ $number -lt 10 ]; then
 	printf "%d is too low\n" $number >&2 
 	return 1

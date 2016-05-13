@@ -10,15 +10,15 @@
 main() {
     
     ## Get the name of the script without its path
-    declare progname=${0##%/}
+    local progname=${0##%/}
     ## Options arguments storage
-    declare -i verbose=0
-    declare filename=""
+    local -i verbose=0
+    local filename=""
     ## List of options the program will accept;
     ## Thise options that take arguments are followed by a colon
-    declare optstring=f:v
+    local optstring=f:v
     ## Current option storage
-    declare opt=""
+    local opt=""
     
     ## The loop calls tegopts untill there are no more options on the command line
     ## Each option is stored in $opt, any option arguments are stored in OPTARG

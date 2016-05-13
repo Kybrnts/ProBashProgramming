@@ -7,7 +7,7 @@
 #: Options     : NA
 
 main() {
-    declare path="${1?An argument is required}"
+    local path="${1?An argument is required}"
     shift $#
 
     case $path in

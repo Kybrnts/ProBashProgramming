@@ -13,8 +13,8 @@ main() {
     shift $#
     
     # Variable declaration section
-    declare script=$HOME/bp1/bin/hw
-    declare code="#!/bin/bash\n"
+    local script=$HOME/bp1/bin/hw
+    local code="#!/bin/bash\n"
 
     # Write all hw code
     code+="#: Title       : hw\n"

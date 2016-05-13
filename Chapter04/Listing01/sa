@@ -7,10 +7,10 @@
 #: Options     : N/A
 
 main() {
-    # shift $#     # Do not spare any arguments
+    # shift $#   # Do not spare any arguments
 
-    declare pre=:  # Passed arguments delimeters
-    declare post=: # 
+    local pre=:  # Passed arguments delimeters
+    local post=: # 
 
     # Print each argument on a separate line, enclosed by previous delimiters
     printf "$pre%s$post\n" "$@"

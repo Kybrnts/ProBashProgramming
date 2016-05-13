@@ -11,7 +11,7 @@ main() {
     shift $#   # Discard all positional parameters
 
     # Variables declaration section
-    declare -i number=0 # Declare a integer variable to store input number
+    local -i number=0 # Declare a integer variable to store input number
 
     read number
     if [ $number -gt 10 ]; then
