@@ -1,0 +1,50 @@
+#!/bin/bash
+#: Title       : Funky
+#: Date        : 2016-05-16
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Test for a subshell compound command
+#: Options     : NA
+#
+# Quotes:
+# 1. "By default, a variable’s definition is known only to the shell in which it is defined (and to subshells of that
+#    shell)"
+# 2. "Variables set in a subshell are not visible to the script that called it. Subshells include command substitution,
+#    as in $(command) or `command`; all elements of a pipeline, and code enclosed in parentheses, as in ( command )"
+#
+
+## Global variable declarations
+declare name=""
+
+## Function declarations
+## "name" variable is not declared as local, hence global
+## This version of funky will be executed in the current shell
+funky1() { echo "Funky1, 1: name = $name"; name=nobody; echo "Funky1, 2: name = $name"; }
+## On the contrary this one will be executed in a subshell
+funky2() ( echo "Funky2, 1: name = $name"; name=nobody; echo "Funky2, 2: name = $name" )
+## Notice the syntax difference: funky1's body is enclosed within "{}"; and it should finish in a newline or ";".
+## On the other hand funky2's body is enclosed within "()".
+
+main() {
+    shift $#
+    ##
+    ## Test1: Set the global variable
+    name=Rumpelstiltskin
+    echo "Main, Test1: name = $name"
+    ## Call funky1()
+    ## Funky1 is executed in the current shell, so "name" is the same as in the current shell 
+    funky1 
+    ## So changes to name's value are visible in the current shell
+    echo "Main, Test1: name = $name"
+    ##
+    ## Test2: Re-set global variabl
+    name=Rumpelstiltskin
+    echo "Main, Test2: name = $name"
+    ## Call funk2()
+    ## Funky2 is executed in a sub-sell, so "name" is nothing but a copy of current shell's
+    funky2
+    ## Changes to name's value are not vivible in the current shell
+    echo "Main, Test2: name = $name"
+}
+
+main "$@"

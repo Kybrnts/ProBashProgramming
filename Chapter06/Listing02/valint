@@ -1,0 +1,16 @@
+#!/bin/bash
+#: Title       : Valint
+#: Date        : 2016-05-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Check argument for valid integer
+#: Options     : NA
+
+valint() { #@ USAGE: valint INTEGER
+    local integer="${1?An argument is required}"
+    shift $#
+
+    case ${integer#-} in      ## Leading hyphen removed to accept negative numbers
+	*[^0-9]*) return 1 ;; ## The string contains a non-digit character
+    esac                      ## the whole number and nothing but the number
+}

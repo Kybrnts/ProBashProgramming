@@ -1,0 +1,24 @@
+#!/bin/bash
+#: Title       : Isvalidiptest
+#: Date        : 2016-05-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Checks "isvalidip()" function
+#: Options     : NA
+
+# Include isvalidip() function declaration in current shell
+. "${0%/*}/isvalidip"
+
+main() {
+    shift $#
+    
+    for ip in 127.0.0.1 168.260.0.234 1.2.3.4 123.100.34.21 204.255.122.150; do
+	if isvalidip "$ip"; then
+	    printf "%15s: valid\n" "$ip"
+	else
+	    printf "%15s: invalid\n" "$ip"
+	fi
+    done
+}
+
+main

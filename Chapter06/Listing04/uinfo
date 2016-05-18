@@ -1,0 +1,39 @@
+#!/bin/bash
+#: Title       : Uinfo
+#: Date        : 2016-05-17
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Print information about the environment
+#: Options     : N/A
+
+## Function declarations
+uinfo() { #@ USAGE: uinfo [file]
+    ## Function header
+    shift $#
+
+    printf "%12s: %s\n" \
+	USER    "${USER:-No value assigned}" \
+	PWD     "${PWD:-No value assigned}" \
+	COLUMNS "${COLUMNS:-No value assigned}" \
+	LINES   "${LINES:-No value assigned}" \
+	SHELL 	"${SHELL:-No value assigned}" \
+        HOME    "${HOME:-No value assigned}" \
+	TERM	"${TERM:-No value assigned}"
+} >"${1:-/dev/fd/1}" ## Redirection is evaluated at runtime
+                     ## This means that its executed BEFORE above "shift"
+                     ## Also output may be captured with command substitution:
+                     ##   info=$( uinfo )
+
+main() {
+    ## Function header
+    shift $#
+
+    printf "$FUNCNAME: Calling \"uinfo\" without parameter..\n" ## FUNCNAME contains the name of the current function in
+    uinfo                                                       ## execution.
+    
+    printf "$FUNCNAME: Calling \"uinfo /tmp/uinfotest..\"\n"
+    uinfo /tmp/uinfotest
+}
+
+## Run!
+main "$@"

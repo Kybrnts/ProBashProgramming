@@ -1,0 +1,148 @@
+#!/bin/bash
+#: Title       : Max3
+#: Date        : 2016-05-18
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Sort three integers and store results in variables
+#: Options     : N/A
+
+## Global variables 
+declare -ri _MAXFAILS=3      # Maximum read input fails
+declare -i _MAX3 _MID3 _MIN3 # Numbers to order storage
+
+## Function declarations
+getint() { #@ Prompt user, and read integer string from input
+           #@ USAGE: getint PROMPTSTRING NAME
+    ## Function headers
+    local prmptstr="${1?$FUNCNAME: Missing argument}"
+    local ref_name="${2?$FUNCNAME: Missing argument as name}"
+    shift $#
+
+    ## Local variables
+    local intstring=""    # Input string container
+    local -i dfltstring=0 # Default input
+
+    ## Randomize default input and its sign
+    dfltstring=$(( ((-1*$RANDOM % 2) < 0 ? -1 : 1)*$RANDOM ))
+    ## Prompt user and get input
+    ## * Set prompt w/default input
+    ## * Set input timeout 30 seconds
+    ## *Store read value
+    read -p "$prmptstr ($dfltstring): " -t 30 -r intstring                        
+
+    ## Timed out while awaiting for answer?
+    if [ -z "$intstring" -o  $? -gt 128 ]; then
+	printf -v $ref_name "%d" $dfltstring # Write default input in ref_name's name
+	return 1                             # Let the calling environment know
+    fi
+    printf -v $ref_name "%s" "$intstring"    # Write intstring's value in ref_name's name
+}
+valint() { #@ Test for digits-only and optionally single-dashed-prefix string at $1
+           #@ USAGE: valint INTEGER
+    ## Function header
+    local integer="${1?$FUNCNAME: Missing argument}"
+    shift $#
+
+    case ${integer#-} in            ## Leading hyphen removed to accept negative numbers
+	"" | *[^0-9]*) return 1 ;;  ## The string contains a non-digit character
+    esac                            ## the whole number, and nothing but the number
+}
+atoi() { #@ Turns a valid integer string into arithmetic evaluable integer string
+         #@ USAGE: atoi VALID_INT NAME
+    ## Funtion header
+    local integer="${1?$FUNCNAME: Missing argument}"
+    local ref_name="${2?$FUNCNAME: Missing argument as name}"
+    shift $#
+    
+    ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
+    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
+    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
+    integer=${integer%%[^-]*}$(( 10#${integer#-} )) # First keep hyphen character if present (negative integers)
+                                                    # Then replace unsigned $integer w/its decimal representation
+    printf -v $ref_name "%d" $integer               # Now it is safe to write it on "ref_name" name value.
+}
+getvalint() { #@ Tries to read a valid random integer string from user and turns it int a integer
+              #@ USAGE: getvalint "[ PROMPTSTRING ]" NAME
+    ## Function header
+    local prmptstr="${1:-Enter a whole number}"                # Prompt for getint()
+    local ref_name="${2?$FUNCNAME: Missing argument as name}"  # One of _MAX3, _MID3 or _MIN3
+    shift $#
+
+    ## Local variables
+    local inptstr=""                                           # Current input string
+    local -i fails=0                                           # Input read fails counter
+    
+    while [ $fails -lt $_MAXFAILS ]; do
+	getint "$prmptstr" inptstr
+	case $? in
+	    0)  ## getint() succeeded, we can now test input string
+		if ! valint "$inptstr"; then # InValid input string?
+		    printf "%s\n" "Invalid input read. Try again."
+		else                         # Valid input string?
+		    atoi $inptstr $ref_name  # Turn input string into integer
+		    break
+		fi ;;
+	    1) ## getint() get default $RANDOM as input, assume valid input string
+		printf -v $ref_name "%d" $inptstr
+		break ;;
+	esac
+	(( fails++ ))
+    done
+    if [ $fails -eq $_MAXFAILS ]; then
+	return 1
+    fi
+}
+_max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
+          #@ USAGE: _max3 INT INT INT    
+    ## Funtion header
+    ## Fail if not enouth args w/propper error message. Also INT values will be accepted
+    local -i int1="${1:?$FUNCNAME: Missing integer argument}" 
+    local -i int2="${2:?$FUNCNAME: Missing integer argument}"
+    local -i int3="${3:?$FUNCNAME: Missing integer argument}"    
+    shift $#
+
+    set -- $int1 $int2 $int3         # Now that we tested values we can use them
+    unset int1 int2 int3             # Release used memory 
+    
+    ## Sort input values
+    [ $1 -gt $2 ] && set -- $2 $1 $3  # If $1 is greater thatn $2 swap 'em
+    [ $2 -gt $3 ] && set -- $1 $3 $2  # Now $1, $2 and $3 have been reasigned
+    [ $1 -gt $2 ] && set -- $2 $1 $3 
+
+    ## Store results in globals
+    _MAX3=$3
+    _MID3=$2
+    _MIN3=$1 
+}
+
+main() {
+    ## Function header
+    shift $#
+    
+    ## Local variables
+    local -ri digits=5                      # Digits per random number to display
+    local -r format=" %5s: %-5${digits}d\n" # Single line output format
+    
+    ## Try to get three random valid integers
+    if ! getvalint "" _MAX3; then 
+	printf "Error! Failed to read first valid integer" >&2
+	return 1
+    fi
+    if ! getvalint "Enter another whole number" _MID3; then 
+	printf "Error! Failed to read second valid integer" >&2
+	return 2
+    fi
+    if ! getvalint "Enter the the last whole number" _MIN3; then
+	printf "Error! Failed to read third valid integer" >&2
+	return 3
+    fi
+
+    # Sort the three random numbers
+    _max3 $_MAX3 $_MID3 $_MIN3
+
+    ## Output results
+    printf "$format" _MAX3 $_MAX3 _MID3 $_MID3 _MIN3 $_MIN3
+}
+
+## Run!
+main "$@"

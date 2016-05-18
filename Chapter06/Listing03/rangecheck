@@ -1,0 +1,64 @@
+#!/bin/bash
+#: Title       : Rangecheck
+#: Date        : 2016-05-17
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Prompt for a number and check that it is within a given range
+#: Options     : N/A
+
+## Globals
+declare -ir MIN=10 # Default minimum value
+declare -ir MAX=20 # Default maximum value
+
+## Function declarations
+valint() { #@ USAGE: valint INTEGER
+    ## Function header
+    local integer="${1?An argument is required}"
+    shift $#
+
+    case ${integer#-} in            ## Leading hyphen removed to accept negative numbers
+	"" | *[^0-9]*) return 1 ;;  ## The string contains a non-digit character
+    esac                            ## the whole number, and nothing but the number
+}
+rangecheck() { #@ USAGE: rangecheck int [low [high]]
+## /!\ This funtion will accept INTEGERS only /!\
+    ## Function header
+    local -i integer="${1:?An integer argument is required}"
+    local -i low="${2:-$MIN}"           ## Use global defaults, as local defaults
+    local -i high="${3:-$MAX}"
+    shift $#
+
+    [ $integer -ge $low ] || return 1   ## Exit code for below minimum is 1
+    [ $integer -le $high ] || return 2  ## Exit code for above maximum is 2
+}
+
+main() {
+    ## Function header
+    shift $#
+    
+    local integer="" # Input number string storage
+
+    read -p "Enter a whole number between $MIN and $MAX inclusive: " integer
+    if ! valint "$integer"; then 
+	printf "%s is not a valid input value.\n" $integer >&2
+	return 2
+    fi
+    ## Strip left zeros from $integer, as they cannot be assigned to rangecheck arguments.
+    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
+    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
+    integer=${integer%%[^-]*}$(( 10#${integer#-} )) ## First keep hyphen character if present
+                                                    ## Then replace unsigned $integer w/its decimal representation
+    rangecheck $integer                             ## Now it is safe to feed it to rangecheck()
+    case $? in
+	2) 
+	    printf "%d is too high\n" $integer >&2
+	    return 1 ;;
+	1) 
+	    printf "%d is too low\n" $integer >&2 
+	    return 1 ;;
+    esac    
+    printf "You entered %d\n" $integer
+}
+
+## Run!
+main "$@"
