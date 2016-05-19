@@ -1,0 +1,37 @@
+#!/bin/bash
+#: Title       : Valint
+#: Date        : 2016-05-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Tests valint() function
+#: Options     : NA
+
+# Include valint() function declaration in current shell or exit inmediately
+. "${0%/*}/valint" || exit 1
+
+displayvalint() { #@ Display a fancy message to showcase valint
+                  #@ USAGE: displayvalint [ INTEGER ]
+    local integer="${1-NULL}" # If unset argument, set it to "NULL"
+    shift $#
+
+    printf "\"$integer\" is"
+    if ! valint "$integer"; then
+	printf " NOT"
+    fi
+    printf " a valid integer\n"
+}
+main() {
+    displayvalint $RANDOM          # Valid integer
+    displayvalint 192.168.100.1    # INvalid integer
+    displayvalint -9999            # Valid 
+    displayvalint 0.3141592        # INvalid
+    displayvalint 00025            # Valid
+    displayvalint "Hello world!"   # INvalid
+    displayvalint -01              # Valid
+    displayvalint ""               # INvalid
+    displayvalint                  # NULL is passed to valint, so INvalid    
+    valint                         # Wrong invocation of valint(), script finishes
+    printf "Not executed\n"        # Execution never reaches this point
+}
+
+main "@"

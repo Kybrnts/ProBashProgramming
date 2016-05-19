@@ -6,8 +6,8 @@
 #: Description : Checks "isvalidip()" function
 #: Options     : NA
 
-# Include isvalidip() function declaration in current shell
-. "${0%/*}/isvalidip"
+# Include isvalidip() function declaration in current shell or exit inmediately
+. "${0%/*}/isvalidip1" || exit 1
 
 main() {
     shift $#

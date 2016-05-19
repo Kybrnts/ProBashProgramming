@@ -6,21 +6,14 @@
 #: Description : Prompt for a number and check that it is within a given range
 #: Options     : N/A
 
+## Inclusions
+. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+
 ## Globals
 declare -ir MIN=10 # Default minimum value
 declare -ir MAX=20 # Default maximum value
 
-## Function declarations
-valint() { #@ USAGE: valint INTEGER
-    ## Function header
-    local integer="${1?An argument is required}"
-    shift $#
-
-    case ${integer#-} in            ## Leading hyphen removed to accept negative numbers
-	"" | *[^0-9]*) return 1 ;;  ## The string contains a non-digit character
-    esac                            ## the whole number, and nothing but the number
-}
-rangecheck() { #@ USAGE: rangecheck int [low [high]]
+rangecheck() { #@ USAGE: rangecheck INT [LOW [HIGH]]
 ## /!\ This funtion will accept INTEGERS only /!\
     ## Function header
     local -i integer="${1:?An integer argument is required}"

@@ -6,8 +6,10 @@
 #: Description : Check argument for valid dotted-quad IP address
 #: Options     : NA
 
-isvalidip() { #@ USAGE: isvalidip DOTTED-QUAD
-    local dttd_quad="${1?An argument is required}"
+isvalidip() { #@ USAGE: isvalidip '[ DOTTED-QUAD ]'
+    ## Funtion header
+    ## FUNCNAME contains the name of any currently-executing shell function
+    local dttd_quad="${1?$FUNCNAME: An argument is required}"
     shift $#
     
     case $dttd_quad in

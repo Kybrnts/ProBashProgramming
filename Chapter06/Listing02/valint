@@ -6,11 +6,13 @@
 #: Description : Check argument for valid integer
 #: Options     : NA
 
-valint() { #@ USAGE: valint INTEGER
-    local integer="${1?An argument is required}"
+valint() { #@ USAGE: valint '[ INTEGER ]'
+    ## Funtion header
+    ## Empty argument (empty strin) is accepted but not an unset (null) one.
+    local integer="${1?$FUNCNAME: An argument is required}"
     shift $#
 
-    case ${integer#-} in      ## Leading hyphen removed to accept negative numbers
-	*[^0-9]*) return 1 ;; ## The string contains a non-digit character
-    esac                      ## the whole number and nothing but the number
+    case ${integer#-} in           ## Leading hyphen removed to accept negative numbers
+	"" | *[^0-9]*) return 1 ;; ## The string is empty or contains a non-digit character
+    esac                           ## the whole number and nothing but the number
 }

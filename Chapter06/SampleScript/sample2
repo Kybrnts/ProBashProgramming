@@ -1,0 +1,133 @@
+#!/bin/bash
+#: Title       : Sample
+#: Date        : 2016-05-19
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Creates a basic web page
+#: Options     : N/A
+
+##
+## Global variables 
+##
+declare glb_prompt=" ==> "
+declare glb_template='<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset=utf-8>
+<title>%s</title>
+<link href="%s" rel="stylesheet">
+</head>
+<body>
+<h1>%s</h1>
+<div id=main>
+ 
+</div>
+</body>
+</html>
+'
+declare glb_progname=""                     # This program's name
+declare glb_version=""                      # This program's version
+declare glb_bashversion=${BASH_VERSION%%.*} # Current bash version number
+declare glb_title=""
+declare glb_h1=""
+declare glb_css=""
+
+##
+## Function declarations
+##
+die() { #@ DESCRIPTION: Print error message and exit with ERRNO code
+        #@ USAGE: die ERRNO MESSAGE ...
+    ## Function header
+    local error="$1"   # Error Nº for exit satus
+    shift              # Discard first argument
+    local message="$@" # Put all remaining args into message
+    shift $#
+    
+    [ -n "$message" ] && printf "%s\n" "$message" >&2
+    exit $error
+}
+usage() { #@ DESCRIPTION: Print script's usage information
+          #@ USAGE: usage
+    ## Function header
+    shift $#
+    printf "USAGE: %s HTMLFILE\n" "$glb_progname"
+}
+version() { #@ DESCRIPTION: Print script's version information
+            #@ USAGE: version
+    ## Function header
+    shift $#
+    printf "%s version %s" "$progname" "${glb_version:-1}"
+}
+readline() { #@ DESCRIPTION: Glb_Prompt user for string and offer default
+             #@ USAGE: readline NAME PROMPT DEFAULT
+    ## Function header only so it may be used inside other function declarations
+    local ref_name="$1"
+    local prompt="$2"
+    local default="$3"
+    shift $#
+}
+
+main() { #@ Main function
+    ## Function header
+    local filename="$1"    # HTML output path
+    local -i totalargs=$#  # Total number of arguments
+    shift $#
+
+    ## Set/Change some global variables
+    glb_progname="sample"
+    glb_version="2.0"
+
+    ## Change some function declarations
+    ## Redefine the correct version for current bash or other shell
+    ## However function header must be preserved
+    if [ ${glb_bashversion:-0} -ge 4 ]; then
+	## bash4.x has an -i option for editing a supplied value
+	readline() {
+	    local ref_name="${1:?Missing argument as name}"
+	    local prompt="${2:-$glb_prompt}"
+	    local default="$3"
+	    shift $#
+	    
+	    read -ep "$prompt" -i "$default" $ref_name
+	}
+    elif [ ${glb_bashversion:-0} -ge 2 ]; then
+	readline() {
+	    local ref_name="${1:?Missing argument as name}"
+	    local prompt="${2:-$glb_prompt}"
+	    local default="${3:-none}"
+	    shift $#
+	    
+	    history -s "$default"
+	    printf "Press up arrow to edit default vaule: '%s'\n" "$default"
+	    read -ep "$prompt" $ref_name
+	}
+    else
+	readline() {
+	    local ref_name="${1:?Missing argument as name}"
+	    local prompt="${2:-$glb_prompt}"
+	    local default="$3"
+	    shift $#
+	    
+	    printf "Press enter for default of '%s'\n" "$default"
+	    printf "%s " "$prompt"
+	    read
+	    eval "$ref_name=\"${REPLY:-$default}\""
+	}
+    fi    
+    ## Did we get the first argument
+    if [ $totalargs -ne 1 ]; then
+	usage
+	return 1
+    fi
+
+    ## Get global template's pàrameters from user
+    readline glb_title "Page title: "
+    readline glb_h1 "Main headline: " "$title"
+    readline glb_css "Style sheet file: " "${filename%.*}.css"
+
+    ## Print the html file
+    printf "$glb_template" "$glb_title" "$glb_css" "$glb_h1" >"$filename"
+}
+
+## Run!
+main "$@"
