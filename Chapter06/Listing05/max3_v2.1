@@ -42,7 +42,7 @@ getint() { #@ Prompt user, and read integer string from input
     ## Write intstring's value to output (it's a reference)
     output="$intstring"
 }
-atoi() { #@ Turns a valid integer string into arithmetic evaluable integer string
+atoi() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
          #@ USAGE: atoi VALID_INTSTRING NAME
     ## Funtion header
     local integer="${1:?$FUNCNAME: Missing integer argument}"
@@ -56,7 +56,7 @@ atoi() { #@ Turns a valid integer string into arithmetic evaluable integer strin
                                                     # Then replace unsigned $integer w/its decimal representation
     output=$integer                                 # Now it is safe to write it to output.
 }
-getvalint() { #@ Tries to read a valid random integer string from user and turns it int a integer
+getvalint() { #@ DESCRIPTION: Tries to read a valid random integer string from user and stores it into array element
               #@ USAGE: getvalint NAME INDEX [ PROMPTSTRING ]
     ## Function header
     local -n output="${1:?$FUNCNAME: Missing argument as name}" # Global _MAX name
@@ -77,7 +77,9 @@ getvalint() { #@ Tries to read a valid random integer string from user and turns
 		if ! valint "$inptstr"; then     # InValid input string?
 		    printf "%s\n" "Invalid input read. Try again."
 		else                             # Valid input string?
-		    atoi $inptstr output[$index] # Turn input string into integer
+		    atoi $inptstr inptstr        # Turn input string into integer
+		    output[$index]=$inptstr      # Assign it to current index entry
+		    # NOTE: It is not possible to pass an array element by name to atoi()
 		    break
 		fi ;;
 	    1) ## getint() failed, so use default input string (is already valid)
@@ -90,7 +92,7 @@ getvalint() { #@ Tries to read a valid random integer string from user and turns
 	return 1
     fi
 }
-_max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
+_max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
           #@ USAGE: _max3 INT INT INT [NAME]
     ## Funtion header
     ## Fail if not enouth args w/propper error message. Also INT values will be accepted
@@ -117,7 +119,7 @@ main() {
     shift $#
     
     ## Local variables
-    local -ri digits=5                      # Digits per random number to display
+    local -r digits=5                       # Digits per random number to display
     local -r format=" %5s: %-5${digits}d\n" # Single line output format
     
     ## Try to get three random valid integers

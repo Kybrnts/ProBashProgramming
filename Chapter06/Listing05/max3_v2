@@ -10,9 +10,9 @@
 . "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
 
 ## Global variables 
-declare -ri _GETTMOUT=30     # Maximum number of seconds to await on user input
-declare -ri _MAXFAILS=3      # Maximum read input fails
-declare -i _MAX3 _MID3 _MIN3 # Numbers to order storage
+declare -ri _GETTMOUT=30   # Maximum number of seconds to await on user input
+declare -ri _MAXFAILS=3    # Maximum read input fails
+declare _MAX3 _MID3 _MIN3  # Numbers to order storage
 
 ## Function declarations
 getint() { #@ Prompt user, and read integer string from input
@@ -29,7 +29,7 @@ getint() { #@ Prompt user, and read integer string from input
     ## Prompt user and get input
     ## * Set prompt w/default input
     ## * Set input timeout 30 seconds
-    ## *Store read value
+    ## * Store read value
     read -p "$prmptstr" -t $_GETTMOUT -r intstring
     ## Save exit status
     estat=$?
@@ -42,21 +42,7 @@ getint() { #@ Prompt user, and read integer string from input
     ## Write intstring's value in ref_name's name
     printf -v $ref_name "%s" "$intstring"    
 }
-atoi() { #@ Turns a valid integer string into arithmetic evaluable integer string
-         #@ USAGE: atoi VALID_INTSTRING NAME
-    ## Funtion header
-    local integer="${1:?$FUNCNAME: Missing integer argument}"
-    local ref_name="${2:?$FUNCNAME: Missing argument as name}"
-    shift $#
-    
-    ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
-    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
-    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
-    integer=${integer%%[^-]*}$(( 10#${integer#-} )) # First keep hyphen character if present (negative integers)
-                                                    # Then replace unsigned $integer w/its decimal representation
-    printf -v $ref_name "%d" $integer               # Now it is safe to write it on "ref_name" name value.
-}
-getvalint() { #@ Tries to read a valid random integer string from user and turns it int a integer
+getvalint() { #@ DESCRIPTION: Tries to read a valid random integer string from user and turns it int a integer
               #@ USAGE: getvalint NAME [ PROMPTSTRING ]
     ## Function header
     local ref_name="${1:?$FUNCNAME: Missing argument as name}" # One of _MAX3, _MID3 or _MIN3
@@ -73,10 +59,10 @@ getvalint() { #@ Tries to read a valid random integer string from user and turns
 	getint inptstr "$prmptstr ($dfltstring)"
 	case $? in
 	    0)  ## getint() succeeded, we can now test input string
-		if ! valint "$inptstr"; then # InValid input string?
+		if ! valint "$inptstr"; then          # InValid input string?
 		    printf "%s\n" "Invalid input read. Try again."
-		else                         # Valid input string?
-		    atoi $inptstr $ref_name  # Turn input string into integer
+		else                                  # Valid input string?
+		    printf -v $ref_name "%s" $inptstr # Print string to $ref_name value
 		    break
 		fi ;;
 	    1) ## getint() failed, so use default input string (is already valid)
@@ -89,13 +75,13 @@ getvalint() { #@ Tries to read a valid random integer string from user and turns
 	return 1
     fi
 }
-_max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
+_max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
           #@ USAGE: _max3 INT INT INT    
     ## Funtion header
     ## Fail if not enouth args w/propper error message. Also INT values will be accepted
-    local -i int1="${1:?$FUNCNAME: Missing integer argument}" 
-    local -i int2="${2:?$FUNCNAME: Missing integer argument}"
-    local -i int3="${3:?$FUNCNAME: Missing integer argument}"    
+    local int1="${1:?$FUNCNAME: Missing non-empty argument}" 
+    local int2="${2:?$FUNCNAME: Missing non-empty argument}"
+    local int3="${3:?$FUNCNAME: Missing non-empty argument}"
     shift $#
 
     set -- $int1 $int2 $int3         # Now that we tested values we can use them
@@ -117,8 +103,8 @@ main() {
     shift $#
     
     ## Local variables
-    local -ri digits=5                      # Digits per random number to display
-    local -r format=" %5s: %-5${digits}d\n" # Single line output format
+    local -r digits=5                       # Digits per random number to display
+    local -r format=" %5s: %-5${digits}s\n" # Single line output format
     
     ## Try to get three random valid integers
     if ! getvalint _MAX3; then 

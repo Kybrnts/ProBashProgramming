@@ -1,0 +1,54 @@
+#!/bin/bash
+#: Title       : Max3
+#: Date        : 2016-05-20
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 2.0
+#: Description : Sort three integers and store results in variables
+#:             : Add a check to max3 to verify that VARNAME is a valid name for a variable
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/nametest" # Include test var name functionality
+
+## Global variables 
+declare -a _MAX3=()  # Numbers to order storage
+
+## Function declarations
+_max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
+          #@ USAGE: _max3 INT INT INT [VARNAME]
+    ## Funtion header
+    ## Fail if not enouth args w/propper error message. Also INT values will be accepted
+    local -i int1="${1:?$FUNCNAME: Missing integer argument}" 
+    local -i int2="${2:?$FUNCNAME: Missing integer argument}"
+    local -i int3="${3:?$FUNCNAME: Missing integer argument}"
+    nametest "${4-_MAX3}"
+    local -n _max3=${4:-_MAX3}       # As of Bash 4.3.11, "local -n" already checks for valid variable names
+    shift $#
+
+    set -- $int1 $int2 $int3         # Now that we tested values we can use them
+    unset int1 int2 int3             # Release used memory 
+    
+    ## Sort input values
+    (( $1 > $2 )) && set -- $2 $1 $3  # If $1 is greater thatn $2 swap 'em
+    (( $2 > $3 )) && set -- $1 $3 $2  # Now $1, $2 and $3 have been reasigned
+    (( $1 > $2 )) && set -- $2 $1 $3 
+
+    ## Store results in globals
+    _max3=( $3 $2 $1 )
+}
+
+
+main() {
+    shift $#
+    
+    local -r digits=5                       # Digits per random number to display
+    local -r format=" %5s: %-5${digits}d\n" # Single line output format
+    
+    # Sort three random numbers
+    _max3 $RANDOM $RANDOM $RANDOM
+
+    # Output results
+    printf "$format" _MAX3 $_MAX3 _MID3 ${_MAX3[1]} _MIN3 ${_MAX3[2]}
+}
+
+main "$@"

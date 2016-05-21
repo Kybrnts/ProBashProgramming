@@ -1,0 +1,29 @@
+#: Title       : isvalname
+#: Date        : 2016-05-20
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Adds test for variable names
+#: Options     : N/A
+
+nametest() { #@DESCRIPTION: Verifies that string is a valid variable name
+              #@             A variable is a parameter denoted by a name; a name is a word containing only letters,
+              #@             numbers, or underscores and beginning with a letter or an underscore.
+              #@USAGE:       isvalname '[ STRINGNAME ]'
+    ## Function header
+    local varname="${1?$FUNCNAME: Missing argument}"
+    shift $#
+
+    case $varname in
+	[_a-zA-z]*)            ## Does it start w/an underscore or letter?
+	    case $varname in       
+		*[^_a-zA-z0-9]*)   ## If it does contain non alnum chars, discard it
+		                   ## ${FUNCNAME[1]} will expando to the callig function's name
+		    printf "${FUNCNAME[1]}: Invalid name variable name\n" >&2 
+		    exit 1 ;;      ## Stop entire script execution
+	    esac ;;
+	*)                     ## Also discard it if starts w/other characters
+	    printf "${FUNCNAME[1]}: Invalid name variable name\n" >&2 
+	    exit 1 ;;
+    esac
+}

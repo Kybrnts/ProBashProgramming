@@ -6,9 +6,7 @@
 #: Description : Creates a basic web page
 #: Options     : N/A
 
-##
 ## Global variables 
-##
 declare glb_prompt=" ==> "
 declare glb_template='<!DOCTYPE html>
 <html lang="en">
@@ -32,9 +30,7 @@ declare glb_title=""
 declare glb_h1=""
 declare glb_css=""
 
-##
 ## Function declarations
-##
 die() { #@ DESCRIPTION: Print error message and exit with ERRNO code
         #@ USAGE: die ERRNO MESSAGE ...
     ## Function header
@@ -58,14 +54,43 @@ version() { #@ DESCRIPTION: Print script's version information
     shift $#
     printf "%s version %s" "$progname" "${glb_version:-1}"
 }
-readline() { #@ DESCRIPTION: Glb_Prompt user for string and offer default
-             #@ USAGE: readline NAME PROMPT DEFAULT
-    ## Function header only so it may be used inside other function declarations
-    local ref_name="$1"
-    local prompt="$2"
+## Various versions of the same function declaration
+## All headers MUST be the same so they can be later referenced as the same
+readline1() {
+    ## Function Header
+    local ref_name="${1:?Missing argument as name}"
+    local prompt="${2:-$glb_prompt}"
     local default="$3"
     shift $#
+    
+    read -ep "$prompt" -i "$default" $ref_name
 }
+readline2() {
+    ## Function Header
+    local ref_name="${1:?Missing argument as name}"
+    local prompt="${2:-$glb_prompt}"
+    local default="${3:-none}"
+    shift $#
+    
+    history -s "$default"
+    printf "Press up arrow to edit default vaule: '%s'\n" "$default"
+    read -ep "$prompt" $ref_name
+}
+readline3() {
+    ## Function Header
+    local ref_name="${1:?Missing argument as name}"
+    local prompt="${2:-$glb_prompt}"
+    local default="$3"
+    shift $#
+    
+    printf "Press enter for default of '%s'\n" "$default"
+    printf "%s " "$prompt"
+    read
+    eval "$ref_name=\"${REPLY:-$default}\""
+}
+## Declare a reference and initialize it
+declare readline=readline3 # readline3 will be the default
+                           # Now we can use "$readline arg1 arg2 arg3" inside any other function
 
 main() { #@ Main function
     ## Function header
@@ -73,57 +98,34 @@ main() { #@ Main function
     local -i totalargs=$#  # Total number of arguments
     shift $#
 
-    ## Set/Change some global variables
-    glb_progname="sample"
-    glb_version="2.0"
-
     ## Change some function declarations
-    ## Redefine the correct version for current bash or other shell
-    ## However function header must be preserved
+    ## We included this part inside main(), to minimize the execution outside it (C-Style)
+    ## Redefine the correct version for current bash or other shell using alias
     if [ ${glb_bashversion:-0} -ge 4 ]; then
 	## bash4.x has an -i option for editing a supplied value
-	readline() {
-	    local ref_name="${1:?Missing argument as name}"
-	    local prompt="${2:-$glb_prompt}"
-	    local default="$3"
-	    shift $#
-	    
-	    read -ep "$prompt" -i "$default" $ref_name
-	}
+	readline=readline1
+	unset -f readline2 readline3           # Destroy what won't be used to free stack
     elif [ ${glb_bashversion:-0} -ge 2 ]; then
-	readline() {
-	    local ref_name="${1:?Missing argument as name}"
-	    local prompt="${2:-$glb_prompt}"
-	    local default="${3:-none}"
-	    shift $#
-	    
-	    history -s "$default"
-	    printf "Press up arrow to edit default vaule: '%s'\n" "$default"
-	    read -ep "$prompt" $ref_name
-	}
+	readline=readline2
+	unset -f readline1 readline3           # Free stack space
     else
-	readline() {
-	    local ref_name="${1:?Missing argument as name}"
-	    local prompt="${2:-$glb_prompt}"
-	    local default="$3"
-	    shift $#
-	    
-	    printf "Press enter for default of '%s'\n" "$default"
-	    printf "%s " "$prompt"
-	    read
-	    eval "$ref_name=\"${REPLY:-$default}\""
-	}
+	unset -f readline1 readline2           # Free stack space
     fi    
     ## Did we get the first argument
     if [ $totalargs -ne 1 ]; then
 	usage
 	return 1
     fi
+    
+    alias -p
 
+    ## Set/Change some global variables
+    glb_progname="sample"
+    glb_version="2.0"
     ## Get global template's pàrameters from user
-    readline glb_title "Page title: "
-    readline glb_h1 "Main headline: " "$title"
-    readline glb_css "Style sheet file: " "${filename%.*}.css"
+    $readline glb_title "Page title: "
+    $readline glb_h1 "Main headline: " "$title"
+    $readline glb_css "Style sheet file: " "${filename%.*}.css"
 
     ## Print the html file
     printf "$glb_template" "$glb_title" "$glb_css" "$glb_h1" >"$filename"

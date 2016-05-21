@@ -1,0 +1,104 @@
+#!/bin/bash
+#: Title       : Rangechecktest
+#: Date        : 2016-05-17
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Put rangecheck() to the test
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+
+## Globals
+declare -ir MIN=10 # Default minimum value
+declare -ir MAX=20 # Default maximum value
+
+rangecheck1() { #@ DESCRIPTION: Tests if integer is whithin range
+	        #@ USAGE: rangecheck INT [LOW [HIGH]]    
+    ## Function header
+    ## /!\ This funtion will accept valid integer strings only /!\
+    local integer="${1:?$FUNCNAME: Missing non-empty argument}"
+    local low="${2:-$MIN}"   ## Use global defaults, as local defaults
+    local high="${3:-$MAX}"
+    shift $#
+
+    ## Here we used internal "test" command for performing the test
+    [ $integer -ge $low ] || return 1   ## Exit code for below minimum is 1
+    [ $integer -le $high ] || return 2  ## Exit code for above maximum is 2
+    ## We are using ARITHMETIC TEST for the range check, hence any values to be passed as arguments for this function
+    ## must be valid integers.
+}
+rangecheck2() { #@ DESCRIPTION: Tests if integer is whithin range
+	        #@ USAGE: rangecheck INT [LOW [HIGH]]
+    ## Function header
+    ## /!\ This funtion will accept INTEGERS only /!\
+    local integer="${1:?$FUNCNAME: Missing non-empty argument}"
+    local low="${2:-$MIN}"             ## Use global defaults, as local defaults
+    local high="${3:-$MAX}"
+    shift $#
+
+    ## In this version of the function we used ARITHMETIC EVALUATION for the test
+    (( $integer >= $low ))  || return 1  ## Exit code for below minimum is 1
+    (( $integer <= $high )) || return 2  ## Exit code for above maximum is 2
+    ## Here we are using ARITHMETIC EVALUATION for the range check, it may be wise to make above local names to have the
+    ## integer attribute (-i). This will perform the evaluation during the above assignment, preventing for any invalid
+    ## values to be fed to range check expresssions.
+}
+displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
+                  #@ USAGE: displayvalint [ INTEGER ]
+    ## Function header
+    local integer="${1-NULL}" # If unset argument, set it to "NULL"
+    shift $#
+
+    printf "\"$integer\" is"
+    if ! valint "$integer"; then
+	printf " NOT"
+    fi
+    printf " a valid integer\n"
+}
+displayrangecheck() { #@ DESCRIPTION: Tests above functions
+                      #@ USAGE: testrangecheck '[1|2]' [ INTEGER ]
+    ## Function header
+    local version="${1:-1}"   # Version of rangecheck to be called
+    local integer="${2-NULL}" # Integer to be tested if whithin range
+    shift $#
+
+    printf "rangecheck%d \"%s\" tests " $version "$integer"
+    # Select wich rangecheckN() use, according to $1
+    if rangecheck"$version" "$integer"; then
+	printf "true.\n"
+    else
+	printf "false.\n"
+    fi
+}
+
+main() {
+    ## Function header
+    shift $#
+
+    echo ----------             ## This test will run correctly with both rangetest functions
+    displayvalint -73521
+    displayrangecheck 1 -73521
+    displayrangecheck 2 -73521
+    echo
+
+    echo ----------            ## This test will run correctly with both rangetest functions
+    displayvalint -0015        ## However there is a SEMANTIC difference between rangetests executions
+    displayrangecheck 1 -0015  ## This one will test for "15 between $MIN and $MAX"
+    displayrangecheck 2 -0015  ## But this one will use octal 15 insteal of its decimal representation.
+    echo                       ## Leading zeros causes ARITHMETIC EVALUATION to treat integers as octals
+
+    echo ----------
+    displayvalint 08
+    displayrangecheck 1 08     ## This rangecheck1 invocation will work fine
+    displayrangecheck 2 08     ## But this one will fail because 08 is not even a valid octal number
+    echo 
+}
+## NOTES: 1. It is always a good idea to test for a valid integer string BEFORE feeding it to functions that expect such
+##           strings as arguments.
+##        2. But it is not enough to test for valid integer string before an ARITHMETIC EVALUATION expression.
+##        3. We can conclude than ARITHMETIC TEST is somewhat more robust, than ARITHMETIC EVALUATION, however the
+##           former won't offer as much functionalities as the later.
+
+## Run!
+main "$@"

@@ -1,4 +1,3 @@
-#!/bin/bash
 #: Title       : Valint
 #: Date        : 2016-05-15
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
@@ -6,10 +5,11 @@
 #: Description : Check argument for valid integer
 #: Options     : NA
 
-valint() { #@ USAGE: valint '[ INTEGER ]'
+valint() { #@ DESCRIPTION: Tests if $1 string is a valid integer
+	   #@ USAGE: valint '[ INTEGER ]'
     ## Funtion header
     ## Empty argument (empty strin) is accepted but not an unset (null) one.
-    local integer="${1?$FUNCNAME: An argument is required}"
+    local integer="${1?$FUNCNAME: Missing argument}"
     shift $#
 
     case ${integer#-} in           ## Leading hyphen removed to accept negative numbers

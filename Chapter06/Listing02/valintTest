@@ -9,7 +9,7 @@
 # Include valint() function declaration in current shell or exit inmediately
 . "${0%/*}/valint" || exit 1
 
-displayvalint() { #@ Display a fancy message to showcase valint
+displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
                   #@ USAGE: displayvalint [ INTEGER ]
     local integer="${1-NULL}" # If unset argument, set it to "NULL"
     shift $#

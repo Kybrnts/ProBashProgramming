@@ -1,0 +1,63 @@
+#!/bin/bash
+#: Title       : Rangecheck
+#: Date        : 2016-05-17
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Prompt for a number and check that it is within a given range
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+
+## Globals
+declare -ir MIN=10 # Default minimum value
+declare -ir MAX=20 # Default maximum value
+
+rangecheck() { #@ DESCRIPTION: Tests if integer is whithin range
+	       #@ USAGE: rangecheck INT [LOW [HIGH]]
+    ## Function header
+    ## /!\ This funtion will accept INTEGERS only /!\
+    local -i integer="${1:?$FUNCNAME: Missing integer argument}"
+    local -i low="${2:-$MIN}"             ## Use global defaults, as local defaults
+    local -i high="${3:-$MAX}"
+    shift $#
+
+    ## In this version of the function we used ARITHMETIC EVALUATION for the test
+    (( $integer >= $low ))  || return 1  ## Exit code for below minimum is 1
+    (( $integer <= $high )) || return 2  ## Exit code for above maximum is 2
+    ## Here we are using ARITHMETIC EVALUATION for the range check, it is wise to make above local names to have the
+    ## integer attribute (-i). This will perform the evaluation during the above assignment, preventing for any invalid
+    ## values to be fed to range check expresssions.
+}
+
+main() {
+    ## Function header
+    shift $#
+    
+    local integer="" # Input number string storage
+ 
+    read -p "Enter a whole number between $MIN and $MAX inclusive: " integer
+    ## Test for valid integer before feeding it to rangecheck
+    if ! valint "$integer"; then 
+	printf "%s is not a valid input value.\n" $integer >&2
+	return 2
+    fi
+    ## Strip leading zeros from $integer, as they cannot be assigned to rangecheck arguments.
+    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
+    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
+   integer=${integer%%[^-]*}$((10#${integer#-})) ## First keep hyphen character if present
+                                                 ## Then replace unsigned $integer w/its decimal representation
+    rangecheck $integer                          ## Now it is safe to feed it to rangecheck()
+    case $? in
+	2) 
+	    printf "%d is too high\n" $integer >&2
+	    return 1 ;;
+	1) 
+	    printf "%d is too low\n" $integer >&2 
+	    return 1 ;;
+    esac    
+    printf "You entered %d\n" $integer
+}
+
+## Run!
+main "$@"

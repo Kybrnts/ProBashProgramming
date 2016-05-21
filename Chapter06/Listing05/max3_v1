@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Globals
-declare -i _MAX3 _MID3 _MIN3
+declare _MAX3 _MID3 _MIN3
 
 _max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
           #@ USAGE: _max3 INT INT INT
@@ -16,8 +16,8 @@ _max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
     [ $# -ne 3 ] && return 5    
     
     ## Sort input values
-    [ $1 -gt $2 ] && { set -- $2 $1 $3; } # If $1 is greater thatn $2 swap 'em
-    [ $2 -gt $3 ] && { set -- $1 $3 $2; } # Now $1, $2 and $3 have been reasigned
+    [ $1 -gt $2 ] && { set -- $2 $1 $3; }   # If $1 is greater thatn $2 swap 'em
+    [ $2 -gt $3 ] && { set -- $1 $3 $2; }   # Now $1, $2 and $3 have been reasigned
     [ $1 -gt $2 ] && { set -- $2 $1 $3; }
     
     ## Store results in globals
@@ -29,8 +29,8 @@ _max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
 main() {
     shift $#
     
-    local -ri digits=5                      # Digits per random number to display
-    local -r format=" %5s: %-5${digits}d\n" # Single line output format
+    local -r digits=5                       # Digits per random number to display
+    local -r format=" %5s: %-5${digits}s\n" # Single line output format
     
     # Sort three random numbers
     _max3 $RANDOM $RANDOM $RANDOM           
