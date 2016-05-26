@@ -1,0 +1,42 @@
+#!/bin/bash
+#: Date        : 2016-05-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Test script for getfirstn() and getlastn()
+#: Options     : N/A
+
+## Inclusions
+. ${0%/*}/firstchars
+
+
+main() {
+    ## Function header
+    shift $#
+
+    ## Local variables
+    local teststring="Dixie Flatline" ## Test string container
+    local -i fn=3 ln=10               ## Number of characters to get from teststring
+    local _gtfrstn="" _gtlstn=""      ## Names to be written by getfirstn() and getlastn()
+  
+    ## Use first version of getfirstn() and getlastn()
+    ## Get first characters string
+    getfirstn _gtfrstn "$teststring" $fn
+    printf "First %d chars of %s :%s:\n" $fn "$teststring" "$_gtfrstn"
+    ## Get last characters string
+    getlastn _gtlstn "$teststring" $ln
+    printf "Last %d chars of %s :%s:\n" $ln "$teststring" "$_gtlstn"
+    
+    ## Use second version of getfirstn() and getlastn()
+    . ${0%/*}/lastchars
+
+    teststring="Norbert Wiener"
+    fn=9 ln=2
+    ## Get first characters string
+    getfirstn _gtfrstn "$teststring" $fn
+    printf "First %d chars of %s :%s:\n" $fn "$teststring" "$_gtfrstn"
+    ## Get last characters string
+    getlastn _gtlstn "$teststring" $ln
+    printf "Last %d chars of %s :%s:\n" $ln "$teststring" "$_gtlstn"    
+}
+
+main "$@"

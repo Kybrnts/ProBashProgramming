@@ -1,0 +1,28 @@
+#!/bin/bash
+#: Date        : 2016-05-23
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Test repeat() and alert()
+#: Options     : N/A
+
+## Includes
+. "${0%/*}"/alert2 # Include repeat and alert functions
+
+main() {
+    
+    ## Repeat&print single character string
+    repeat "%" 20
+    echo 
+    ## Repeat and print multiple character string
+    repeat "%-~" 10
+    echo
+    ## Alert tests 
+    alert "Press red button"
+    echo
+    alert "/!\ Do you really want to delete all your files? /!\\"
+    echo
+    alert " Warning! continue at your own risk" "%@%"
+    echo
+}
+
+main "$@"

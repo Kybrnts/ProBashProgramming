@@ -1,0 +1,39 @@
+#: Title       : Lastchars
+#: Date        : 2016-05-24
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Get N last characters from a string
+#: Options     : N/A
+
+## Includes
+. ${0%/*}/../Listing01/repeat2 || exit 1 ## Include repeat() declaration
+
+## Alternatively we define getlastn() as our starting point
+getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
+             #@ USAGE: getlastn NAME '[ STRING ]' [ NUM ]
+    ## Function header
+    local ref_lastn="${1:?$FUNCNAME: Missing name argument}" ## Name where to writ eth last N character string
+    local string="${2?$FUNCNAME: Missing argument}"          ## String to be trimmed container
+    local -i n="${3:-1}"                                     ## Number of character to be kept from the back
+    shift $#
+
+    local lastn=""
+    _repeat "?" $n
+    lastn="${string#${string%$_REPEAT}}"
+    printf -v $ref_lastn "%s" "$lastn"
+}
+## Then we define getfirstn() based on lastn
+getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
+              #@ USAGE: getfirstn NAME '[ STRING ]' [ NUM ]
+    ## Function header
+    local ref_firstn="${1:?$FUNCNAME: Missing name argument}" ## Name where to write the first N character string
+    local string="${2?$FUNCNAME: Missing argument}"           ## The string to be trimmed 
+    local -i n="${3:-1}"                                      ## Number of characters to be kept from the beginning
+    shift $#
+    
+    local _gtlstn=""
+    n=$(( ${#string} - $n ))
+    getlastn _gtlstn "$string" $n
+    printf -v $ref_firstn "%s" "${string%$_gtlstn}"
+}

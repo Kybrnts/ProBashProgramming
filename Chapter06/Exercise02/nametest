@@ -1,4 +1,4 @@
-#: Title       : isvalname
+#: Title       : namtest
 #: Date        : 2016-05-20
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0
@@ -7,9 +7,9 @@
 #: Options     : N/A
 
 nametest() { #@DESCRIPTION: Verifies that string is a valid variable name
-              #@             A variable is a parameter denoted by a name; a name is a word containing only letters,
-              #@             numbers, or underscores and beginning with a letter or an underscore.
-              #@USAGE:       isvalname '[ STRINGNAME ]'
+              #@            A variable is a parameter denoted by a name; a name is a word containing only letters,
+              #@            numbers, or underscores and beginning with a letter or an underscore.
+              #@USAGE:      isvalname '[ STRINGNAME ]'
     ## Function header
     local varname="${1?$FUNCNAME: Missing argument}"
     shift $#

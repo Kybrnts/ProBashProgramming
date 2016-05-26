@@ -1,0 +1,23 @@
+#: Title       : Alert
+#: Date        : 2016-05-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Bash function declarations file
+#:             : Generate alert messages
+#: Options     : N/A
+
+## Includes
+. ${0%/*}/../Listing01/repeat2 || exit 1 ## Include repeat() declaration
+
+## Function declarations
+alert() { #@ DESCRIPTION: Prints in-box-alert-message
+          #@ USAGE: alert '[ MESSAGE ]' [ BORDER ]
+    ## Function header
+    local message="${1?$FUNCNAME: Missing argument}"
+    local border="${2:-#}"
+    shift $#
+    _repeat "$border" $(( ${#message} + 6 ))
+    printf '\a%s\n' "$_REPEAT" ## \a = BEL
+    printf '%2.2s %s %2.2s\n' "$_REPEAT" "$message" "$_REPEAT"
+    printf '%s\n' "$_REPEAT"
+}

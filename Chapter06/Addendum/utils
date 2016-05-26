@@ -1,0 +1,63 @@
+#: Title       : Utils
+#: Date        : 2016-05-20
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Adds usefull validation tests
+#: Options     : N/A
+
+## Function declarations
+validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
+              #@ USAGE: validname '[ STRING ]'
+    local name="${1?$FUNCNAME:Missing argument}"
+    shift $#
+
+    case $varname in 
+	## Fail if:
+	## * begins w/anything other than letter or underscore;
+	## * contains anything other than a letter, a number or underscore;
+	[^a-zA-Z_]* | *[^a-zA-z0-9_]*) return 1 ;;
+    esac
+}
+valint() { #@ DESCRIPTION: Tests if $1 string is a valid integer
+	   #@ USAGE: valint '[ INTEGER ]'
+    ## Funtion header
+    ## Empty argument (empty strin) is accepted but not an unset (null) one.
+    local integer="${1?$FUNCNAME: Missing argument}"
+    shift $#
+
+    case ${integer#-} in           ## Leading hyphen removed to accept negative numbers
+	"" | *[^0-9]*) return 1 ;; ## The string is empty or contains a non-digit character
+    esac                           ## the whole number and nothing but the number
+}
+atoi() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
+         #@ USAGE: atoi NAME '[ INT_STRING ]'
+    ## Funtion header
+    local ref_intstr="${1?$FUNCNAME: Missing name argument}"
+    local intstr="${2?$FUNCNAME: Missing string argument}"
+    shift $#
+    
+    local out_intstring="" ## Funtion output container
+    
+    ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
+    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
+    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
+    out_intstr=${intstr%%[^-]*}$(( 10#${intstr#-} )) # First keep hyphen character if present (negative integers)
+                                                     # Then replace unsigned $integer w/its decimal representation
+    printf -v $ref_intstr "%s" "$intstr"             # Now it is safe to write it to output.
+    ## NOTES
+    ## * Above "printf" is preferred over "eval "$ref_intstr=\"$intstr\""" not only for safety sake but also because
+    ##   printf offers additional control over output's format. No performance issues have been detected.
+    ## * We introduce the "ref_" name convention for local variables that are supposed to contain global variable NAMES
+    ##   so that it is easy to recognize them as references (i.e. places where to write values).
+    ## * However this is not enough. To make sure that a function that recieves a variable's name (i.e. by reference)
+    ##   works, we must be sure to never pass to it a NAME that it is already used locally.
+    ##   As of now I decided to use "_<funcname>" for variable names that are to be passed to functions that will write
+    ##   values to them. Since underscore won't be used in local names by a previous convention (only user defined
+    ##   globals will), this will reduce chances of name collisions. In addition "funcname" will be the function's name
+    ##   itself or some short-hand version of it. Using the atoi() function, following above's conventions will be like:
+    ##   * Declaring a local variable within the calling function:
+    ##     local _atoi=""
+    ##   * Using it to get atoi's output
+    ##     atoi _atoi "-099"
+}

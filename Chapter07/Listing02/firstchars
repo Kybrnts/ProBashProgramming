@@ -1,0 +1,38 @@
+#: Title       : Firstchars
+#: Date        : 2016-05-24
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Get N first characters from a string
+#: Options     : N/A
+
+## Includes
+. ${0%/*}/../Listing01/repeat2 || exit 1 ## Include repeat() declaration
+
+getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
+              #@ USAGE: getfirstn NAME '[ STRING ]' [ NUM ]
+    ## Function header
+    local ref_firstn="${1:?$FUNCNAME: Missing name rgument}" ## Name where to write the first N character string
+    local string="${2?$FUNCNAME: Missing argument}"          ## The string to be trimmed 
+    local -i n="${3:-1}"                                     ## Number of characters to be kept from the beginning
+    shift $#
+    
+    local firstn=""                                     ## First N character string
+    _repeat "?" $n                                      ## Repeat as much single character wildcards as needed
+    firstn="${string%${string#$_REPEAT}}"               ## First get all characters but first N, then remove them
+    printf -v $ref_firstn "%s" "$firstn"                ## Write the result tho referenced name
+}
+## We can derive a getlastn() function from above declaration
+getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
+             #@ USAGE: getlastn NAME '[ STRING ]' [ NUM ]
+    ## Function header
+    local ref_lastn="${1:?$FUNCNAME: Missing name argument}" ## Name where to writ eth last N character string
+    local string="${2?$FUNCNAME: Missing argument}"          ## String to be trimmed container
+    local -i n="${3:-1}"                                     ## Number of character to be kept from the back
+    shift $#
+
+    local _gtfrstn=""                                   ## Name to be written by getfirstn()
+    n=$(( ${#string} - $n ))                            ## Get the new N for string's back
+    getfirstn _gtfrstn "$string" $n                     ## Get first N, with N new value
+    printf -v $ref_lastn "%s" "${string#$_gtfrstn}"     ## Remove abové's string from string's front, and write it
+}

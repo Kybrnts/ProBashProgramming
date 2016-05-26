@@ -1,0 +1,37 @@
+#: Title       : Revstr
+#: Date        : 2016-05-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Bash function declarations file
+#:             : Reverse the order of a string
+#: Options     : N/A
+
+revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
+           #@ USAGE: revstr '[ STRING ]'
+    ## Function header
+    local ref_str="${1:?$FUNCNAME: Missing argument as name}"
+    local string="${2?$FUNCNAME: Missing argument}"
+    shift $#
+
+    ## Local variables
+    local temp="" revstr=""             ## Now revstr is a local variable
+
+    while [ -n "$string" ]; do          ## While string's size is not zero..
+	temp="${string#?}"              ## Get everything but first char on temp
+	revstr="${string%$temp}$revstr" ## Then get first char only, and place it at the beginning of global
+	string="$temp"                  ## Replace string with temp (remove its first char)
+    done
+    printf -v $ref_str "%s" "$revstr"   ## Print reversed string to referenced variable
+}
+prntrevstr() { #@ DESCRIPTION: Print reverse version of the string $1
+               #@ USAGE: revstr '[ STRING ]'
+    ##Function header
+    local var="${1?$FUNCNAME: Missing argument}"
+    shift $#
+    
+    ## Local variables
+    local _rvstr=""      ## Storage for refstr output
+
+    revstr _rvstr "$var" ## Revert string into above storage
+    printf "$_rvstr\n"   ## Print it to STDOUT
+}
