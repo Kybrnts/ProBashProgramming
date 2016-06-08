@@ -7,12 +7,15 @@
 #: Options     : NA
 
 main() {
-    local path="${1?An argument is required}"
+    local path=${1?"An argument is required"}
     shift $#
-    # 
-    # Get dname from path and then strip it from the beginning of the string.
-    # Also strip the following slash
-    printf "%s\n" "${path##$(dname "$path")/}"
+
+    ## Get dname from path and then strip it from the beginning of the string.
+    ## Also strip the following slash
+    printf "%s\n" "${path##"$(dname "$path")"/}"
+    ## NOTE: In the above expression the first parameter expansion gets delayed until the following command substitution
+    ##       is repaced by its output, which gets quoted to prevent word splitting. The innermost quotes are used in a
+    ##       subshell. Finally the first parameter expansion is also quoted before passing it to printf.
 }
 
 main "$@"

@@ -3,11 +3,12 @@
 #: Date        : 2016-05-17
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0
-#: Description : Print information about the environment
+#: Description : Show information about the environment
 #: Options     : N/A
 
 ## Function declarations
-uinfo() { #@ USAGE: uinfo [file]
+uinfo() { #@ DESCRIPTION: Prints details about the current environment into file
+          #@ USAGE: uinfo [file]
     ## Function header
     shift $#
 

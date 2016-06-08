@@ -11,7 +11,7 @@
 
 displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
                   #@ USAGE: displayvalint [ INTEGER ]
-    local integer="${1-NULL}" # If unset argument, set it to "NULL"
+    local integer=${1-NULL}        # If unset argument, set it to "NULL"
     shift $#
 
     printf "\"$integer\" is"
@@ -35,3 +35,4 @@ main() {
 }
 
 main "@"
+

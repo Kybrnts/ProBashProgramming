@@ -8,7 +8,7 @@
 
 main() {
     # Argument declaration section
-    #shift $#
+    shift $#
     
     # Function body section
     printf "Hello, %s!\n" "$1" # Output greeting message to specified name

@@ -34,7 +34,7 @@ declare glb_css=""
 die() { #@ DESCRIPTION: Print error message and exit with ERRNO code
         #@ USAGE: die ERRNO MESSAGE ...
     ## Function header
-    local error="$1"   # Error Nº for exit satus
+    local error=$1     # Error Nº for exit satus
     shift              # Discard first argument
     local message="$@" # Put all remaining args into message
     shift $#
@@ -58,18 +58,18 @@ version() { #@ DESCRIPTION: Print script's version information
 ## All headers MUST be the same so they can be later referenced as the same
 readline1() {
     ## Function Header
-    local ref_name="${1:?Missing argument as name}"
-    local prompt="${2:-$glb_prompt}"
-    local default="$3"
+    local ref_name=${1:?"Missing name argument"}
+    local prompt=${2:-$glb_prompt}
+    local default=$3
     shift $#
     
     read -ep "$prompt" -i "$default" $ref_name
 }
 readline2() {
     ## Function Header
-    local ref_name="${1:?Missing argument as name}"
-    local prompt="${2:-$glb_prompt}"
-    local default="${3:-none}"
+    local ref_name=${1:?"Missing name argument"}
+    local prompt=${2:-$glb_prompt}
+    local default=${3:-none}
     shift $#
     
     history -s "$default"
@@ -78,9 +78,9 @@ readline2() {
 }
 readline3() {
     ## Function Header
-    local ref_name="${1:?Missing argument as name}"
-    local prompt="${2:-$glb_prompt}"
-    local default="$3"
+    local ref_name=${1:?"Missing name argument"}
+    local prompt=${2:-$glb_prompt}
+    local default=$3
     shift $#
     
     printf "Press enter for default of '%s'\n" "$default"
@@ -94,8 +94,8 @@ declare readline=readline3 # readline3 will be the default
 
 main() { #@ Main function
     ## Function header
-    local filename="$1"    # HTML output path
-    local -i totalargs=$#  # Total number of arguments
+    local filename=$1     # HTML output path
+    local -i totalargs=$# # Total number of arguments
     shift $#
 
     ## Change some function declarations
@@ -133,3 +133,4 @@ main() { #@ Main function
 
 ## Run!
 main "$@"
+

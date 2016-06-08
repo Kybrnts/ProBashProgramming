@@ -22,3 +22,4 @@ main() {
 # arguments containing whitespace will be preserved. If $@ is unquoted, splitting will occur wherever there is
 # whitespace.
 main "$@"
+

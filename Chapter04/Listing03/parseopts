@@ -13,18 +13,18 @@ main() {
     local progname=${0##%/}
     ## Options arguments storage
     local -i verbose=0
-    local filename=""
+    local filename=
     ## List of options the program will accept;
     ## Thise options that take arguments are followed by a colon
     local optstring=f:v
     ## Current option storage
-    local opt=""
+    local opt=
     
     ## The loop calls tegopts untill there are no more options on the command line
     ## Each option is stored in $opt, any option arguments are stored in OPTARG
     while getopts $optstring opt; do
 	case $opt in 
-	    f) filename="$OPTARG" ;;
+	    f) filename=$OPTARG ;;
 	    v) (( verbose++ )) ;;
 	    *) return 1 ;;
 	esac
@@ -65,3 +65,4 @@ main() {
 }
 
 main "$@"
+

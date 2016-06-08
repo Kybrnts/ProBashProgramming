@@ -17,9 +17,9 @@ rangecheck1() { #@ DESCRIPTION: Tests if integer is whithin range
 	        #@ USAGE: rangecheck INT [LOW [HIGH]]    
     ## Function header
     ## /!\ This funtion will accept valid integer strings only /!\
-    local integer="${1:?$FUNCNAME: Missing non-empty argument}"
-    local low="${2:-$MIN}"   ## Use global defaults, as local defaults
-    local high="${3:-$MAX}"
+    local integer=${1:?"$FUNCNAME: Missing non-empty argument"}
+    local low=${2:-$MIN}  ## Use global defaults, as local defaults
+    local high=${3:-$MAX}
     shift $#
 
     ## Here we used internal "test" command for performing the test
@@ -32,9 +32,9 @@ rangecheck2() { #@ DESCRIPTION: Tests if integer is whithin range
 	        #@ USAGE: rangecheck INT [LOW [HIGH]]
     ## Function header
     ## /!\ This funtion will accept INTEGERS only /!\
-    local integer="${1:?$FUNCNAME: Missing non-empty argument}"
-    local low="${2:-$MIN}"             ## Use global defaults, as local defaults
-    local high="${3:-$MAX}"
+    local integer=${1:?"$FUNCNAME: Missing non-empty argument"}
+    local low=${2:-$MIN}  ## Use global defaults, as local defaults
+    local high=${3:-$MAX}
     shift $#
 
     ## In this version of the function we used ARITHMETIC EVALUATION for the test
@@ -47,7 +47,7 @@ rangecheck2() { #@ DESCRIPTION: Tests if integer is whithin range
 displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
                   #@ USAGE: displayvalint [ INTEGER ]
     ## Function header
-    local integer="${1-NULL}" # If unset argument, set it to "NULL"
+    local integer=${1-NULL} # If unset argument, set it to "NULL"
     shift $#
 
     printf "\"$integer\" is"
@@ -59,8 +59,8 @@ displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
 displayrangecheck() { #@ DESCRIPTION: Tests above functions
                       #@ USAGE: testrangecheck '[1|2]' [ INTEGER ]
     ## Function header
-    local version="${1:-1}"   # Version of rangecheck to be called
-    local integer="${2-NULL}" # Integer to be tested if whithin range
+    local version=${1:-1}   # Version of rangecheck to be called
+    local integer=${2-NULL} # Integer to be tested if whithin range
     shift $#
 
     printf "rangecheck%d \"%s\" tests " $version "$integer"
@@ -102,3 +102,4 @@ main() {
 
 ## Run!
 main "$@"
+

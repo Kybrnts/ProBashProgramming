@@ -14,7 +14,7 @@
 #
 
 ## Global variable declarations
-declare name=""
+declare name=
 
 ## Function declarations
 ## "name" variable is not declared as local, hence global
@@ -48,3 +48,4 @@ main() {
 }
 
 main "$@"
+

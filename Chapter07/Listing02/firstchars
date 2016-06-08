@@ -19,7 +19,8 @@ getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $
     
     local firstn=""                                     ## First N character string
     _repeat "?" $n                                      ## Repeat as much single character wildcards as needed
-    firstn="${string%${string#$_REPEAT}}"               ## First get all characters but first N, then remove them
+    firstn="${string%"${string#$_REPEAT}"}"             ## First get all characters but first N, then remove them
+                                                        ## Quoting is important to allow escape sequences
     printf -v $ref_firstn "%s" "$firstn"                ## Write the result tho referenced name
 }
 ## We can derive a getlastn() function from above declaration
@@ -34,5 +35,5 @@ getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 
     local _gtfrstn=""                                   ## Name to be written by getfirstn()
     n=$(( ${#string} - $n ))                            ## Get the new N for string's back
     getfirstn _gtfrstn "$string" $n                     ## Get first N, with N new value
-    printf -v $ref_lastn "%s" "${string#$_gtfrstn}"     ## Remove abové's string from string's front, and write it
+    printf -v $ref_lastn "%s" "${string#"$_gtfrstn"}"   ## Remove abové's string from string's front, and write it
 }

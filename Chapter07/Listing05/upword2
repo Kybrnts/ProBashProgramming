@@ -1,0 +1,29 @@
+#: Title       : Upword
+#: Date        : 2016-05-30
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Des/cription : Bash function declarations file
+#:             : Convert Word to Uppercase
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/../Listing04/toupper2" || exit 1  ## Include to_upper declaration
+
+## Function declarations
+upword() {
+    local ref_word="${1?$FUNCNAME: Missing name argument}"
+    local word="${2:?$FUNCNAME: Missing argument}"
+    shift $#
+
+    local _t_uppr=""
+
+    while [ -n "$word" ]; do ## Loop until nothing is left in $word
+	to_upper "$word"     ## Change to uppercase word's first char, storing it in _UPR
+	_UPWORD+=$_UPR       ## Append _UPR's current value to new global _UPWORD
+	word="${word#?}"     ## Remove word's first char
+    done
+}
+displayupword() {
+     "$@"
+    printf "%s\n" "$_UPWORD"
+}

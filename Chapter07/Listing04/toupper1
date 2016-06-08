@@ -1,0 +1,37 @@
+#: Title       : Revstr
+#: Date        : 2016-05-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Convert First Character to Uppercase
+#: Options     : N/A
+
+## Global variables
+declare _UPR=""
+
+to_upper() { #@ DESCRIPTION: 
+             #@ USAGE:
+    local str="${1?$FUNCNAME: Missing argument}"
+    shift $#
+    
+    ## Reset _UPR because it might be 
+    _UPR=""
+    case $str in
+	a*) _UPR=A ;; b*) _UPR=B ;; c*) _UPR=C ;; d*) _UPR=D ;;
+	e*) _UPR=E ;; f*) _UPR=F ;; g*) _UPR=G ;; h*) _UPR=H ;;
+	i*) _UPR=I ;; j*) _UPR=J ;; k*) _UPR=K ;; l*) _UPR=L ;;
+	m*) _UPR=M ;; n*) _UPR=N ;; ñ*) _UPR=Ñ ;; o*) _UPR=O ;;
+	p*) _UPR=P ;; q*) _UPR=Q ;; r*) _UPR=R ;; s*) _UPR=S ;;
+	t*) _UPR=T ;; u*) _UPR=U ;; v*) _UPR=V ;; w*) _UPR=W ;;
+	x*) _UPR=X ;; y*) _UPR=Y ;; z*) _UPR=Z ;; á*) _UPR=Á ;;
+	é*) _UPR=É ;; í*) _UPR=Í ;; ó*) _UPR=Ó ;; ú*) _UPR=Ú ;;
+	*) _UPR="${str%${str#?}}" ;;
+    esac
+}
+capitalize() {
+    local str="${1?$FUNCNAME: Missing argument}"
+    shift $#
+    
+    to_upper "$str"
+    printf "%c%s\n" $_UPR "${str#?}"
+}

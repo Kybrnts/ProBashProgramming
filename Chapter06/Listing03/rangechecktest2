@@ -17,9 +17,9 @@ rangecheck() { #@ DESCRIPTION: Tests if integer is whithin range
 	       #@ USAGE: rangecheck INT [LOW [HIGH]]
     ## Function header
     ## /!\ This funtion will accept INTEGERS only /!\
-    local -i integer="${1:?$FUNCNAME: Missing integer argument}"
-    local -i low="${2:-$MIN}"             ## Use global defaults, as local defaults
-    local -i high="${3:-$MAX}"
+    local -i integer=${1:?"$FUNCNAME: Missing integer argument"}
+    local -i low=${2:-$MIN}  ## Use global defaults, as local defaults
+    local -i high=${3:-$MAX}
     shift $#
 
     ## In this version of the function we used ARITHMETIC EVALUATION for the test
@@ -34,7 +34,7 @@ main() {
     ## Function header
     shift $#
     
-    local integer="" # Input number string storage
+    local integer= # Input number string storage
  
     read -p "Enter a whole number between $MIN and $MAX inclusive: " integer
     ## Test for valid integer before feeding it to rangecheck
@@ -61,3 +61,4 @@ main() {
 
 ## Run!
 main "$@"
+

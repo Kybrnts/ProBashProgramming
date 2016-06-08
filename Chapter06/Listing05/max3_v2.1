@@ -18,13 +18,13 @@ declare -a _MAX3=()      # Numbers to order storage
 getint() { #@ Prompt user, and read integer string from input
            #@ USAGE: getint NAME [ PROMPTSTRING ]
     ## Funtion header
-    local -n output="${1:?$FUNCNAME: Missing argument as name}" # Declared as name (bash-4.x)
-    local prmptstr="${2:+$2: }"                                 # Not empty? add colon and space at end
+    local -n output=${1:?"$FUNCNAME: Missing argument as name"} # Declared as name (bash-4.x)
+    local prmptstr=${2:+"$2: "}                                 # Not empty? add colon and space at end
     shift $#
 
     ## Local variables
-    local intstring=""    # Input string container
-    local -i estat=0      # Read exit status storage
+    local intstring=    # Input string container
+    local -i estat=0    # Read exit status storage
 
     ## Prompt user and get input
     ## * Set prompt w/default input
@@ -40,13 +40,13 @@ getint() { #@ Prompt user, and read integer string from input
 	return 1                          # Let the calling environment know
     fi
     ## Write intstring's value to output (it's a reference)
-    output="$intstring"
+    output=$intstring
 }
-atoi() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
-         #@ USAGE: atoi VALID_INTSTRING NAME
+val2decint() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
+               #@ USAGE: val2decint VALID_INTSTRING NAME
     ## Funtion header
-    local integer="${1:?$FUNCNAME: Missing integer argument}"
-    local -n output="${2:?$FUNCNAME: Missing argument as name}" # Declared as name (bash-4.x)
+    local integer=${1:?"$FUNCNAME: Missing integer argument"}
+    local -n output=${2:?"$FUNCNAME: Missing argument as name"} # Declared as name (bash-4.x)
     shift $#
     
     ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
@@ -59,14 +59,15 @@ atoi() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable 
 getvalint() { #@ DESCRIPTION: Tries to read a valid random integer string from user and stores it into array element
               #@ USAGE: getvalint NAME INDEX [ PROMPTSTRING ]
     ## Function header
-    local -n output="${1:?$FUNCNAME: Missing argument as name}" # Global _MAX name
-    local -i index="${2:?$FUNCNAME: Missing integer argument}"  # 1, 2 or 3
-    local prmptstr="${3:-Enter a whole number}"                 # Prompt for getint()
+    local -n output=${1:?"$FUNCNAME: Missing argument as name"} # Global _MAX name
+    local -i index=${2:?"$FUNCNAME: Missing integer argument"}  # 1, 2 or 3
+    local prmptstr=${3:-"Enter a whole number"}                 # Prompt for getint()
     shift $#
 
     ## Local variables
-    local inptstr=""                                           # Current input string
-    local -i fails=0                                           # Input read fails counter
+    local inptstr=                                           # Current input string
+    local _vl2dcnt=                                          # val2decint output container
+    local -i fails=0                                         # Input read fails counter
     ## Randomize default input and its sign
     local -i dfltstring=$(( ((-1*$RANDOM % 2) < 0 ? -1 : 1)*$RANDOM )) 
     
@@ -77,9 +78,9 @@ getvalint() { #@ DESCRIPTION: Tries to read a valid random integer string from u
 		if ! valint "$inptstr"; then     # InValid input string?
 		    printf "%s\n" "Invalid input read. Try again."
 		else                             # Valid input string?
-		    atoi $inptstr inptstr        # Turn input string into integer
-		    output[$index]=$inptstr      # Assign it to current index entry
-		    # NOTE: It is not possible to pass an array element by name to atoi()
+		    val2decint $inptstr _vl2dcnt # Turn input string into integer
+		    output[$index]=$_vl2dcnt     # Assign it to current index entry
+		    # NOTE: It is not possible to pass an array element by name to val2decint()
 		    break
 		fi ;;
 	    1) ## getint() failed, so use default input string (is already valid)
@@ -96,17 +97,17 @@ _max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 an
           #@ USAGE: _max3 INT INT INT [NAME]
     ## Funtion header
     ## Fail if not enouth args w/propper error message. Also INT values will be accepted
-    local -i int1="${1:?$FUNCNAME: Missing integer argument}" 
-    local -i int2="${2:?$FUNCNAME: Missing integer argument}"
-    local -i int3="${3:?$FUNCNAME: Missing integer argument}"
+    local -i int1=${1:?"$FUNCNAME: Missing integer argument"} 
+    local -i int2=${2:?"$FUNCNAME: Missing integer argument"}
+    local -i int3=${3:?"$FUNCNAME: Missing integer argument"}
     local -n _max3=${4:-_MAX3}
     shift $#
 
     set -- $int1 $int2 $int3         # Now that we tested values we can use them
     unset int1 int2 int3             # Release used memory 
     
-    ## Sort input values
-    (( $1 > $2 )) && set -- $2 $1 $3  # If $1 is greater thatn $2 swap 'em
+    ## Sort input values (using arithmetic evaluation)
+    (( $1 > $2 )) && set -- $2 $1 $3  # If $1 is greater thatn $2 swap them
     (( $2 > $3 )) && set -- $1 $3 $2  # Now $1, $2 and $3 have been reasigned
     (( $1 > $2 )) && set -- $2 $1 $3 
 

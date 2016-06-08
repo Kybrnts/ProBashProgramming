@@ -8,18 +8,18 @@
 
 main() {
     # Function arguments declaration section
-    local superstring="$1" # First argument stores container string
-    local string="$2"      # Second stores contained string to test
-    shift $#               # Discard all positional parameters
+    local superstring=$1 # First argument stores container string
+    local string=$2      # Second stores contained string to test
+    shift $#             # Discard all positional parameters
 
     case $superstring in
-	*"$string"*)         # Superstring matches string w/additional left or right chars;
+	*"$string"*)      # Superstring matches string w/additional left or right chars;
 	    return 0 ;;
-	*)                   # Superstring will always match with "*", but match will not be tested if the previous
-	                     # match tested OK
+	*)                # Superstring will always match with "*", but match will not be tested if the previous
+	                  # match tested OK
 	    return 1 ;;
-
     esac
 }
 
 main "$@"
+

@@ -18,13 +18,13 @@ declare _MAX3 _MID3 _MIN3  # Numbers to order storage
 getint() { #@ Prompt user, and read integer string from input
            #@ USAGE: getint NAME [ PROMPTSTRING ]
     ## Funtion header
-    local ref_name="${1:?$FUNCNAME: Missing argument as name}"
-    local prmptstr="${2:+$2: }" # If not empty add colon and space at the end
+    local ref_name=${1:?"$FUNCNAME: Missing argument as name"}
+    local prmptstr=${2:+"$2: "} # If not empty add colon and space at the end
     shift $#
 
     ## Local variables
-    local intstring=""    # Input string container
-    local -i estat=0      # Read exit status storage 
+    local intstring=    # Input string container
+    local -i estat=0    # Read exit status storage 
 
     ## Prompt user and get input
     ## * Set prompt w/default input
@@ -45,13 +45,13 @@ getint() { #@ Prompt user, and read integer string from input
 getvalint() { #@ DESCRIPTION: Tries to read a valid random integer string from user and turns it int a integer
               #@ USAGE: getvalint NAME [ PROMPTSTRING ]
     ## Function header
-    local ref_name="${1:?$FUNCNAME: Missing argument as name}" # One of _MAX3, _MID3 or _MIN3
-    local prmptstr="${2:-Enter a whole number}"                # Prompt for getint()
+    local ref_name=${1:?"$FUNCNAME: Missing argument as name"} # One of _MAX3, _MID3 or _MIN3
+    local prmptstr=${2:-"Enter a whole number"}                # Prompt for getint()
     shift $#
 
     ## Local variables
-    local inptstr=""                                           # Current input string
-    local -i fails=0                                           # Input read fails counter
+    local inptstr=                                           # Current input string
+    local -i fails=0                                         # Input read fails counter
     ## Randomize default input and its sign
     local -i dfltstring=$(( ((-1*$RANDOM % 2) < 0 ? -1 : 1)*$RANDOM )) 
     
@@ -79,16 +79,16 @@ _max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 an
           #@ USAGE: _max3 INT INT INT    
     ## Funtion header
     ## Fail if not enouth args w/propper error message. Also INT values will be accepted
-    local int1="${1:?$FUNCNAME: Missing non-empty argument}" 
-    local int2="${2:?$FUNCNAME: Missing non-empty argument}"
-    local int3="${3:?$FUNCNAME: Missing non-empty argument}"
+    local int1=${1:?"$FUNCNAME: Missing non-empty argument"} 
+    local int2=${2:?"$FUNCNAME: Missing non-empty argument"}
+    local int3=${3:?"$FUNCNAME: Missing non-empty argument"}
     shift $#
 
     set -- $int1 $int2 $int3         # Now that we tested values we can use them
     unset int1 int2 int3             # Release used memory 
     
     ## Sort input values
-    [ $1 -gt $2 ] && set -- $2 $1 $3  # If $1 is greater thatn $2 swap 'em
+    [ $1 -gt $2 ] && set -- $2 $1 $3  # If $1 is greater thatn $2 swap them
     [ $2 -gt $3 ] && set -- $1 $3 $2  # Now $1, $2 and $3 have been reasigned
     [ $1 -gt $2 ] && set -- $2 $1 $3 
 
@@ -129,3 +129,4 @@ main() {
 
 ## Run!
 main "$@"
+

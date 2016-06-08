@@ -1,0 +1,20 @@
+#!/bin/bash
+#: Title       : Upword
+#: Date        : 2016-05-30
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Convert Word to Uppercase test
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/upword1" || exit 1
+
+main() {
+    shift $#
+
+    upword " :Test string:"
+    upword "Artigas Ñeoñaré, by Nelson Caula"
+    upword '/!\ Additional test string /!\'
+}
+
+main "$@"

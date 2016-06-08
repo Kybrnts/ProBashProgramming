@@ -8,9 +8,9 @@
 
 main() {
     # Argument declaration section
-    local name="${1:-Unknown}"   # Declare a variable and store $1 value on it
-                                 # Also define a default value (Unknown) in case $1 is empty
-    shift $#                     # Discard any other positional parameters
+    local name=${1:-Unknown}      # Declare a variable and store $1 value on it
+                                  # Also define a default value (Unknown) in case $1 is empty
+    shift $#                      # Discard any other positional parameters
     
     # Function body section
     printf "Hello, %s!\n" "$name" # Output greeting message to specified name

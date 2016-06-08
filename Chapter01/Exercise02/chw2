@@ -14,7 +14,7 @@ main() {
     
     # Variable declaration section
     local script=$HOME/bp1/bin/hw
-    local code=""
+    local code=
     local hwscript=$HOME/Workspaces/ProBashProgramming/hw
 
     # Get code from hw script

@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Globals
-declare _MAX3 _MID3 _MIN3
+declare _MAX3= _MID3= _MIN3=
 
 _max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
           #@ USAGE: _max3 INT INT INT
@@ -40,3 +40,4 @@ main() {
 }
 
 main "$@"
+

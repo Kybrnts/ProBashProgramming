@@ -9,7 +9,7 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
               #@ USAGE: isvalidip '[ DOTTED-QUAD ]'
     ## Funtion header
     ## FUNCNAME contains the name of any currently-executing shell function
-    local dttd_quad="${1?$FUNCNAME: Missing argument}"
+    local dttd_quad=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     case $dttd_quad in
@@ -34,3 +34,4 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
     [ ${3:-666} -le 255 ] && [ ${4:-666} -le 255 ]
 }
 ## NOTE: Formats other than dotted quads can be valid IP addresses, as in 127.1, 216.239.10085 and 3639551845.
+

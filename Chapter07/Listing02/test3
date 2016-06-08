@@ -25,6 +25,12 @@ main() {
     ## Get last characters string
     getlastn _gtlstn "$teststring" $ln
     printf "Last %d chars of %s :%s:\n" $ln "$teststring" "$_gtlstn"
+    ## Test with another string
+    teststring="/!\\ - Alert message /!\\"
+    getfirstn _gtfrstn "$teststring" $fn
+    getlastn _gtlstn "$teststring" $ln
+    printf "First %d chars of %s :%s:\n" $fn "$teststring" "$_gtfrstn"
+    printf "Last %d chars of %s :%s:\n" $ln "$teststring" "$_gtlstn"
     
     ## Use second version of getfirstn() and getlastn()
     . ${0%/*}/lastchars

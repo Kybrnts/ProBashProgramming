@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 main() {    
-    local string="${1:-NULL}" # First argument stores string to test
+    local string=${1:-"NULL"} # First argument stores string to test
     shift $#
 
     case $string in

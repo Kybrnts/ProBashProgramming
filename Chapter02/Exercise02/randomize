@@ -14,7 +14,7 @@ main() {
     local -i digits=5                           # Digits per random number to display
     local format=" %${digits}d.%-5${digits}d\n" # Single line output format
     local outputfile=$HOME/randoms              # File to print output
-    local outputvar=""                          # Variable to print output
+    local outputvar=                            # Variable to print output
 
     # Main function's body
     outputvar=$(printf "$format" $RANDOM $RANDOM\
