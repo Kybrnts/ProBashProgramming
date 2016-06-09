@@ -15,12 +15,12 @@ reports in HTML format. In any case, success rate ranged from "thrilling achieve
 overall results improved with time. This was for the most part, thanks to a knowledge input that came from internet
 forums, blogs, advice from colleagues and a handful of e-books that I could gather over time, such as Machtlet Garrels's
 "Bash-Beginners guide" and Mendel Cooper's "Bash-Advanced guide". Among those it was Chris Johnson's 
-"Pro Bash Programming" that was notorious for its procedural/modular programming approach.
+"Pro Bash Programming", notorious for its procedural/modular programming approach.
 
 C-Style Approach
 ----------------
 In spite of my very limited programming knowledge, I remembered from my student days, most of the issues regarding BAD
-programming practices that I was starting to notice in my own scripts, and some of the benefits of using proper C's
+programming practices, that I was starting to notice in my own scripts, and some of the benefits of using proper C's
 structured and modular approach. This approach is not enforced by any shell, however with enough time, one can find a 
 lot of features in Bash that provide support for it. I remember by starting to use an idea once found in a web forum: to
 wrap all script's code inside a function declaration. This allowed among other things to end execution's flow and set an
@@ -29,8 +29,8 @@ next step. One small drawback is that we still need to call this main function a
 execution to take place. Moreover script's positional parameters are to be passed to it using "$@" or "$*" if needed.
 But although Bash's functions support helped with the procedural approach, the variable scope constraints imposed by the
 "local" built-in allows for better modularity. In addition, it is easy to create functions capable of writing values to
-variables in the calling environment by simulating a passed-by-reference argument mechanism, as it will be shown later
-(As of bash-4.1 or later, this is natively supported with "declare -n").
+variables in the calling environment by simulating a passed-by-reference argument mechanism, as it will be shown (As of
+bash-4.1 or later, this is natively supported with "declare -n").
 Finally we are also allowed to create non-executable files containing only bash declaration statements, and later 
 include that code in any bash script by using the "source" built-in. This allows code reusability through library files.
 
