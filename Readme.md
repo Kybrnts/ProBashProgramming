@@ -20,7 +20,7 @@ forums, blogs, advice from colleagues and a handful of e-books that I could gath
 C-Style Approach
 ----------------
 In spite of my very limited programming knowledge, I remembered from my student days, most of the issues regarding BAD
-programming practices, that I was starting to notice in my own scripts, and some of the benefits of using proper C's
+programming practices, that I was starting to notice in my own scripts; and some of the benefits of using proper C's
 structured and modular approach. This approach is not enforced by any shell, however with enough time, one can find a 
 lot of features in Bash that provide support for it. I remember by starting to use an idea once found in a web forum: to
 wrap all script's code inside a function declaration. This allowed among other things to end execution's flow and set an
@@ -63,7 +63,7 @@ General coding rules:
     * Word splitting;
   * When referencing a variable in the RHS of an ASSIGNMENT, double quoting is not needed (in Bash);
   * Use double quoting for arguments to present them as single words, even when containing white spaces.
-* Arithmetic 
+* Arithmetic
   * Use names "integer" attribute, for integer variables (local -i aname=0);
   * Perform arithmetic operations and numeric comparisons within "(( ))" blocks: e.g. if ((42<=24+24)), ((3**3==27));
   * Reference variables by name, not expansion, within arithmetic evaluation: e.g. ((i++)) rather than (($i++)),
@@ -103,19 +103,18 @@ Global declarations rules:
   * Function and (global) variable declarations.
 
 Function declaration rules:
-* Try Create a function header w/local variables as arguments to store all positional parameters values. This allows
-  using custom names for arguments and so ease variable tracking throughout function's body code.
-* Declare MANDATORY (not unset) arguments that cannot be empty first, then MANDATORY that can be empty and finally
-  the optional ones (may be unset or empty).
-* Prefix Parameters that hold variable names (references) with "_ref", and make them MANDATORY.
-* Use "Display Error  if  Null  or  Unset", "Use default value" or "Use alternate value" parameter expansion for
-  MANDATORY arguments.
-* Use "Display Error if null" parameter expansion for reference arguments.
+* Create a function header w/local variables as arguments to store all positional parameters values. This allows
+  using custom and more meaningful names for arguments and so ease variable tracking throughout function's body;
+* Declare MANDATORY (non-unset) non-null arguments first, then MANDATORY that can be null and finally the optional ones
+  (may be unset or null);
+* Prefix parameters that hold variable names (references) with "ref_", and make them MANDATORY and non-null;
+* Use the following parameter expansions right before assignment to arguments:
+  * "Display error if null or unset", for MANDATORY non-null positional parameters;
+  * "Display if null", for MANDATORY positional parameters that may be null strings; 
+  * "Use default value" or "Use alternate value" parameter expansion for OPTIONAL positional parameters;
+  This will enforce proper function call by stopping script execution if a MANDATORY argument is missing, or null when
+  it is not supposed to. Also assign default values for optional parameters;
 * Then flush all parameters with "shift $#", to "enclose" function's header and to release memory; also any remaining
-  parameters passed to the function by mistake will be ignored.
-* Then declare as "local" ANY needed variables inside the function (avoid globals).
-* Use return to:
-  * Set exit status even for the main() function;
-  * Simplify compound commands: e.g. "if ! conditioncommand; then return 1; list; fi" rather than 
-    "if conditioncommand; then list; fi".
-* Avoid exit calls; however they might be used upon signal traps or die()-like functions.
+  parameters passed to the function by mistake will be ignored;
+* Then declare as "local" ANY needed variables inside the function (avoid globals);
+* Use return to avoid exit calls; however they might be used upon signal traps or die()-like functions.

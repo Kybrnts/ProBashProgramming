@@ -7,21 +7,20 @@
 #: Options     : N/A
 
 ## Function declarations
-superstring() { #@ DESCRIPTION:
-                #@ USAGE:
-    local superstring=${1:?"$FUNCNAME: Missing argument"}
+superstring() { #@ DESCRIPTION: Tests if $1 string contains string $2
+                #@ USAGE: '[ STRING1 ]' [ STRING2 ]
+    local superstring=${1?"$FUNCNAME: Missing argument"}
     local string=$2
     shift $#
     
     case $superstring in
         *"$string"*)      # Superstring matches string w/additional left or right chars;
             return 0 ;;
-        *)                # Superstring will always match with "*", but match will not be tested if the previous
-                          # match tested OK
-            return 1 ;;
+        *)                # Superstring will always match with "*", but match will not be tested if the previous match
+            return 1 ;;   # tested OK
     esac
 }
-substring() { #@ DESCRIPTION:
+substring() { #@ DESCRIPTION: Tests if $1 string is contained by string $2
               #@ USAGE:
     local substring=${1:?"$FUNCNAME: Missing argument"}
     local string=$2

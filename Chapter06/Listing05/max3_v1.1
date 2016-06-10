@@ -1,0 +1,47 @@
+#!/bin/bash
+#: Title       : Max3
+#: Date        : 2016-05-17
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Sort three integers and write results in variables
+#: Options     : N/A
+
+max3() { #@ Sort 3 integers and store in globals $_MAX3, $_MID3 and $_MIN3
+         #@ USAGE: max3 NAME NAME NAME [ INT [ INT [ INT ] ] ]
+    ## Function header
+    local ref_1=${1:?"$FUNCNAME: Missing name argument"}
+    local ref_2=${2:?"$FUNCNAME: Missing name argument"}
+    local ref_3=${3:?"$FUNCNAME: Missing name argument"}
+    local -i int1=${4:-0}
+    local -i int2=${5:-0}
+    local -i int3=${6:-0}
+    shift $#
+    
+    local -i temp=0
+    ## Sort input values
+    [ $int1 -gt $int2 ] && temp=$int1 int1=$int2 int2=$temp
+    [ $int2 -gt $int3 ] && temp=$int2 int2=$int3 int3=$temp
+    [ $int1 -gt $int2 ] && temp=$int1 int1=$int2 int2=$temp
+    ## Store results in referenced names
+    printf -v $ref_1 "%s" $int3
+    printf -v $ref_2 "%s" $int2
+    printf -v $ref_3 "%s" $int1
+}
+
+main() {
+    shift $#
+    
+    local -ri digits=5                      # Digits per random number to display
+    local -r format=" %5s: %-5${digits}s\n" # Single line output format
+    
+    # Get three random numbers
+    local -i _max3a=0 _max3b=0 _max3c=0
+    # Sort three random numbers
+    max3 _max3a _max3b _max3c $RANDOM $RANDOM $RANDOM
+
+    # Output results
+    printf "$format" max3 $_max3a mid3 $_max3b min3 $_max3c
+}
+
+main "$@"
+
