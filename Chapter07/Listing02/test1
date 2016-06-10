@@ -6,7 +6,7 @@
 #: Options     : N/A
 
 ## Includes
-. "${0%/*}"/alert1 # Include repeat and alert functions
+. "${0%/*}"/alert # Include repeat and alert functions
 
 main() {
     

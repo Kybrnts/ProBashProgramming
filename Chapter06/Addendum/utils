@@ -7,27 +7,7 @@
 #: Options     : N/A
 
 ## Function declarations
-superstring() { #@ DESCRIPTION: Tests if $1 string contains string $2
-                #@ USAGE: '[ STRING1 ]' [ STRING2 ]
-    local superstring=${1?"$FUNCNAME: Missing argument"}
-    local string=$2
-    shift $#
-    
-    case $superstring in
-        *"$string"*)      # Superstring matches string w/additional left or right chars;
-            return 0 ;;
-        *)                # Superstring will always match with "*", but match will not be tested if the previous match
-            return 1 ;;   # tested OK
-    esac
-}
-substring() { #@ DESCRIPTION: Tests if $1 string is contained by string $2
-              #@ USAGE:
-    local substring=${1:?"$FUNCNAME: Missing argument"}
-    local string=$2
-    shift $#
-    superstring "$string" "$substring"
-}
-isunset() { #@ DESCRIPTION: Tests if NAME contained in $1 is unset (i.e. expands to null string)
+isunset() { #@ DESCRIPTION: Tests if NAME contained in $1 is unset (i.e. expands to null pointer)
             #@ USAGE: isunset NAME
     local name=${1:?"$FUNCNAME: Missing name argument"}
     shift $#
@@ -35,28 +15,47 @@ isunset() { #@ DESCRIPTION: Tests if NAME contained in $1 is unset (i.e. expands
     ## Check if referenced value is not empty
     [ -z ${!name+x} ]
 }
-isset() { #@ DESCRIPTION:
+isset() { #@ DESCRIPTION: Tests if NAME contained in $1 is set (
           #@ USAGE:
     local name=${1:?"$FUNCNAME: Missing name argument"}
     shift $#
     
     ! isunset $name
 }
-isempty() { #@ DESCRIPTION: Tests if $1 string is empty
-            #@ USAGE: isempty [ STRING ]
-    local string=$1 ## Even unset strings will be parsed as empty
+substring() { #@ DESCRIPTION: Tests if $1 string is contained by string $2
+              #@ USAGE: substring '[ STRING1 ]' '[ STRING2 ]'
+    local substring=${1?"$FUNCNAME: Missing argument"}
+    local string=${2?"$FUNCNAME: Missing argument"}
+    shift $#
+
+    case $string in                 ## Does string match substring w/additional left or right chars?
+	*"$substring"*) return 0 ;; ## Yes, then it is a substring
+    esac                            ##
+    return 1                        ## No, hence it is not a substring
+}
+superstring() { #@ DESCRIPTION: Tests if $1 string contains string $2
+                #@ USAGE: superstring '[ STRING1 ]' '[ STRING2 ]'
+    local superstring=${1?"$FUNCNAME: Missing argument"}
+    local string=${2?"$FUNCNAME: Missing argument"}
     shift $#
     
-    ## Check if received string is empty
-    [ -z "$string" ]
+    substring "$string" "$superstring"
 }
-isnotempty() { #@ DESCRIPTION:
-               #@ USAGE:
-    local string=$1
+isempty() { #@ DESCRIPTION: Tests if $1 string is empty
+            #@ USAGE: isempty '[ STRING ]'
+    local string=${1?"$FUNCNAME: Missing argument"}
+    shift $#
+    
+    ## Check if received string is susbstring of the null string
+    substring "$string" ""
+}
+isnotempty() { #@ DESCRIPTION: Tests if $1 string is NOT empty
+               #@ USAGE: isnotempty '[ STRING ]'
+    local string=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     ## Check if received string is NOT empty
-    [ -n "$string" ]
+    ! isempty "$string"
 }
 validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
               #@ USAGE: validname '[ STRING ]'
@@ -86,7 +85,7 @@ val2decint() { #@ DESCRIPTION: Turns a valid integer string into arithmetic eval
                #@ USAGE: val2decint NAME '[ INT_STRING ]'
     ## Funtion header
     local ref_intstr=${1?"$FUNCNAME: Missing name argument"}
-    local intstr=${2?"$FUNCNAME: Missing string argument"}
+    local intstr=${2:?"$FUNCNAME: Missing valid integer argument"}
     shift $#
     
     local out_intstring="" ## Funtion output container
@@ -94,11 +93,11 @@ val2decint() { #@ DESCRIPTION: Turns a valid integer string into arithmetic eval
     ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
     ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
     ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
-    out_intstr=${intstr%%[^-]*}$(( 10#${intstr#-} )) # First keep hyphen character if present (negative integers)
-                                                     # Then replace unsigned $integer w/its decimal representation
-    printf -v $ref_intstr "%s" "$intstr"             # Now it is safe to write it to output.
+    out_intstr=${intstr%%[^-]*}$(( 10#${intstr#-} )) ## First keep hyphen character if present (negative integers)
+                                                     ## Then replace unsigned $integer w/its decimal representation
+    printf -v $ref_intstr "%s" "$intstr"             ## Now it is safe to write it to output.
     ## Using the atoi() function, example:
     ## * Declaring a local variable within the calling function:
     ##   local _vl2dcnt=""
-    ## * Using it to get atoi's output atoi _vl2dcnt "-099"
+    ## * Using it to get atoi's output val2decint _vl2dcnt "-099"
 }

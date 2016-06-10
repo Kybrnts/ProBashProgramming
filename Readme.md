@@ -38,11 +38,11 @@ Goals
 -----
 The idea is to establish a set of "good bash scripting rules", and then put them to the test by re-writing all the code
 available in Chris Johnson's book following them. The task shouldn't be very hard as published code is already close to
-that.  However it is expected that this rules will be improved and extended during the process. 
+that. However it is expected that this rules will be improved and extended during the process. 
 From a more practical point of view we also aim to improve:
 * Code clarity and simplicity, making it easy to maintain, share and extend.
 * Code Reusability, putting a bit of effort in function libraries development.
-* Also some effort in writing code that it is safer to execute, robust, that works consistently with wider range of inputs
+* Also some effort in writing code that it is safer to execute, robust, works consistently with wider range of inputs
   and with proper run time error handling. 
 
 Scripting rules

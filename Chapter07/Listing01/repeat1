@@ -10,17 +10,22 @@
 declare _REPEAT=""
 
 ## Function declarations
-_repeat() { #@ DESCRIPTION: Repeat a string N times
-            #@ USAGE: _repeat string number
-
-    _REPEAT=$1
-    while (( ${#_REPEAT} < $2 )); do ## Loop unitl string exceeds desired length
-	_REPEAT=$_REPEAT$_REPEAT$_REPEAT ## 3 seems to be the optimum number	
+_repeat() { #@ DESCRIPTION: Repeat a repstr N timesp
+            #@ USAGE: _repeat repstr number
+    local repstr=${1?"$FUNCNAME: Missing argument"}
+    local -i num=${2:-1}
+    shift $#
+    
+    while (( ${#repstr} < $num )); do ## Loop until repstr exceeds desired length
+	repstr+=$repstr$repstr        ## 3 seems to be the optimum number
     done
-    _REPEAT=${_REPEAT:0:$2} ## Trim to desired length
+    _REPEAT=${repstr:0:$num}          ## Trim to desired length & store in global
 }
-
 repeat() {
-    _repeat  "$@"
+    local repstr=${1?"$FUNCNAME: Missing argument"}
+    local -i num=$2
+    shift $#
+
+    _repeat "$repstr" $num
     printf "%s\n" "$_REPEAT"
 }

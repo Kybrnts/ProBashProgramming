@@ -10,30 +10,46 @@
 . ${0%/*}/../Listing01/repeat2 || exit 1 ## Include repeat() declaration
 
 ## Alternatively we define getlastn() as our starting point
-getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
-             #@ USAGE: getlastn NAME '[ STRING ]' [ NUM ]
-    ## Function header
-    local ref_lastn="${1:?$FUNCNAME: Missing name argument}" ## Name where to writ eth last N character string
-    local string="${2?$FUNCNAME: Missing argument}"          ## String to be trimmed container
-    local -i n="${3:-1}"                                     ## Number of character to be kept from the back
+_getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
+              #@ USAGE: getlastn NAME '[ STRING ]' [ NUM ]
+    local ref_lastn=${1:?"$FUNCNAME: Missing name argument"} ## Name where to writ eth last N character string
+    local string=${2?"$FUNCNAME: Missing argument"}          ## String to be trimmed container
+    local -i n=${3:-1}                                       ## Number of character to be kept from the back
     shift $#
 
-    local lastn=""
-    _repeat "?" $n
-    lastn="${string#${string%$_REPEAT}}"
-    printf -v $ref_lastn "%s" "$lastn"
+    local __rpt=
+    _repeat __rpt "?" $n
+    printf -v $ref_lastn "%s" "${string#"${string%$__rpt}"}" ## Quoting the second parameter expansion matters!
+}
+getlastn() {
+    local string=${1?"$FUNCNAME: Missing argument"} ## String to be trimmed container
+    local -i n=${2:-1}                              ## Number of character to be kept from the back
+    shift $#
+
+    local __gtlstn=
+    _getlastn __gtlstn "$string" $n
+    printf "%s\n" "$__gtlstn"
 }
 ## Then we define getfirstn() based on lastn
-getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
-              #@ USAGE: getfirstn NAME '[ STRING ]' [ NUM ]
+_getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
+               #@ USAGE: getfirstn NAME '[ STRING ]' [ NUM ]
     ## Function header
-    local ref_firstn="${1:?$FUNCNAME: Missing name argument}" ## Name where to write the first N character string
-    local string="${2?$FUNCNAME: Missing argument}"           ## The string to be trimmed 
-    local -i n="${3:-1}"                                      ## Number of characters to be kept from the beginning
+    local ref_firstn=${1:?"$FUNCNAME: Missing name argument"} ## Name where to write the first N character string
+    local string=${2?"$FUNCNAME: Missing argument"}           ## The string to be trimmed 
+    local -i n=${3:-1}                                        ## Number of characters to be kept from the beginning
     shift $#
     
-    local _gtlstn=""
+    local __gtlstn=
     n=$(( ${#string} - $n ))
-    getlastn _gtlstn "$string" $n
-    printf -v $ref_firstn "%s" "${string%$_gtlstn}"
+    getlastn __gtlstn "$string" $n
+    printf -v $ref_firstn "%s" "${string%"$__gtlstn"}"
+}
+getfirstn() {
+    local string=${1?"$FUNCNAME: Missing argument"} ## The string to be trimmed 
+    local -i n=${2:-1}                              ## Number of characters to be kept from the beginning
+    shift $#
+
+    local __gtfrstn=
+    _getfirstn __gtfrstn "$string" $n
+    printf "%s\n" "$__gtfrstn"
 }

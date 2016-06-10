@@ -1,28 +1,74 @@
 #!/bin/bash
-#: Date        : 2016-05-23
+#: Date        : 2016-05-21
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
-#: Version     : 1.0
-#: Description : Test repeat() and alert()
+#: Version     : 1.1
+#: Description : Test script for getfirstn() and getlastn()
 #: Options     : N/A
 
-## Includes
-. "${0%/*}"/alert2 # Include repeat and alert functions
+## Inclusions
+. ${0%/*}/firstchars
+
+displayn() {
+    local string=${1?"$FUNCNAME: Missing argument"}
+    local from=${2:-first}
+    local -i num=$3
+    shift $#
+
+    ## Protect next function call. (only first or last are defined)
+    case $from in
+	first|last) : ;;
+	*) from=first ;;
+    esac
+    
+    printf "\n${from^} %d chars of \"%s\": " $num "$teststring"
+    get${from}n "$teststring" $num
+}
 
 main() {
-    
-    ## Repeat&print single character string
-    repeat "%" 20
-    echo 
-    ## Repeat and print multiple character string
-    repeat "%-~" 10
-    echo
-    ## Alert tests 
-    alert "Press red button"
-    echo
-    alert "/!\ Do you really want to delete all your files? /!\\"
-    echo
-    alert " Warning! continue at your own risk" "%@%"
-    echo
+    ## Function header
+    shift $#
+
+    ## Local variables
+    local teststring="Dixie Flatline" ## Test string container
+    local -i fn=3 ln=10               ## Number of characters to get from teststring
+    ## Use first version of getfirstn() and getlastn()
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+
+    ## Test with another string
+    teststring="/!\\ - Alert message /!\\"
+    fn=4 ln=12
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+   
+    ## Use second version of getfirstn() and getlastn()
+    ##. ${0%/*}/lastchars
+    teststring="Norbert Wiener"
+    fn=9 ln=2
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+
+    printf "%s\n" "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+    ## Now test lastchars()
+    . ${0%/*}/firstchars
+    teststring="Dixie Flatline" ## Test string container
+    fn=3 ln=10               ## Number of characters to get from teststring
+    ## Use first version of getfirstn() and getlastn()
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+
+    ## Test with another string
+    teststring="/!\\ - Alert message /!\\"
+    fn=4 ln=12
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+   
+    ## Use second version of getfirstn() and getlastn()
+    ##. ${0%/*}/lastchars
+    teststring="Norbert Wiener"
+    fn=9 ln=2
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
 }
 
 main "$@"

@@ -6,25 +6,26 @@
 #:             : Adds repeating string capabilities
 #: Options     : N/A
 
-## Global variables
-declare _REPEAT=""
-
 ## Function declarations
 _repeat() { #@ DESCRIPTION: Repeat a string N times
             #@ USAGE: _repeat STRING NUMBER
 ## Function header
-    local repstr="${1?$FUNCNAME: Missing argument}"
-    local -i num="${2?$FUNCNAME: Missing integer argument}"
+    local ref_rep=${1:?"$FUNCNAME: Missing name argument"}
+    local repstr=${2?"$FUNCNAME: Missing argument"}
+    local -i num=${3:-1}
     shift $#
 
-    while [ ${#repstr} -lt $num ]; do   ## Loop until string exceeds desired length
-	repstr+="$repstr$repstr$repstr" ## 3 seems to be the optimum number
+    while (( ${#repstr} < $num )); do          ## Loop until string exceeds desired length
+	repstr+=$repstr$repstr                 ## 3 seems to be the optimum number
     done
-    repstr="${repstr:0:$num}"           ## Trim to desired length
-    _REPEAT="$repstr"                   ## Write result to global
+    printf -v $ref_rep "%s" "${repstr:0:$num}" ## Trim to desired length & write result
 }
-
 repeat() {
-    _repeat  "$@"
-    printf "%s\n" "$_REPEAT"
+    local repstr=${1?"$FUNCNAME: Missing argument"}
+    local -i num=$2
+    shift $#
+
+    local __rpt=
+    _repeat __rpt "$repstr" $num
+    printf "%s\n" "$__rpt"
 }
