@@ -1,0 +1,21 @@
+#: Title       : Test
+#: Date        : 2016-06-14
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Tests validname() functionality
+#: Options     : N/A
+
+## Inclusions
+. "${0%/*}/validname" || exit 1
+
+## Function declarations
+main() {
+    shift $#
+    
+    local name=
+    for name in name1 2var first.name first_name last-name; do
+	validname "$name" && echo " valid: $name" || echo "invalid: $name"
+    done
+}
+## Run!
+main "$@"

@@ -30,7 +30,7 @@ getint() { #@ Prompt user, and read integer string from input
     ## * Set prompt w/default input
     ## * Set input timeout 30 seconds
     ## * Store read value
-    read -p "$prmptstr" -t $_GETTMOUT -r intstring
+    read -r -p "$prmptstr" -t $_GETTMOUT intstring
     ## Save exit status
     estat=$?
     ## Did we get input from user?

@@ -1,0 +1,35 @@
+#: Title       : Insert_string
+#: Date        : 2016-06-14
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Insert one string into another at specific position
+
+## Global variables
+declare _INSERT_STRING=            ## Inserted string storage
+declare -i _INSERT_STRING_DFLT=2  ## Default insert string location
+
+## Function declarations
+_insert_string() { #@ DESCRIPTION:
+                   #@ USAGE:
+    local string=$1                        ## String container
+    local i_string=$2                      ## String to be inserted
+    local i_pos=${3:-$_INSERT_STRING_DFLT} ## Insert location
+    shift $#
+
+    local left= right=                     ## Before and after pieces
+
+    left=${string:0:$(( i_pos - 1 ))}      ## String to left of insert
+    right=${string:$(( i_pos - 1 ))}       ## String to right of insert
+    _INSERT_STRING=$left$i_string$right    ## Build new string on global
+}
+insert_string() { #@ DESCRIPTION:
+                  #@ USAGE: 
+    local string=$1
+    local i_string=$2
+    local i_pos=$3
+    shift $#
+
+    _insert_string "$string" "$i_string" "$i_pos"
+    printf "%s\n" "$_INSERT_STRING"
+}

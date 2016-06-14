@@ -1,0 +1,44 @@
+#!/bin/bash
+#: Title       : Test
+#: Date        : 2016-06-14
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Convert month name to number
+#: Options     : N/A
+
+## Globals
+declare -i _MONTH=0       ## Month number
+declare -ri _READTMOUT=20 ## Maximum number of seconds to wait on user to input
+
+## Function declarations
+month2num() {
+    local monthname=${1?"$FUNCNAME: Missing argument"}
+    shift $#
+    
+    case $monthname in
+	[Jj][Aa][Nn]*) _MONTH=1 ;; [Ff][Ee][Bb]*) _MONTH=2 ;; [Mm][Aa][Rr]*) _MONTH=3 ;; 
+	[Aa][Pp][Rr]*) _MONTH=4 ;; [Mm][Aa][Yy]*) _MONTH=5 ;; [Jj][Uu][Nn]*) _MONTH=6 ;; 
+	[Jj][Uu][Ll]*) _MONTH=7 ;; [Aa][Uu][Gg]*) _MONTH=8 ;; [Ss][Ee][Pp]*) _MONTH=9 ;; 
+	[Oo][Cc][Tt]*) _MONTH=10 ;; [Nn][Oo][Vv]*) _MONTH=11 ;; [Dd][Ee][Cc]*) _MONTH=12 ;; 
+	[1-9]|1[0-2]) _MONTH=$monthname ;;
+	*) return 1 ;;
+    esac
+}
+
+main() {
+    shift $#
+    
+    local monthname=
+    if ! read -r -p "Enter the name of the month: " -t $_READTMOUT monthname; then
+	printf "Error: \n%s\n" "Failed to get input" >&2
+	return 1	
+    fi
+    if ! month2num "$monthname"; then
+	printf "Error: %s\n" "Invalid month name entered: $monthname" >&2
+	return 2
+    fi
+    printf "%s is month nº %d.\n" "$monthname" $_MONTH
+}
+
+## Run!
+main "$@"
