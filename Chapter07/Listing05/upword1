@@ -10,21 +10,24 @@
 . "${0%/*}/../Listing04/toupper1" || exit 1 ## Include to_upper declaration
 
 ## Global variables
-declare _UPWORD=""
+declare _UPWORD=
 
 ## Function declarations
 _upword() {
-    local word="${1:?$FUNCNAME: Missing argument}"
+    local word=$1
     shift $#
     
-    _UPWORD=""               ## Reset _UPWORD before using it (expanded before being assigned)
+    _UPWORD=                 ## Reset _UPWORD before using it (expanded before being assigned)
     while [ -n "$word" ]; do ## Loop until nothing is left in $word
 	to_upper "$word"     ## Change to uppercase word's first char, storing it in _UPR
-	_UPWORD+=$_UPR       ## Append _UPR's current value to new global _UPWORD
+	_UPWORD+=$_UPR       ## Append _UPR's current value in new global _UPWORD
 	word=${word#?}       ## Remove word's first char
     done
 }
 upword() {
-    _upword "$@"
+    local word=$1
+    shift $#
+
+    _upword "$word"
     printf "%s\n" "$_UPWORD"
 }

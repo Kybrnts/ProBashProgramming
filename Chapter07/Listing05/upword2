@@ -10,20 +10,26 @@
 . "${0%/*}/../Listing04/toupper2" || exit 1  ## Include to_upper declaration
 
 ## Function declarations
-upword() {
-    local ref_word="${1?$FUNCNAME: Missing name argument}"
-    local word="${2:?$FUNCNAME: Missing argument}"
+_upword() {
+    local ref_word=${1:?"$FUNCNAME: Missing name argument"}
+    local word=$2
     shift $#
 
-    local _t_uppr=""
+    local _t_uppr= upword=
 
-    while [ -n "$word" ]; do ## Loop until nothing is left in $word
-	to_upper "$word"     ## Change to uppercase word's first char, storing it in _UPR
-	_UPWORD+=$_UPR       ## Append _UPR's current value to new global _UPWORD
-	word="${word#?}"     ## Remove word's first char
+    while [ -n "$word" ]; do     ## Loop until nothing is left in $word
+	to_upper _t_uppr "$word" ## Change to uppercase word's first char, storing it in _t_uppr
+	upword+=$_t_uppr         ## Append _t_uppr current value in local upword
+	word=${word#?}           ## Remove word's first char
     done
+    printf -v $ref_word "%s" "$upword"
 }
-displayupword() {
-     "$@"
-    printf "%s\n" "$_UPWORD"
+upword() {
+    local word=$1
+    shift $#
+
+    local __upwrd=
+    
+    _upword __upwrd "$word"
+    printf "%s\n" "$__upwrd"
 }

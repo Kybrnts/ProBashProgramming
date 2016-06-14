@@ -4,6 +4,8 @@
 #: Version     : 1.0
 #: Description : Bash function declarations file
 #:             : Get N first characters from a string
+#:             : This is not to be meant as "the real thing" but just an exercise. First N chars from a string can (and
+#:             : should) be directly obtained w/parameter expansion: ${string:0:N}
 #: Options     : N/A
 
 ## Includes

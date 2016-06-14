@@ -8,11 +8,11 @@
 
 to_upper() { #@ DESCRIPTION: 
              #@ USAGE:
-    local ref_c="${1:?$FUNCNAME: Missing name argument}"
-    local str="${2?$FUNCNAME: Missing argument}"
+    local ref_c=${1:?"$FUNCNAME: Missing name argument"}
+    local str=$2
     shift $#
 
-    local upr=""
+    local upr=
 
     case $str in
 	a*) upr=A ;; b*) upr=B ;; c*) upr=C ;; d*) upr=D ;;
@@ -23,15 +23,15 @@ to_upper() { #@ DESCRIPTION:
 	t*) upr=T ;; u*) upr=U ;; v*) upr=V ;; w*) upr=W ;;
 	x*) upr=X ;; y*) upr=Y ;; z*) upr=Z ;; á*) upr=Á ;;
 	é*) upr=É ;; í*) upr=Í ;; ó*) upr=Ó ;; ú*) upr=Ú ;;
-	*) upr="${str%${str#?}}" ;;
+	*) upr=${str%"${str#?}"} ;;
     esac
-    printf -v $ref_c "%c" $upr
+    printf -v $ref_c "%c" "$upr"  ## If you thought that quoting is not needed, What if character is a space?
 }
 capitalize() {
-    local str="${1?$FUNCNAME: Missing argument}"
+    local str=$1
     shift $#
 
-    local _t_uppr=""
+    local _t_uppr=
 
     to_upper _t_uppr "$str"
     printf "%c%s\n" $_t_uppr "${str#?}"

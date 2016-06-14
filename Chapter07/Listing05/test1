@@ -12,9 +12,16 @@
 main() {
     shift $#
 
-    upword " :Test string:"
+   upword " :Test string:"
+   upword "Artigas ñemoñaré, by Nelson Caula"
+   upword '/!\ Additional test string /!\'
+
+    . "${0%/*}/upword2" || exit 1
+
+    upword " :tesT String:"
     upword "Artigas Ñeoñaré, by Nelson Caula"
     upword '/!\ Additional test string /!\'
+
 }
 
 main "$@"

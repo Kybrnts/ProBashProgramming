@@ -6,30 +6,28 @@
 #:             : Reverse the order of a string; store results in global
 #: Options     : N/A
 
-declare _REVSTR=""
+declare _REVSTR=
 
 _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
-            #@ USAGE: revstr '[ STRING ]'
-    ## Function header
-    local var="${1?$FUNCNAME: Missing argument}"
+            #@ USAGE: revstr [ STRING ]
+    local var=$1
     shift $#
 
     ## Local variables
-    local temp=""
+    local temp=
 
-    _REVSTR=""
+    _REVSTR=                           ## Reset the global (we don't want to accumulate any previous garbage)
     while [ -n "$var" ]; do            ## While string's size is not zero..
-	temp="${var#?}"                ## Get everything but first char on temp
-	_REVSTR="${var%$temp}$_REVSTR" ## Then get first char only, and place it at the beginning of global
-	var="$temp"                    ## Replace string with temp (remove its first char)
+	temp=${var#?}                  ## Get everything but first char on temp
+	_REVSTR=${var%"$temp"}$_REVSTR ## Then get first char only, and place it at the beginning of global
+	var=$temp                      ## Replace string with temp (remove its first char)
     done
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
            #@ USAGE: revstr '[ STRING ]'
-    ##Function header
-    local var="${1?$FUNCNAME: Missing argument}"
+    local var=$1
     shift $#
 
     _revstr "$var"
-    printf "$_REVSTR\n"
+    printf "%s\n" "$_REVSTR"
 }

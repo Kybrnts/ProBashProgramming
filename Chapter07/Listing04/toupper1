@@ -7,15 +7,15 @@
 #: Options     : N/A
 
 ## Global variables
-declare _UPR=""
+declare _UPR=
 
 to_upper() { #@ DESCRIPTION: 
              #@ USAGE:
-    local str="${1?$FUNCNAME: Missing argument}"
+    local str=$1
     shift $#
     
-    ## Reset _UPR because it might be 
-    _UPR=""
+    ## Reset _UPR because if contains garbage it may cause trouble
+    _UPR=
     case $str in
 	a*) _UPR=A ;; b*) _UPR=B ;; c*) _UPR=C ;; d*) _UPR=D ;;
 	e*) _UPR=E ;; f*) _UPR=F ;; g*) _UPR=G ;; h*) _UPR=H ;;
@@ -25,11 +25,11 @@ to_upper() { #@ DESCRIPTION:
 	t*) _UPR=T ;; u*) _UPR=U ;; v*) _UPR=V ;; w*) _UPR=W ;;
 	x*) _UPR=X ;; y*) _UPR=Y ;; z*) _UPR=Z ;; á*) _UPR=Á ;;
 	é*) _UPR=É ;; í*) _UPR=Í ;; ó*) _UPR=Ó ;; ú*) _UPR=Ú ;;
-	*) _UPR="${str%${str#?}}" ;;
+	*) _UPR=${str%"${str#?}"} ;;
     esac
 }
 capitalize() {
-    local str="${1?$FUNCNAME: Missing argument}"
+    local str=$1
     shift $#
     
     to_upper "$str"

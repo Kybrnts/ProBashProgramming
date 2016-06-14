@@ -8,14 +8,17 @@ Bash is a powerful and very flexible scripting tool, that has a lot of potential
 specially for Linux Sysops and Sysadmins. Yet in my experience code developed in bash is oftentimes difficult to
 read/understand and hard to maintain and/or extend. Its hard-to-learn syntax is prone to uncanny and sometimes buggy
 expressions.
-Over the past 10 years or so I used Shell scripting as one of my main resources to develop anything from the most simple
-threshold-triggered alerts sent via email, to log cleaners, back-up automated tasks, to more complex ones, like software
-installers or service load balancers; some of which loaded configuration values from a separate conf. file, or generated
-reports in HTML format. In any case, success rate ranged from "thrilling achievement" to "disastrous fail", although 
-overall results improved with time. This was for the most part, thanks to a knowledge input that came from internet
-forums, blogs, advice from colleagues and a handful of e-books that I could gather over time, such as Machtlet Garrels's
-"Bash-Beginners guide" and Mendel Cooper's "Bash-Advanced guide". Among those it was Chris Johnson's 
-"Pro Bash Programming", notorious for its procedural/modular programming approach.
+Over the past 10 years or so, I used Shell scripting as one of my main resources to build a variety of scripts: from the
+simplest threshold-triggered alert email sender, log cleaners and automated back-up tasks, to more complex ones, like
+software installers or service load balancers; some of which loaded configuration values from a separate conf. file, or
+printed reports in HTML format. In any case, success rate ranged from "thrilling achievement" to "disastrous fail",
+although overall results improved with time. This was for the most part, thanks to a knowledge input that came from
+internet forums, blogs, advice from colleagues and a handful of e-books that I could gather over time, such as Machtlet
+Garrels's "Bash-Beginners guide" and Mendel Cooper's "Bash-Advanced guide". Among those it was Chris Johnson's 
+"Pro Bash Programming", remarkable for its procedural/modular programming approach. It was the first time I was able to
+appreciate Bash as a programming language, rather than a command line interpreter (although its actually both). It
+explicitly establishes a large set of good practices that could potentially benefit from additional ideas already
+available from above mentioned "knowledge input"..
 
 C-Style Approach
 ----------------
