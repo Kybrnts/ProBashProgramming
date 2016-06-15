@@ -1,0 +1,35 @@
+#: Title       : Insert_string
+#: Date        : 2016-06-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.2
+#: Description : Bash function declarations file
+#:             : Trim unwanted characters
+
+## Function declarations
+_trim() { #@ DESCRIPTION: 
+          #@ USAGE:
+    local ref_trstr=${1:?"$FUNCNAME: Missing argument"}
+    local trim_string=$2  ## Input string
+    local to_trim=${3:- } ## Part to be removed (default to space)
+    shift $#
+
+    local trim=$trim_string
+    ## Remove all from beginning, up to the first character different to trim, and store it in trim_string
+    trim_string=${trim##*[^"$to_trim"]} ## Not just single chars but entire strings are supported by negation
+    ## Keep what we didn't remove before in trim
+    trim=${trim%"$trim_string"}
+    ## Remove all from back, up to the first character different to trim
+    trim_string=${trim%%[^"$to_trim"]*} ## Quote to preven reinterpretation of specials
+    ## Keep what we didn't remove before in trim
+    printf -v $ref_trstr "%s" "${trim#"$trim_string"}"
+}
+trim() { #@ DESCRIPCION:
+         #@ USAGE:
+    local trim_string=$1
+    local to_trim=$2
+    shift $#
+
+    local __trm=
+    _trim __trm "$trim_string" "$to_trim"
+    printf "%s\n" "$__trm"
+}

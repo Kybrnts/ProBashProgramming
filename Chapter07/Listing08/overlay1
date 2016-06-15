@@ -1,0 +1,34 @@
+#: Title       : Insert_string
+#: Date        : 2016-06-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Place one string on the top of another
+
+## Global variables
+declare _OVERLAY=
+declare -i _OVERLAY_START_DFLT=1
+
+## Function declarations
+_overlay() { #@ DESCRIPTION: 
+             #@ USAGE:
+    local string=$1
+    local sub=$2
+    local -i start=${3:-$_OVERLAY_START_DFLT}
+    shift $#
+    
+    local left= right=
+    left=${string:0:start - 1}
+    right=${string:start + ${#sub} - 1}
+    _OVERLAY=$left$sub$right
+}
+overlay() { #@ DESCRIPTION:
+            #@ USAGE:
+    local string=$1
+    local sub=$2
+    local start=$3
+    shift $#
+    
+    _overlay "$string" "$sub" $start
+    printf "%s\n" "$_OVERLAY"
+}

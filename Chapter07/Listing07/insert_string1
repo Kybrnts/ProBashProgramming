@@ -6,15 +6,15 @@
 #:             : Insert one string into another at specific position
 
 ## Global variables
-declare _INSERT_STRING=            ## Inserted string storage
+declare _INSERT_STRING=           ## Inserted string storage
 declare -i _INSERT_STRING_DFLT=2  ## Default insert string location
 
 ## Function declarations
 _insert_string() { #@ DESCRIPTION:
                    #@ USAGE:
-    local string=$1                        ## String container
-    local i_string=$2                      ## String to be inserted
-    local i_pos=${3:-$_INSERT_STRING_DFLT} ## Insert location
+    local string=$1                           ## String container
+    local i_string=$2                         ## String to be inserted
+    local -i i_pos=${3:-$_INSERT_STRING_DFLT} ## Insert location
     shift $#
 
     local left= right=                     ## Before and after pieces
@@ -27,9 +27,9 @@ insert_string() { #@ DESCRIPTION:
                   #@ USAGE: 
     local string=$1
     local i_string=$2
-    local i_pos=$3
-    shift $#
+    local i_pos=$3                         ## Do not set integer attribute. Because if the parameter is empty, then 0
+    shift $#                               ## will be assigned to i_pos and $_INSERT_STRING_DFLT won't be used
 
-    _insert_string "$string" "$i_string" "$i_pos"
+    _insert_string "$string" "$i_string" $i_pos
     printf "%s\n" "$_INSERT_STRING"
 }
