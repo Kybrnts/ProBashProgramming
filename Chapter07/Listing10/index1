@@ -1,0 +1,34 @@
+#: Title       : Insert_string
+#: Date        : 2016-06-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Return position of one string inside another
+
+## Global variables
+declare -i _INDEX=0
+
+## Function declarations
+_index() { #@ DESCRIPTION: Store position of $2 in $1 in $_INDEX
+           #@ USAGE:
+    local string=$1  ## A random string
+    local substr=$2  ## A substring of the previous one
+    shift $#
+    
+    local idx=       ## Random string after removing substring from its back
+    case $string in
+	"")          ## This is to handle the case in which both strings ar null
+	    _INDEX=0
+	    return 1 ;;
+	*"$substr"*) ## Is a substring? 
+	    idx=${string%%"$substr"*}    ## Extract up to beginning of the matching part
+	    _INDEX=$(( ${#idx} + 1 )) ;; ## Starting pos is one more than length
+	*)           ## Handle any other cases
+	    _INDEX=0
+	    return 1 ;;
+    esac
+}
+index() {
+    _index "$@"
+    printf "%d\n" "$_INDEX"
+}

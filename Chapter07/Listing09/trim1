@@ -27,10 +27,6 @@ _trim() { #@ DESCRIPTION:
 }
 trim() { #@ DESCRIPCION:
          #@ USAGE:
-    local trim_string=$1
-    local to_trim=$2
-    shift $#
-    
-    _trim "$trim_string" "$to_trim"
+    _trim "$@"
     printf "%s\n" "$_TRIM"
 }

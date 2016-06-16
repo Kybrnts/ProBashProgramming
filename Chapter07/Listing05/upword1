@@ -25,9 +25,6 @@ _upword() {
     done
 }
 upword() {
-    local word=$1
-    shift $#
-
-    _upword "$word"
+    _upword "$@"
     printf "%s\n" "$_UPWORD"
 }

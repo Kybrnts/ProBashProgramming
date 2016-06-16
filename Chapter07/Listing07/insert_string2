@@ -23,13 +23,7 @@ _insert_string() { #@ DESCRIPTION:
 }
 insert_string() { #@ DESCRIPTION:
                   #@ USAGE: 
-    local string=$1
-    local i_string=$2
-    local i_pos=$3
-    shift $#
-
     local __insrt_strng=
-    
-    _insert_string __insrt_strng "$string" "$i_string" $i_pos
+    _insert_string __insrt_strng "$@"
     printf "%s\n" "$__insrt_strng"
 }

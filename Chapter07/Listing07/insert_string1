@@ -25,11 +25,6 @@ _insert_string() { #@ DESCRIPTION:
 }
 insert_string() { #@ DESCRIPTION:
                   #@ USAGE: 
-    local string=$1
-    local i_string=$2
-    local i_pos=$3                         ## Do not set integer attribute. Because if the parameter is empty, then 0
-    shift $#                               ## will be assigned to i_pos and $_INSERT_STRING_DFLT won't be used
-
-    _insert_string "$string" "$i_string" $i_pos
+    _insert_string "$@"
     printf "%s\n" "$_INSERT_STRING"
 }

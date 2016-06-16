@@ -25,11 +25,7 @@ _upword() {
     printf -v $ref_word "%s" "$upword"
 }
 upword() {
-    local word=$1
-    shift $#
-
     local __upwrd=
-    
-    _upword __upwrd "$word"
+    _upword __upwrd "$@"
     printf "%s\n" "$__upwrd"
 }

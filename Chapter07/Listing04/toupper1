@@ -29,9 +29,6 @@ to_upper() { #@ DESCRIPTION:
     esac
 }
 capitalize() {
-    local str=$1
-    shift $#
-    
-    to_upper "$str"
-    printf "%c%s\n" $_UPR "${str#?}"
+    to_upper "$1"
+    printf "%c%s\n" $_UPR "${1#?}"
 }

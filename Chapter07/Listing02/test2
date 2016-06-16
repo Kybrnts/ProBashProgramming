@@ -10,7 +10,7 @@
 . ${0%/*}/firstchars
 
 displayn() {
-    local string=${1?"$FUNCNAME: Missing argument"}
+    local string=$1
     local from=${2:-first}
     local -i num=$3
     shift $#
@@ -21,8 +21,8 @@ displayn() {
 	*) from=first ;;
     esac
     
-    printf "\n${from^} %d chars of \"%s\": " $num "$teststring"
-    get${from}n "$teststring" $num
+    printf "\n${from^} %d chars of \"%s\": " $num "$string"
+    get${from}n "$string" $num
 }
 
 main() {
@@ -42,10 +42,13 @@ main() {
     displayn "$teststring" first $fn
     displayn "$teststring" last $ln
    
-    ## Use second version of getfirstn() and getlastn()
-    ##. ${0%/*}/lastchars
     teststring="Norbert Wiener"
     fn=9 ln=2
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+
+    teststring=""
+    fn=0 ln=-12
     displayn "$teststring" first $fn
     displayn "$teststring" last $ln
 
@@ -64,10 +67,13 @@ main() {
     displayn "$teststring" first $fn
     displayn "$teststring" last $ln
    
-    ## Use second version of getfirstn() and getlastn()
-    ##. ${0%/*}/lastchars
     teststring="Norbert Wiener"
     fn=9 ln=2
+    displayn "$teststring" first $fn
+    displayn "$teststring" last $ln
+
+    teststring=""
+    fn=0 ln=-12
     displayn "$teststring" first $fn
     displayn "$teststring" last $ln
 }

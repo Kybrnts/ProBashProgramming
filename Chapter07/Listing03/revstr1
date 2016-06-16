@@ -24,10 +24,7 @@ _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
     done
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
-           #@ USAGE: revstr '[ STRING ]'
-    local var=$1
-    shift $#
-
-    _revstr "$var"
+           #@ USAGE: revstr [ STRING ]
+    _revstr "$@"
     printf "%s\n" "$_REVSTR"
 }

@@ -24,11 +24,6 @@ _overlay() { #@ DESCRIPTION:
 }
 overlay() { #@ DESCRIPTION:
             #@ USAGE:
-    local string=$1
-    local sub=$2
-    local start=$3
-    shift $#
-    
-    _overlay "$string" "$sub" $start
+    _overlay "$@"
     printf "%s\n" "$_OVERLAY"
 }

@@ -12,10 +12,10 @@
 . ${0%/*}/../Listing01/repeat1 || exit 1 ## Include repeat() declaration
 
 _getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
-               #@ USAGE: getfirstn NAME '[ STRING ]' [ NUM ]
-    local ref_firstn=${1:?"$FUNCNAME: Missing name rgument"} ## Name where to write the first N character string
-    local string=${2?"$FUNCNAME: Missing argument"}          ## The string to be trimmed 
-    local -i n=${3:-1}                                       ## Number of characters to be kept from the beginning
+               #@ USAGE: _getfirstn NAME [ STRING ] [ NUM ]
+    local ref_firstn=${1:?"$FUNCNAME: Missing name rgument"} ## Where to write first N characters
+    local string=$2                                          ## The string to be trimmed 
+    local -i n=${3:-1}                                       ## Characters to keep from the beginning
     shift $#
     
     local firstn=                         ## First N character string
@@ -24,21 +24,18 @@ _getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to 
                                           ## Quoting is important to prevent reinterp. of specials and word splitt.
     printf -v $ref_firstn "%s" "$firstn"  ## Write the result tho referenced name
 }
-getfirstn() {
-    local string=${1?"$FUNCNAME: Missing argument"} ## The string to be trimmed 
-    local -i n=$2                                   ## Number of characters to be kept from the beginning
-    shift $#
-    
+getfirstn() { #@ DESCRIPTION: Display first $2 characters of $1 string
+              #@ USAGE: getfirstn [ _getfirstn args ]
     local __gtfrstn=
-    _getfirstn __gtfrstn "$string" $n
+    _getfirstn __gtfrstn "$@"
     printf "%s\n" "$__gtfrstn"
 }
 ## We can derive a getlastn() function from above declaration
 _getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
-              #@ USAGE: getlastn NAME '[ STRING ]' [ NUM ]
-    local ref_lastn=${1:?"$FUNCNAME: Missing name argument"} ## Name where to writ eth last N character string
-    local string=${2?"$FUNCNAME: Missing argument"}          ## String to be trimmed container
-    local -i n=${3:-1}                                       ## Number of character to be kept from the back
+              #@ USAGE: _getlastn NAME [ STRING ] [ NUM ]
+    local ref_lastn=${1:?"$FUNCNAME: Missing name argument"} ## Where to write last N characters
+    local string=$2                                          ## String to be trimmed
+    local -i n=${3:-1}                                       ## Characters to keep from back
     shift $#
 
     local __gtfrstn=                                   ## Name to be written by getfirstn()
@@ -46,12 +43,9 @@ _getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1
     _getfirstn __gtfrstn "$string" $n                  ## Get first N, with N new value
     printf -v $ref_lastn "%s" "${string#"$__gtfrstn"}" ## Remove abové's string from string's front, and write it
 }
-getlastn() {
-    local string=${1?"$FUNCNAME: Missing argument"} ## String to be trimmed container
-    local -i n=$2                                   ## Number of character to be kept from the back
-    shift $#
-    
+getlastn() { #@ DESCRIPTION: Display last $2 characters of $1 string
+             #@ USAGE: getlastn [ _getlastn args ]
     local __gtlstn=
-    _getlastn __gtlstn "$string" $n
+    _getlastn __gtlstn "$@" $n
     printf "%s\n" "$__gtlstn"
 }

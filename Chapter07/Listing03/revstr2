@@ -7,13 +7,11 @@
 #: Options     : N/A
 
 _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
-           #@ USAGE: revstr NAME [ STRING ]
-    ## Function header
+            #@ USAGE: revstr NAME [ STRING ]
     local ref_str=${1:?"$FUNCNAME: Missing argument as name"}
     local string=$2
     shift $#
 
-    ## Local variables
     local temp= revstr=                 ## Now revstr is a local variable
 
     while [ -n "$string" ]; do          ## While string's size is not zero..
@@ -25,13 +23,7 @@ _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
            #@ USAGE: revstr [ STRING ]
-    ##Function header
-    local var=$1
-    shift $#
-    
-    ## Local variables
     local __rvstr=            ## Storage for refstr output
-
-    _revstr __rvstr "$var"    ## Revert string into above storage
+    _revstr __rvstr "$@"      ## Revert string into above storage
     printf "%s\n" "$__rvstr"  ## Print it to STDOUT
 }

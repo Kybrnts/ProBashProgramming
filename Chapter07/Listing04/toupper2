@@ -29,11 +29,7 @@ to_upper() { #@ DESCRIPTION:
                                   ## We used "%s" instead of "%c" to add support for unicodes
 }
 capitalize() {
-    local str=$1
-    shift $#
-
     local _t_uppr=
-
-    to_upper _t_uppr "$str"
-    printf "%c%s\n" $_t_uppr "${str#?}"
+    to_upper _t_uppr "$1"
+    printf "%c%s\n" $_t_uppr "${1#?}"
 }
