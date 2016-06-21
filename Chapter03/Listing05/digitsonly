@@ -14,7 +14,7 @@ main() {
 	*[^0-9]*) return 1 ;; # Does string contain non-numerical characters?
 	*) return 0 ;;        # In any other case..
     esac
-   # Previous case test, works in every case, except when $1 is empty or set to the null string.
+   # Previous case test, works in every case, except when $1 is unset or set to the null string.
    # In both cases we defined the default "NULL" value at the begining of the function, so that
    # later they will be tested as false.
 }

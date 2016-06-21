@@ -7,12 +7,12 @@
 #: Options     : N/A
 
 ## Includes
-. ${0%/*}/../Listing01/repeat1 || exit 1 ## Include repeat functions declarations
+. ${BASH_SOURCE%/*}/../Listing01/repeat1 || exit 1 ## Include repeat functions declarations
 
 ## Function declarations
 alert() { #@ DESCRIPTION: Prints in-box-alert-message
-          #@ USAGE: alert [ MESSAGE ] [ BORDER ]
-    local message=$1
+          #@ USAGE: alert '[ MESSAGE ]' [ BORDER ]
+    local message=${1?"$FUNCNAME: Missing argument"}
     local border=${2:-#}
     shift $#
 

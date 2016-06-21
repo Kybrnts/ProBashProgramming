@@ -6,10 +6,10 @@
 #:             : Convert First Character to Uppercase
 #: Options     : N/A
 
-to_upper() { #@ DESCRIPTION: 
-             #@ USAGE:
+_upr() { #@ DESCRIPTION: 
+         #@ USAGE:
     local ref_c=${1:?"$FUNCNAME: Missing name argument"}
-    local str=$2
+    local str=${2?"$FUNCNAME: Missing argument"}
     shift $#
 
     local upr=
@@ -26,10 +26,11 @@ to_upper() { #@ DESCRIPTION:
 	*) upr=${str%"${str#?}"} ;;
     esac
     printf -v $ref_c "%s" "$upr"  ## If you thought that quoting is not needed, What if character is a space?
-                                  ## We used "%s" instead of "%c" to add support for unicodes
-}
-capitalize() {
-    local _t_uppr=
-    to_upper _t_uppr "$1"
-    printf "%c%s\n" $_t_uppr "${1#?}"
+}                                 ## We used "%s" instead of "%c" to add support for unicodes
+to_upper() {
+    set -- "$1"
+
+    local __upr=
+    _upr __upr "$@"
+    [ -n "$__upr" ] && printf "%s%s\n" $__upr "${@#?}"
 }

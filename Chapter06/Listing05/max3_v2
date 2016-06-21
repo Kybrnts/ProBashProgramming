@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+. "${BASH_SOURCE%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
 
 ## Global variables 
 declare -ri _GETTMOUT=30   # Maximum number of seconds to await on user input
@@ -18,8 +18,8 @@ declare _MAX3 _MID3 _MIN3  # Numbers to order storage
 getint() { #@ Prompt user, and read integer string from input
            #@ USAGE: getint NAME [ PROMPTSTRING ]
     ## Funtion header
-    local ref_name=${1:?"$FUNCNAME: Missing argument as name"}
-    local prmptstr=${2:+"$2: "} # If not empty add colon and space at the end
+    local ref_name=${1:?"$FUNCNAME: Missing name argument"}
+    local prmptstr=${2:+"$2: "} # If not null or unset, append colon and space
     shift $#
 
     ## Local variables
@@ -79,9 +79,9 @@ _max3() { #@ DESCRIPTION: Sort 3 integers and store in globals $_MAX3, $_MID3 an
           #@ USAGE: _max3 INT INT INT    
     ## Funtion header
     ## Fail if not enouth args w/propper error message. Also INT values will be accepted
-    local int1=${1:?"$FUNCNAME: Missing non-empty argument"} 
-    local int2=${2:?"$FUNCNAME: Missing non-empty argument"}
-    local int3=${3:?"$FUNCNAME: Missing non-empty argument"}
+    local int1=${1:?"$FUNCNAME: Missing non-null argument"} 
+    local int2=${2:?"$FUNCNAME: Missing non-null argument"}
+    local int3=${3:?"$FUNCNAME: Missing non-null argument"}
     shift $#
 
     set -- $int1 $int2 $int3         # Now that we tested values we can use them

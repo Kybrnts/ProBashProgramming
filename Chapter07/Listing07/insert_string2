@@ -12,9 +12,9 @@ declare -i _INSERT_STRING_DFLT=2  ## Default insert string location
 _insert_string() { #@ DESCRIPTION:
                    #@ USAGE:
     local ref_insert_string=${1:?"$FUNCNAME: Missing name argument"}
-    local string=$2                           ## String container
-    local i_string=$3                         ## String to be inserted
-    local -i i_pos=${4:-$_INSERT_STRING_DFLT} ## Insert location
+    local string=${2?"$FUNCNAME: Missing argument"}   ## String container
+    local i_string=${3?"$FUNCNAME: Missing argument"} ## String to be inserted
+    local -i i_pos=${4:-$_INSERT_STRING_DFLT}         ## Insert location
     shift $#
 
     local left=${string:0:i_pos - 1}                         ## Now using arithmetic expansion directly
@@ -23,7 +23,9 @@ _insert_string() { #@ DESCRIPTION:
 }
 insert_string() { #@ DESCRIPTION:
                   #@ USAGE: 
+    set -- "$1" "$2" "$3"
+
     local __insrt_strng=
     _insert_string __insrt_strng "$@"
-    printf "%s\n" "$__insrt_strng"
+    [ -n "$__insrt_strng" ] && printf "%s\n" "$__insrt_strng"
 }

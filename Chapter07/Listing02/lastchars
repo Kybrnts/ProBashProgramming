@@ -15,7 +15,7 @@
 _getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1 name
               #@ USAGE: _getlastn NAME [ STRING ] [ NUM ]
     local ref_lastn=${1:?"$FUNCNAME: Missing name argument"} ## Where to writ last N character string
-    local string=$2                                          ## String to be trimmed
+    local string=${2?"$FUNCNAME: Missing argument"}          ## String to be trimmed
     local -i n=${3:-1}                                       ## Character to keep from the back
     shift $#
 
@@ -25,6 +25,8 @@ _getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1
 }
 getlastn() { #@ DESCRIPTION: Displays the last $2 characters from string $1
              #@ USAGE: getlastn [ _getlastn args ]
+    set -- "$1" "$2"
+
     local __gtlstn=
     _getlastn __gtlstn "$@"
     printf "%s\n" "$__gtlstn"
@@ -33,7 +35,7 @@ getlastn() { #@ DESCRIPTION: Displays the last $2 characters from string $1
 _getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to $1 name
                #@ USAGE: _getfirstn NAME [ STRING ] [ NUM ]
     local ref_firstn=${1:?"$FUNCNAME: Missing name argument"} ## Where to write first N characters
-    local string=$2                                           ## The string to be trimmed
+    local string=${2?"$FUNCNAME: Missing argument"}           ## The string to be trimmed
     local -i n=${3:-1}                                        ## Characters keep from beginning
     shift $#
     
@@ -44,6 +46,8 @@ _getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to 
 }
 getfirstn() { #@ DESCRIPTION: Displays the first $2 chars from string $1
               #@ USAGE: _getfirstn [ _getfirstn args ]
+    set -- "$1" "$2"
+
     local __gtfrstn=
     _getfirstn __gtfrstn "$@"
     printf "%s\n" "$__gtfrstn"

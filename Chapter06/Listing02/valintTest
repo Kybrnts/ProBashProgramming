@@ -7,7 +7,7 @@
 #: Options     : NA
 
 # Include valint() function declaration in current shell or exit inmediately
-. "${0%/*}/valint" || exit 1
+. "${BASH_SOURCE%/*}/valint" || exit 1
 
 displayvalint() { #@ DESCRIPTION: display a fancy message to showcase valint
                   #@ USAGE: displayvalint [ INTEGER ]

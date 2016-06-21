@@ -28,7 +28,7 @@ traverse2() {
    ## Trying to do the same thing but with printf
    while [ -n "$string" ]; do
        printf -v char "%c" "$string" ## First character of a string can
-       printf "%c " "$char"          ## also be obtained with printf
+       printf "%c " "$char"          ## also be obtained with printf (%c does not work well w/unicodes)
        string=${string#"$char"}      ## Quotation is needed to avoid reinterp. of special chars
    done
 }

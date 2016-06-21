@@ -15,7 +15,7 @@ main() {
 
     # Function's body
     read name                      # Read one line of input and store in "name" variable
-    if [ -z "$name" ]; then        # Check if "name" content is empty
+    if [ -z "$name" ]; then        # Check if "name" content is the null string
 	echo "No name entered" >&2 # Send error message to STDERR
 	return 1                   # Set a failed return code
     fi

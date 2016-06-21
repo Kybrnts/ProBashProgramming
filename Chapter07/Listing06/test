@@ -6,7 +6,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/validname" || exit 1
+. "${BASH_SOURCE%/*}/validname" || exit 1
 
 ## Function declarations
 main() {

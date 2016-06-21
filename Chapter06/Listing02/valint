@@ -8,12 +8,12 @@
 valint() { #@ DESCRIPTION: Tests if $1 string is a valid integer
 	   #@ USAGE: valint '[ INTEGER ]'
     ## Funtion header
-    ## Empty argument (empty strin) is accepted but not an unset (null) one.
+    ## Null string agument is accepted but not unset one
     local integer=${1?"$FUNCNAME: Missing argument"}
     shift $#
 
     case ${integer#-} in           ## Leading hyphen removed to accept negative numbers
-	"" | *[^0-9]*) return 1 ;; ## The string is empty or contains a non-digit character
+	"" | *[^0-9]*) return 1 ;; ## The string is null or contains a non-digit character
     esac                           ## the whole number and nothing but the number
 }
 

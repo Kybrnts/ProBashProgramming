@@ -10,7 +10,7 @@
 declare -ri _READTMOUT=20 ## Maximum number of seconds to wait on user to input
 
 ## Inclusions
-. "${0%/*}/upword2" || exit 1
+. "${BASH_SOURCE%/*}/upword2" || exit 1
 
 ## Function declarations
 month2num() {

@@ -6,8 +6,10 @@
 #: Description : Checks "isvalidip()" function
 #: Options     : NA
 
-# Include isvalidip() function declaration in current shell or exit inmediately
-. "${0%/*}/isvalidip" || exit 1
+## Include isvalidip() function declaration in current shell or exit inmediately
+. "${BASH_SOURCE%/*}/isvalidip" || exit 1
+## NOTE: $BASH_SOURCE expands to the filename where the current names in $FUNCNAME are defined. And it is preferred over
+##       $0 for sourcing files relative the the script.
 
 main() {
     shift $#

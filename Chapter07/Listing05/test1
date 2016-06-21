@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/upword1" || exit 1
+. "${BASH_SOURCE%/*}/upword1" || exit 1
 
 main() {
     shift $#
@@ -17,7 +17,7 @@ main() {
    upword '/!\ Additional test string /!\'
 
    printf "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n"
-    . "${0%/*}/upword2" || exit 1
+    . "${BASH_SOURCE%/*}/upword2" || exit 1
 
     upword " :tesT String:"
     upword "Artigas Ñeoñaré, by Nelson Caula"

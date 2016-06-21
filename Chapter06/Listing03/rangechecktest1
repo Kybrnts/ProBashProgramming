@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+. "${BASH_SOURCE%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
 
 ## Globals
 declare -ir MIN=10 # Default minimum value
@@ -17,7 +17,7 @@ rangecheck1() { #@ DESCRIPTION: Tests if integer is whithin range
 	        #@ USAGE: rangecheck INT [LOW [HIGH]]    
     ## Function header
     ## /!\ This funtion will accept valid integer strings only /!\
-    local integer=${1:?"$FUNCNAME: Missing non-empty argument"}
+    local integer=${1:?"$FUNCNAME: Missing nonnull argument"}
     local low=${2:-$MIN}  ## Use global defaults, as local defaults
     local high=${3:-$MAX}
     shift $#
@@ -32,7 +32,7 @@ rangecheck2() { #@ DESCRIPTION: Tests if integer is whithin range
 	        #@ USAGE: rangecheck INT [LOW [HIGH]]
     ## Function header
     ## /!\ This funtion will accept INTEGERS only /!\
-    local integer=${1:?"$FUNCNAME: Missing non-empty argument"}
+    local integer=${1:?"$FUNCNAME: Missing nonnull argument"}
     local low=${2:-$MIN}  ## Use global defaults, as local defaults
     local high=${3:-$MAX}
     shift $#

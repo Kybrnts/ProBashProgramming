@@ -17,7 +17,7 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
 
     case $dttd_quad in
 	## Reject the following:
-	## * Empty dttd_quad;
+	## * Null dttd_quad;
 	## * Anything other than digits and dots;
 	## * Anything not ending in a digit
 	"" | *[^0-9.]* | *[^0-9] ) return 1 ;;
@@ -25,7 +25,7 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
     
     for n in {1..4}; do ## Test four numbers
 	## Try to keep leftmost number only
-	## If it's empty then two dots where together
+	## If it's null then two dots where together
 	## Else it must be less than 256. Otherwhise stop processing
 	[ -n "${dttd_quad%%.*}" ] && [ ${dttd_quad%%.*} -lt 256 ] || return 1
 	## Remove leftmost number from input

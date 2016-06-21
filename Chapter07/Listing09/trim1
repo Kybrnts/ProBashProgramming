@@ -1,4 +1,4 @@
-#: Title       : Insert_string
+#: Title       : Trim
 #: Date        : 2016-06-15
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0
@@ -27,6 +27,8 @@ _trim() { #@ DESCRIPTION:
 }
 trim() { #@ DESCRIPCION:
          #@ USAGE:
+    set -- "$1" "$2"
+
     _trim "$@"
-    printf "%s\n" "$_TRIM"
+    [ -n "$_TRIM" ] && printf "%s\n" "$_TRIM"
 }

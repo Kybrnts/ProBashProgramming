@@ -17,8 +17,8 @@ main() {
 	printf  "Error! \$var is not present in the environment.\n" >&2
 	return 1
     fi
-    if [ -z "${var}" ]; then                                          # Avoid empty variable
-	printf "Error! \$var is empty.\n" >&2
+    if [ -z "${var}" ]; then                                          # Avoid null string variable
+	printf "Error! \$var is null.\n" >&2
 	return 2
     fi
     while :; do                                                       # Keep processing input

@@ -7,7 +7,7 @@
 #: Options     : NA
 
 # Include isvalidip() function declaration in current shell or exit inmediately
-. "${0%/*}/isvalidip" || exit 1
+. "${BASH_SOURCE%/*}/isvalidip" || exit 1
 
 main() {
     shift $#

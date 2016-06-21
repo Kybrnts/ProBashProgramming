@@ -11,7 +11,7 @@ main() {
 
     ## The x variable is not mean to be local, we won't "declare" it.
     if [[ ${x+X} = X ]]; then                ## If $x is set
-	if [[ -n $x ]]; then                 ## If $x is NOT empty
+	if [[ -n $x ]]; then                 ## If $x is NOT empty (null string)
 	    printf " \$x = %s\n" "$x"
 	else
 	    printf " \$x is set but empty\n"

@@ -8,7 +8,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/nametest" # Include test var name functionality
+. "${BASH_SOURCE%/*}/nametest" # Include test var name functionality
 
 ## Global variables 
 declare -a _MAX3=()  # Numbers to order storage

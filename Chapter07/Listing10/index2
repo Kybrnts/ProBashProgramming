@@ -1,33 +1,32 @@
 #: Title       : Index
 #: Date        : 2016-06-15
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
-#: Version     : 1.0
+#: Version     : 1.1
 #: Description : Bash function declarations file
 #:             : Return position of one string inside another
-
-## Global variables
-declare -i _INDEX=0
 
 ## Function declarations
 _index() { #@ DESCRIPTION: Store position of $2 in $1 in $_INDEX
            #@ USAGE:
-    local string=${1:?"$FUNCNAME: Missing nonnull argument"} ## A random string
-    local substr=${2:?"$FUNCNAME: Missing nonnull argument"} ## A substring of the previous one
+    local ref_index=${1:?"$FUNCNAME: Missing name argument"}
+    local string=${2:?"$FUNCNAME: Missing nonnull argument"} ## A random string
+    local substr=${3:?"$FUNCNAME: Missing nonnull argument"} ## A substring of the previous one
     shift $# ## NOTE: Passing unset or null arguments makes no sense. No index could be retrieved
     
     local idx=       ## Random string after removing substring from its back
+    local -i index=0 ## The index
     case $string in
-	*"$substr"*) ## Is a substring? 
+	*"$substr"*)                     ## Is a substring? 
 	    idx=${string%%"$substr"*}    ## Extract up to beginning of the matching part
-	    _INDEX=$(( ${#idx} + 1 )) ;; ## Starting pos is one more than length
-	*)           ## Handle any other cases
-	    _INDEX=0
-	    return 1 ;;
+	    index=$(( ${#idx} + 1 )) ;;  ## Starting pos is one more than length
+	*)  return 1 ;;                  ## Handle any other cases
     esac
+    printf -v $ref_index "%d" $index
 }
 index() {
     set -- "$1" "$2"
 
-    _index "$@"
-    printf "%d\n" "$_INDEX"
+    local -i __index=0
+    _index __index "$@"
+    printf "%d\n" "$__index"
 }

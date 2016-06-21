@@ -7,11 +7,11 @@
 #: Options     : N/A
 
 ## Function declarations
-_repeat() { #@ DESCRIPTION: Repeat a string N times
-            #@ USAGE: _repeat [ STRING ] [ NUMBER ]
+_repeat() { #@ DESCRIPTION: Repeat a string N times and write it to variable
+            #@ USAGE: _repeat NAME '[ STRING ]' [ NUMBER ]
 ## Function header
     local ref_rep=${1:?"$FUNCNAME: Missing name argument"}
-    local repstr=$2
+    local repstr=${2?"$FUNCNAME: Missing argument"}
     local -i num=${3:-1}
     shift $#
 
@@ -22,7 +22,9 @@ _repeat() { #@ DESCRIPTION: Repeat a string N times
 }
 repeat() { #@ DESCRIPTION: Repeat a repstr N times
            #@ USAGE: repeat [ _repeat args ]    
-    local __rpt=             ## Variable to be written by _repeat
+    set -- "$1" "$2"                                    ## Keep only the first two arguments
+
+    local __rpt=                                        ## Variable to be written by _repeat
     _repeat __rpt "$@"
-    printf "%s\n" "$__rpt"
+    [ -n "$__rpt" ] && printf "%s\n" "$__rpt"
 }

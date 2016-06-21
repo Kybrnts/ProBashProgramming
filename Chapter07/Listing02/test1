@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Includes
-. "${0%/*}"/alert # Include repeat and alert functions
+. "${BASH_SOURCE%/*}"/alert # Include repeat and alert functions
 
 main() {
     

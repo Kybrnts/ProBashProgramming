@@ -1,4 +1,4 @@
-#: Title       : Insert_string
+#: Title       : Overlay
 #: Date        : 2016-06-15
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.1
@@ -12,19 +12,20 @@ declare -i _OVERLAY_START_DFLT=1
 _overlay() { #@ DESCRIPTION: 
              #@ USAGE:
     local ref_overlay=${1:?"$FUNCNAME: Missing name argument"}
-    local string=$2
-    local sub=$3
+    local string=${2?"$FUNCNAME: Missing argumeng"}
+    local sub=${3?"$FUNCNAME: Missing argumeng"}
     local -i start=${4:-$_OVERLAY_START_DFLT}
     shift $#
     
-    local left= right=
-    left=${string:0:start - 1}
-    right=${string:start + ${#sub} - 1}
+    local left=${string:0:start - 1}
+    local right=${string:start + ${#sub} - 1}
     printf -v $ref_overlay "%s" "$left$sub$right"
 }
 overlay() { #@ DESCRIPTION:
             #@ USAGE:
+    set -- "$1" "$2" "$3"
+
     local __overlay=
     _overlay __overlay "$@"
-    printf "%s\n" "$__overlay"
+    [ -n "$__overlay" ] && printf "%s\n" "$__overlay"
 }

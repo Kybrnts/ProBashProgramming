@@ -11,20 +11,21 @@ declare _REPEAT=""
 
 ## Function declarations
 _repeat() { #@ DESCRIPTION: Repeat a repstr N times
-            #@ USAGE: _repeat [ REPSTR ] [ NUMBER ]
-    local repstr=$1
-    local -i num=${2:-1}
+            #@ USAGE: _repeat '[ REPSTR ]' [ NUMBER ]
+    local repstr=${1?"$FUNCNAME: Missing argument"} ## Null string is supported
+    local -i num=${2:-1}                            ## Optional value is 1
     shift $#
     
     while (( ${#repstr} < $num && ${#repstr} > 0 )); do ## Loop until repstr exceeds desired length;
                                                         ## but don't loop if repstr is null
 	repstr+=$repstr$repstr                          ## 3 seems to be the optimum number
     done
-    _REPEAT=${repstr:0:$num}          ## Trim to desired length & store in global
+    _REPEAT=${repstr:0:$num}                            ## Trim to desired length & store in global
 }
 repeat() { #@ DESCRIPTION: Display a repeated string
 	   #@ USAGE: repeat [ _repeat args ]
-    _repeat "$@"                      ## No whole header needed here
-                                      ## Just pass args as they are
-    printf "%s\n" "$_REPEAT"          ## Print repeated string to STDOUT
+    set -- "$1" "$2"                              ## keep only the first two arguments
+                                                  ## No whole header needed here
+    _repeat "$@"                                  ## Just pass args as they are
+    [ -n "$_REPEAT" ] && printf "%s\n" "$_REPEAT" ## Print repeated string to STDOUT if not null
 }

@@ -12,7 +12,7 @@ main() {
     # Keep reading with input constraints in prompt
     # Allow backslash to escape characters (useful for file names w/spaces)
     while read -p "Enter path of an existing file: "; do
-	# Is input a non-empty string that points to an existing file?
+	# Is input a non-null string that points to an existing file?
 	if [ -n "$REPLY" -a -e "$REPLY" ]; then
 	    # Yes, so print file name without any other path's component
 	    printf "%s\n" "File \"$( basename $REPLY )\" exists."

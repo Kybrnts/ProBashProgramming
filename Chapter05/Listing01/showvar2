@@ -9,7 +9,7 @@
 # After doing a google search upon "bash test variable is null", I found the below-pointing-link to an Stack-overflow
 # article wich clearly explains why [ -z "$var" ] is not the right way to test if a variable is unset, and the
 # advantages of using the [ -z ${var+X} ] approach. Basicaly it will only expand to something that will not need quotes:
-# either noghing, if var is unset; or to the "X" string, if X does not contain any char.
+# either noghing, if var is unset; or to the "X" string, if X does not contain any char (other than the \0 at the end).
 # http://stackoverflow.com/questions/3601515/how-to-check-if-a-variable-is-set-in-bash
 # The above allowed me to build a simpler version of the Showvar code.
 #
@@ -17,11 +17,11 @@
 main() {
     shift $#
 
-    if [ -z ${x+X} ]; then               ## Here, x is unset (null pointer)
+    if [ -z ${x+X} ]; then               ## Here, x is unset (null POINTER)
 	printf " %s is not set\n" "\$x"
 	return                           ## Stop further execution
     fi
-    if [ -z "$x" ]; then                 ## Here x is set but empty (null string)
+    if [ -z "$x" ]; then                 ## Here x is set but NULL (null string)
 	printf " \$x is set but empty\n"
 	return                           ## Stop further execution
     fi                                   ## Now x is set, and it contains some chars before '\0'

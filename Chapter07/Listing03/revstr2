@@ -23,6 +23,8 @@ _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
            #@ USAGE: revstr [ STRING ]
+    set -- "$1"
+
     local __rvstr=            ## Storage for refstr output
     _revstr __rvstr "$@"      ## Revert string into above storage
     printf "%s\n" "$__rvstr"  ## Print it to STDOUT

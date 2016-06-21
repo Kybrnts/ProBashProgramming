@@ -9,9 +9,9 @@
 ## Global variables
 declare _UPR=
 
-to_upper() { #@ DESCRIPTION: 
-             #@ USAGE:
-    local str=$1
+_upr() { #@ DESCRIPTION: 
+         #@ USAGE:
+    local str=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     ## Reset _UPR because if contains garbage it may cause trouble
@@ -28,7 +28,9 @@ to_upper() { #@ DESCRIPTION:
 	*) _UPR=${str%"${str#?}"} ;;
     esac
 }
-capitalize() {
-    to_upper "$1"
-    printf "%c%s\n" $_UPR "${1#?}"
+to_upper() {
+    set -- "$1"
+
+    _upr "$@"
+    [ -n "$_UPR" ] && printf "%s%s\n" $_UPR "${@#?}" ## We use "%s" instead of "%c" to support unicodes
 }

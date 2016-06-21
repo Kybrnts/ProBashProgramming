@@ -10,7 +10,7 @@ declare _REVSTR=
 
 _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
             #@ USAGE: revstr [ STRING ]
-    local var=$1
+    local var=${1?"$FUNCNAME: Missing argument"}
     shift $#
 
     ## Local variables
@@ -25,6 +25,8 @@ _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
            #@ USAGE: revstr [ STRING ]
+    set -- "$1"
+
     _revstr "$@"
     printf "%s\n" "$_REVSTR"
 }

@@ -12,19 +12,20 @@ declare -i _INSERT_STRING_DFLT=2  ## Default insert string location
 ## Function declarations
 _insert_string() { #@ DESCRIPTION:
                    #@ USAGE:
-    local string=$1                           ## String container
-    local i_string=$2                         ## String to be inserted
-    local -i i_pos=${3:-$_INSERT_STRING_DFLT} ## Insert location
+    local string=${1?"$FUNCNAME: Missing argument"}   ## String container
+    local i_string=${2?"$FUNCNAME: Missing argument"} ## String to be inserted
+    local -i i_pos=${3:-$_INSERT_STRING_DFLT}         ## Insert location
     shift $#
 
-    local left= right=                     ## Before and after pieces
-
-    left=${string:0:$(( i_pos - 1 ))}      ## String to left of insert
-    right=${string:$(( i_pos - 1 ))}       ## String to right of insert
-    _INSERT_STRING=$left$i_string$right    ## Build new string on global
+    local left= right=                  ## Before and after pieces
+    left=${string:0:$(( i_pos - 1 ))}   ## String to left of insert
+    right=${string:$(( i_pos - 1 ))}    ## String to right of insert
+    _INSERT_STRING=$left$i_string$right ## Build new string on global
 }
 insert_string() { #@ DESCRIPTION:
-                  #@ USAGE: 
+                  #@ USAGE:
+    set -- "$1" "$2" "$3"
+
     _insert_string "$@"
-    printf "%s\n" "$_INSERT_STRING"
+    [ -n "$_INSERT_STRING" ] && printf "%s\n" "$_INSERT_STRING"
 }

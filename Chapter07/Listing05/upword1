@@ -7,24 +7,26 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/../Listing04/toupper1" || exit 1 ## Include to_upper declaration
+. "${BASH_SOURCE%/*}/../Listing04/toupper1" || exit 1 ## Include to_upper declaration
 
 ## Global variables
 declare _UPWORD=
 
 ## Function declarations
 _upword() {
-    local word=$1
+    local word=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     _UPWORD=                 ## Reset _UPWORD before using it (expanded before being assigned)
     while [ -n "$word" ]; do ## Loop until nothing is left in $word
-	to_upper "$word"     ## Change to uppercase word's first char, storing it in _UPR
+	_upr "$word"         ## Change to uppercase word's first char, storing it in _UPR
 	_UPWORD+=$_UPR       ## Append _UPR's current value in new global _UPWORD
 	word=${word#?}       ## Remove word's first char
     done
 }
 upword() {
+    set -- "$1"
+
     _upword "$@"
-    printf "%s\n" "$_UPWORD"
+    [ -n "$$_UPWORD" ] && printf "%s\n" "$_UPWORD"
 }

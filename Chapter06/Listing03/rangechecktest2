@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+. "${BASH_SOURCE%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
 
 ## Globals
 declare -ir MIN=10 # Default minimum value

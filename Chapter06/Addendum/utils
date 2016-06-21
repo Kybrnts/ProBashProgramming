@@ -12,15 +12,16 @@ isunset() { #@ DESCRIPTION: Tests if NAME contained in $1 is unset (i.e. expands
     local name=${1:?"$FUNCNAME: Missing name argument"}
     shift $#
 
-    ## Check if referenced value is not empty
+    ## Check if referenced value is unset
+    ## Expanded to "x" only if name is unset, in that case expansion will became a NOT null string
     [ -z ${!name+x} ]
 }
-isset() { #@ DESCRIPTION: Tests if NAME contained in $1 is set (
-          #@ USAGE:
+isset() { #@ DESCRIPTION: Tests if NAME contained in $1 is set
+          #@ USAGE: isset NAME
     local name=${1:?"$FUNCNAME: Missing name argument"}
-    shift $#
-    
-    ! isunset $name
+    shift $# 
+
+    ! isunset $name ## Names canNOT contain spaces, hence no quotting needed
 }
 substring() { #@ DESCRIPTION: Tests if $1 string is contained by string $2
               #@ USAGE: substring '[ STRING1 ]' '[ STRING2 ]'
@@ -37,25 +38,25 @@ superstring() { #@ DESCRIPTION: Tests if $1 string contains string $2
                 #@ USAGE: superstring '[ STRING1 ]' '[ STRING2 ]'
     local superstring=${1?"$FUNCNAME: Missing argument"}
     local string=${2?"$FUNCNAME: Missing argument"}
-    shift $#
+    shift $# 
     
     substring "$string" "$superstring"
 }
-isempty() { #@ DESCRIPTION: Tests if $1 string is empty
-            #@ USAGE: isempty '[ STRING ]'
+isnull() { #@ DESCRIPTION: Tests if $1 string contains characters (other than '\0')
+           #@ USAGE: isnull '[ STRING ]'
     local string=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     ## Check if received string is susbstring of the null string
     substring "$string" ""
 }
-isnotempty() { #@ DESCRIPTION: Tests if $1 string is NOT empty
-               #@ USAGE: isnotempty '[ STRING ]'
+isnotnull() { #@ DESCRIPTION: Tests if $1 string is NOT the null string
+              #@ USAGE: isnotnull '[ STRING ]'
     local string=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
-    ## Check if received string is NOT empty
-    ! isempty "$string"
+    ## Check if received string is NOT null
+    ! isnull "$string"
 }
 validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
               #@ USAGE: validname '[ STRING ]'
@@ -64,7 +65,7 @@ validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
 
     case $name in 
 	## Fail if:
-	## * Is empty;
+	## * Is the null string;
 	## * begins w/anything other than letter or underscore;
 	## * contains anything other than a letter, a number or underscore.
 	"" | [^a-zA-Z_]* | *[^a-zA-z0-9_]*) return 1 ;;
@@ -72,18 +73,15 @@ validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
 }
 valint() { #@ DESCRIPTION: Tests if $1 string is a valid integer
 	   #@ USAGE: valint '[ INTEGER ]'
-    ## Funtion header
-    ## Empty argument (empty strin) is accepted but not an unset (null) one.
     local integer=${1?"$FUNCNAME: Missing argument"}
     shift $#
 
     case ${integer#-} in           ## Leading hyphen removed to accept negative numbers
-	"" | *[^0-9]*) return 1 ;; ## The string is empty or contains a non-digit character
+	"" | *[^0-9]*) return 1 ;; ## The string is null or contains a non-digit character
     esac                           ## the whole number and nothing but the number
 }
 val2decint() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
                #@ USAGE: val2decint NAME '[ INT_STRING ]'
-    ## Funtion header
     local ref_intstr=${1?"$FUNCNAME: Missing name argument"}
     local intstr=${2:?"$FUNCNAME: Missing valid integer argument"}
     shift $#

@@ -15,7 +15,7 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
     
     case $dttd_quad in
 	## Reject the following:
-	## * Empty dttd_quad;
+	## * Empty (null string) dttd_quad;
 	## * Anything other than digits and dots;
 	## * Anything not ending in a digit
 	"" | *[^0-9.]* | *[^0-9] ) return 1 ;;

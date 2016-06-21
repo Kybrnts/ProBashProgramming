@@ -7,7 +7,7 @@
 #: Options     : N/A
 
 ## Inclusions
-. "${0%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
+. "${BASH_SOURCE%/*}/../Listing02/valint" || exit 1 # Include valint() declaration
 
 ## Global variables 
 declare -ri _GETTMOUT=30 # Maximum number of seconds to await on user input
@@ -18,8 +18,8 @@ declare -a _MAX3=()      # Numbers to order storage
 getint() { #@ Prompt user, and read integer string from input
            #@ USAGE: getint NAME [ PROMPTSTRING ]
     ## Funtion header
-    local -n output=${1:?"$FUNCNAME: Missing argument as name"} # Declared as name (bash-4.x)
-    local prmptstr=${2:+"$2: "}                                 # Not empty? add colon and space at end
+    local -n output=${1:?"$FUNCNAME: Missing name argument"} # Declared as name (bash-4.x)
+    local prmptstr=${2:+"$2: "}                              # Not null or unset? append colon and space
     shift $#
 
     ## Local variables
