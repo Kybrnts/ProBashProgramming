@@ -26,7 +26,7 @@ _getfirstn() { #@ DESCRIPTION: Writes the first $3 characters from string $2 to 
 }
 getfirstn() { #@ DESCRIPTION: Display first $2 characters of $1 string
               #@ USAGE: getfirstn [ _getfirstn args ]
-    set -- "$1" "$2"
+    set -- "${@:1:2}"
 
     local __gtfrstn=
     _getfirstn __gtfrstn "$@"
@@ -47,7 +47,7 @@ _getlastn() { #@ DESCRIPTION: Writes the last $3 characters from string $2 to $1
 }
 getlastn() { #@ DESCRIPTION: Display last $2 characters of $1 string
              #@ USAGE: getlastn [ _getlastn args ]
-    set -- "$1" "$2"
+    set -- "${@:1:2}"
 
     local __gtlstn=
     _getlastn __gtlstn "$@" $n

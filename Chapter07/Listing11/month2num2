@@ -1,0 +1,31 @@
+#: Title       : Month2num
+#: Date        : 2016-06-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Return position of one string inside another
+
+## Inclusions
+source "${BASH_SOURCE%/*}/../Listing05/upword2" || exit 1
+source "${BASH_SOURCE%/*}/../Listing10/index2" || exit 1
+
+## Function declarations
+_month2num() { #@ DESCRIPTION:
+               #@ USAGE:
+    local ref_num=${1:?"$FUNCNAME: Missing name argument"}
+    local monthname=${2:?"$FUNCNAME: Missing nonnull argument"}
+    shift $#
+    
+    local months=JAN.FEB.MAR.APR.MAY.JUN.JUL.AUG.SEP.OCT.NOV.DEC
+    local __upwrd=
+    local -i __indx=0
+    _upword __upwrd "${monthname:0:3}"             ## Take first three letters of monthname to uppercase
+    _index __indx "$months" "$__upwrd" || return 1 ## Is the monthame in months list?
+    printf -v $ref_num "%d" $(( __indx / 4 + 1 ))  ## Turn first list's month first leter index to real index
+}
+month2num() {
+    set -- "${@:1:1}"
+
+    local -i __mnth2nm=0
+    _month2num __mnth2nm "$@" && printf "%d\n" $__mnth2nm
+}

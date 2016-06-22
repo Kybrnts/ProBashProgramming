@@ -23,7 +23,7 @@ _insert_string() { #@ DESCRIPTION:
 }
 insert_string() { #@ DESCRIPTION:
                   #@ USAGE: 
-    set -- "$1" "$2" "$3"
+    set -- "${@:1:3}"
 
     local __insrt_strng=
     _insert_string __insrt_strng "$@"

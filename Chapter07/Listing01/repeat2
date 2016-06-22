@@ -9,7 +9,7 @@
 ## Function declarations
 _repeat() { #@ DESCRIPTION: Repeat a string N times and write it to variable
             #@ USAGE: _repeat NAME '[ STRING ]' [ NUMBER ]
-## Function header
+    ## Function header
     local ref_rep=${1:?"$FUNCNAME: Missing name argument"}
     local repstr=${2?"$FUNCNAME: Missing argument"}
     local -i num=${3:-1}
@@ -22,7 +22,7 @@ _repeat() { #@ DESCRIPTION: Repeat a string N times and write it to variable
 }
 repeat() { #@ DESCRIPTION: Repeat a repstr N times
            #@ USAGE: repeat [ _repeat args ]    
-    set -- "$1" "$2"                                    ## Keep only the first two arguments
+    set -- "${@:1:2}"                                   ## Keep only the first two arguments
 
     local __rpt=                                        ## Variable to be written by _repeat
     _repeat __rpt "$@"

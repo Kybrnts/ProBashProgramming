@@ -1,5 +1,5 @@
 #: Title       : Utils
-#: Date        : 2016-05-20
+#: Date        : 2016-06-21
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0
 #: Description : Bash function declarations file
@@ -71,31 +71,45 @@ validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
 	"" | [^a-zA-Z_]* | *[^a-zA-z0-9_]*) return 1 ;;
     esac
 }
-valint() { #@ DESCRIPTION: Tests if $1 string is a valid integer
-	   #@ USAGE: valint '[ INTEGER ]'
-    local integer=${1?"$FUNCNAME: Missing argument"}
+digitsonly() { #@ DESCRIPTION:
+               #@ USAGE:
+    local string=${1?"$FUNCNAME: Missing argument"}
+    shift $#
+    
+    ## Test if the string is null or contains nondigit chars
+    case $string in
+	"" | *[0-9]*) return 1 ;;
+    esac
+}
+valdecint() { #@ DESCRIPTION:
+              #@ USAGE:
+    local string=${1?"$FUNCNAME: Missing argument"}
+    shift $#
+    
+    digitsonly "${integer#[-+]}"
+}
+validipv4() { #@ DESCRIPTION: test for a valid IP address string
+            #@ USAGE: validip '[ DOTTED-QUAD ]'
+    local dttd_quad=${1?"$FUNCNAME: Missing argument"}
     shift $#
 
-    case ${integer#-} in           ## Leading hyphen removed to accept negative numbers
-	"" | *[^0-9]*) return 1 ;; ## The string is null or contains a non-digit character
-    esac                           ## the whole number and nothing but the number
-}
-val2decint() { #@ DESCRIPTION: Turns a valid integer string into arithmetic evaluable integer string
-               #@ USAGE: val2decint NAME '[ INT_STRING ]'
-    local ref_intstr=${1?"$FUNCNAME: Missing name argument"}
-    local intstr=${2:?"$FUNCNAME: Missing valid integer argument"}
-    shift $#
-    
-    local out_intstring="" ## Funtion output container
-    
-    ## Strip left zeros from $integer, as they are not propperly handled by arithmetic evaluation.
-    ## NOTE: Strings like "0099" and "-018" are valid integers as per valint(). But they are interpreted as octals by
-    ##       arithmetic evaluation, and could fail when assigned to names with the integer attribute enabled (local -i).
-    out_intstr=${intstr%%[^-]*}$(( 10#${intstr#-} )) ## First keep hyphen character if present (negative integers)
-                                                     ## Then replace unsigned $integer w/its decimal representation
-    printf -v $ref_intstr "%s" "$intstr"             ## Now it is safe to write it to output.
-    ## Using the val2decint() function, example:
-    ## * Declaring a local variable within the calling function:
-    ##   local _vl2dcnt=""
-    ## * Using it to get atoi's output val2decint _vl2dcnt "-099"
+    case $dttd_quad in
+	## Reject the following:
+	## * Empty (null string) dttd_quad;
+	## * Anything other than digits and dots;
+	## * Anything not ending in a digit
+	"" | *[^0-9.]* | *[^0-9] ) return 1 ;;
+    esac
+    ## Change IFS to a dot, but only in this function
+    local IFS=.
+    ## Place the IP addresss into the positional parameters;
+    ## After word splitting each element becomes a parameter
+    set -- $dttd_quad
+    [ $# -eq 4 ] && ## Must be four parameters
+                    ## Each must be less than 256
+    ## A default of 666 (which is invalid) is used if a parameter is empty
+    ## All four parameters must pass the test
+    [ ${1:-666} -le 255 ] && [ ${2:-666} -le 255 ] &&
+    [ ${3:-666} -le 255 ] && [ ${4:-666} -le 255 ]
+    ## NOTE: Formats other than dotted quads can be valid IP addresses, as in 127.1, 216.239.10085 and 3639551845.
 }

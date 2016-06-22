@@ -6,7 +6,7 @@
 #:             : Reverse the order of a string
 #: Options     : N/A
 
-_revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
+_revstr() { #@ DESCRIPTION: Reverse $1 string order and write results in variable
             #@ USAGE: revstr NAME [ STRING ]
     local ref_str=${1:?"$FUNCNAME: Missing argument as name"}
     local string=$2
@@ -23,7 +23,7 @@ _revstr() { #@ DESCRIPTION: Reverse $1 string order and store results in _REVSTR
 }
 revstr() { #@ DESCRIPTION: Print reverse version of the string $1
            #@ USAGE: revstr [ STRING ]
-    set -- "$1"
+    set -- "${@:1:1}"
 
     local __rvstr=            ## Storage for refstr output
     _revstr __rvstr "$@"      ## Revert string into above storage

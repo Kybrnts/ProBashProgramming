@@ -24,7 +24,7 @@ _repeat() { #@ DESCRIPTION: Repeat a repstr N times
 }
 repeat() { #@ DESCRIPTION: Display a repeated string
 	   #@ USAGE: repeat [ _repeat args ]
-    set -- "$1" "$2"                              ## keep only the first two arguments
+    set -- "${@:1:2}"                             ## keep only the first two arguments
                                                   ## No whole header needed here
     _repeat "$@"                                  ## Just pass args as they are
     [ -n "$_REPEAT" ] && printf "%s\n" "$_REPEAT" ## Print repeated string to STDOUT if not null

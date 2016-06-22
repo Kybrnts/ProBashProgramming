@@ -24,9 +24,12 @@ _index() { #@ DESCRIPTION: Store position of $2 in $1 in $_INDEX
     printf -v $ref_index "%d" $index
 }
 index() {
-    set -- "$1" "$2"
+    set -- "${@:1:2}"
 
     local -i __index=0
-    _index __index "$@"
-    printf "%d\n" "$__index"
+    if ! _index __index "$@"; then
+	printf "%d\n" $__index
+	return 1
+    fi
+    printf "%d\n" $__index
 }

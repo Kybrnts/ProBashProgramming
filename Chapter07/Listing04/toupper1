@@ -29,7 +29,7 @@ _upr() { #@ DESCRIPTION:
     esac
 }
 to_upper() {
-    set -- "$1"
+    set -- "${@:1:1}"
 
     _upr "$@"
     [ -n "$_UPR" ] && printf "%s%s\n" $_UPR "${@#?}" ## We use "%s" instead of "%c" to support unicodes

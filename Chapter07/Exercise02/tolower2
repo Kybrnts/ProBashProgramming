@@ -1,0 +1,34 @@
+#: Title       : Tolower
+#: Date        : 2016-06-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.1
+#: Description : Bash function declarations file
+#:             : Write a function called to_lower that does the opposite of the to_upper function in Listing04
+#: Options     : N/A
+
+_lwr() { #@ DESCRIPTION: 
+         #@ USAGE:
+    local ref_c=${1:?"$FUNCNAME: Missing name argument"}
+    local str=${2?"$FUNCNAME: Missing argument"}
+    shift $#
+
+    local lwr=
+    case $str in
+	A*) lwr=a ;; B*) lwr=b ;; C*) lwr=c ;; D*) lwr=d ;;
+	E*) lwr=e ;; F*) lwr=f ;; G*) lwr=g ;; H*) lwr=h ;;
+	I*) lwr=i ;; J*) lwr=j ;; K*) lwr=k ;; L*) lwr=l ;;
+	M*) lwr=m ;; N*) lwr=n ;; Ñ*) lwr=ñ ;; O*) lwr=o ;;
+	P*) lwr=p ;; Q*) lwr=q ;; R*) lwr=r ;; S*) lwr=s ;;
+	T*) lwr=t ;; U*) lwr=u ;; V*) lwr=v ;; W*) lwr=w ;;
+	X*) lwr=x ;; Y*) lwr=y ;; Z*) lwr=z ;; Á*) lwr=á ;;
+	É*) lwr=é ;; Í*) lwr=í ;; Ó*) lwr=ó ;; Ú*) lwr=ú ;;
+	*) lwr=${str%"${str#?}"} ;;
+    esac
+    printf -v $ref_c "%s" "$lwr"
+}
+to_lower() {
+    set -- "${@:1:1}"
+    local __lwr=
+    _lwr __lwr "$@"
+    [ -n "$__lwr" ] && printf "%s%s\n" $__lwr "${@#?}"
+}

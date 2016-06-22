@@ -1,0 +1,23 @@
+#!/bin/bash
+#: Title       : Test
+#: Date        : 2016-06-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Tests month2num()
+
+## Inclusions
+. "${BASH_SOURCE%/*}/month2num2" || exit 1
+
+main() {
+    shift $#
+
+    month2num mAR
+    month2num jul
+    month2num dEc
+    month2num "wrong value"
+    month2num ""
+    month2num
+}
+
+## Run!
+main "$@"

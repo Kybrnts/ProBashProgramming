@@ -1,0 +1,38 @@
+#: Title       : Trim
+#: Date        : 2016-06-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : 
+
+## Global variables
+declare _LTRIM=
+declare _RTRIM=
+
+## Function declarations
+_ltrim() {
+    local trim_string=${1?"$FUNCNAME: Missing argument"}  ## Input string
+    local to_trim=${2:-$' \t'}                            ## Part to be removed (default to space or tab)
+    shift $#
+
+    _LTRIM=$trim_string
+    ## Remove all from right, up to the first character different to trim, and store it in trim_string
+    trim_string=${_LTRIM%%[^"$to_trim"]*} 
+    ## Keep what we didn't remove before in _LTRIM
+    _LTRIM=${_LTRIM#"$trim_string"}
+}
+ltrim() {
+    set -- "${@:1:2}"
+    _ltrim "$@"
+    [ -n "$_LTRIM" ] && printf "%s\n" "$_LTRIM"
+}
+_rtrim() {
+    local trim_string=${1?"$FUNCNAME: Missing argument"}  ## Input string
+    local to_trim=${2:-$' \t'}                            ## Part to be removed (default to space or tab)
+    shift $#
+
+    _RTRIM=$trim_string
+    ltrim "$_RTRIM" "$to_trim"
+    
+
+}

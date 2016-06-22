@@ -11,7 +11,7 @@ source "${BASH_SOURCE%/*}/../Listing10/index1" || exit 1
 
 
 ## Global variables
-declare _MONTH2NUM=
+declare -i _MONTH2NUM=
 
 ## Function declarations
 _month2num() { #@ DESCRIPTION:
@@ -25,5 +25,7 @@ _month2num() { #@ DESCRIPTION:
     _MONTH2NUM=$(( $_INDEX / 4 + 1 ))       ## Turn first list's month first leter index to real index
 }
 month2num() {
-    _month2num "$@" && printf "%s\n" "$_MONTH2NUM"
+    set -- "${@:1:1}"
+
+    _month2num "$@" && printf "%d\n" $_MONTH2NUM
 }

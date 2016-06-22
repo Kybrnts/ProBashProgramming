@@ -24,7 +24,7 @@ _upword() {
     printf -v $ref_word "%s" "$upword"
 }
 upword() {
-    set -- "$1"
+    set -- "${@:1:1}"
 
     local __upwrd=
     _upword __upwrd "$@"

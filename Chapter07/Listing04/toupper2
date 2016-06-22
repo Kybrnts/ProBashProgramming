@@ -28,7 +28,7 @@ _upr() { #@ DESCRIPTION:
     printf -v $ref_c "%s" "$upr"  ## If you thought that quoting is not needed, What if character is a space?
 }                                 ## We used "%s" instead of "%c" to add support for unicodes
 to_upper() {
-    set -- "$1"
+    set -- "${@:1:1}"
 
     local __upr=
     _upr __upr "$@"

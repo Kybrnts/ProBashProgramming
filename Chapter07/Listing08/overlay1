@@ -23,7 +23,7 @@ _overlay() { #@ DESCRIPTION:
 }
 overlay() { #@ DESCRIPTION:
             #@ USAGE:
-    set -- "$1" "$2" "$3"
+    set -- "${@:1:3}"
 
     _overlay "$@"
     [ -n "$_OVERLAY" ] && printf "%s\n" "$_OVERLAY"

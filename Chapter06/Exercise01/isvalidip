@@ -9,7 +9,7 @@ isvalidip() { #@ DESCRIPTION: test for a valid IP address string
               #@ USAGE: isvalidip '[ DOTTED-QUAD ]'
     ## Funtion header
     ## FUNCNAME contains the name of any currently-executing shell function
-    local dttd_quad="${1?$FUNCNAME: Missing argument}"
+    local dttd_quad=${1?"$FUNCNAME: Missing argument"}
     shift $#
     
     ## Local variables    

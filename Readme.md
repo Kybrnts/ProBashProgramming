@@ -79,10 +79,10 @@ General coding rules:
   * In particular "printf -v $ref_NAME [FORMATSTR] STRVALUE" is preferred over "eval "$ref_NAME=\"$intstr\"" to write
     a value into referenced name. It also allows control over STRVALUE's format (no performance drawbacks detected);
   * Do not start local variable names with underscores unless it is meant to be written by an user-defined function;
-  * Use "_<funcname>" for variable names that are to be written by functions (passed-by-reference variables); where
-    "funcname" is function's name itself or a shorthand version of it. This convention reduces the chances of name
-    collisions, when passing variable NAMES to functions so that they can write values to those names, and hence
-    received names could potentially be already defined locally;
+  * Use "_<funcname>" for variable names that are to be written by functions (passed-by-reference); where "funcname" is
+    function's name itself or a shorthand version of it. This convention reduces the chances of name collisions, when
+    passing variable NAMES to functions so that they can write values to those names, and hence received names could
+    potentially be already defined locally;
   * When changing directory, confirm that it worked afterwards;
   * When issuing an external command, confirm that it worked afterwards.
 * Clarity
@@ -101,7 +101,7 @@ Global declarations rules:
 * If the script is to be executed (not sourced), declare a main function.
 * Main() must be the last one to be declared so that it can use all above declared functions.
 * Call "main "$@"" as the last script command to execute it passing all arguments to it.
-* Avoid flow control outside main(): This means that ONLY below commands are allowed OUTSIDE main's declaration:
+* Minimize flow control outside main(): This means that ONLY below commands are allowed OUTSIDE main's declaration:
   * Source files (or exit if it fails), to include external declarations;
   * Function and (global) variable declarations.
 

@@ -11,8 +11,8 @@ declare _TRIM=
 ## Function declarations
 _trim() { #@ DESCRIPTION: 
           #@ USAGE:
-    local trim_string=$1  ## Input string
-    local to_trim=${2:- } ## Part to be removed (default to space)
+    local trim_string=${1?"$FUNCNAME: Missing argument"}  ## Input string
+    local to_trim=${2:- }                                 ## Part to be removed (default to space)
     shift $#
 
     _TRIM=$trim_string
@@ -27,7 +27,7 @@ _trim() { #@ DESCRIPTION:
 }
 trim() { #@ DESCRIPCION:
          #@ USAGE:
-    set -- "$1" "$2"
+    set -- "${@:1:2}"
 
     _trim "$@"
     [ -n "$_TRIM" ] && printf "%s\n" "$_TRIM"
