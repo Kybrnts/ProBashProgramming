@@ -6,8 +6,7 @@
 #:             : 
 
 ## Global variables
-declare _LTRIM=
-declare _RTRIM=
+declare _LTRIM= _RTRIM= _TRIM=
 
 ## Function declarations
 _ltrim() {
@@ -16,9 +15,9 @@ _ltrim() {
     shift $#
 
     _LTRIM=$trim_string
-    ## Remove all from right, up to the first character different to trim, and store it in trim_string
-    trim_string=${_LTRIM%%[^"$to_trim"]*} 
-    ## Keep what we didn't remove before in _LTRIM
+    ## Remove from the first nonmatching character of trim_string, to the end.
+    trim_string=${_LTRIM%%[^"$to_trim"]*} ## I.e. remove to_trim right complement from string
+    ## Remove the (unwanted) remaining string from the beginning of the trim_string
     _LTRIM=${_LTRIM#"$trim_string"}
 }
 ltrim() {
@@ -32,7 +31,25 @@ _rtrim() {
     shift $#
 
     _RTRIM=$trim_string
-    ltrim "$_RTRIM" "$to_trim"
-    
+    trim_string=${_RTRIM##*[^"$to_trim"]} ## Remove to_trim left complement from string
+    _RTRIM=${_RTRIM%"$trim_string"}       ## Remove the remaining string from the beginning
+}
+rtrim() {
+    set -- "${@:1:2}"
+    _rtrim "$@"
+    [ -n "$_RTRIM" ] && printf "%s\n" "$_RTRIM"
+}
+_trim() {
+    local trim_string=${1?"$FUNCNAME: Missing argument"}  ## Input string
+    local to_trim=${2:-$' \t'}                            ## Part to be removed (default to space or tab)
+    shift $#
 
+    _ltrim "$trim_string" "$to_trim"
+    _rtrim "$_LTRIM" "$to_trim"
+    _TRIM="$_RTRIM"
+}
+trim() {
+    set -- "${@:1:2}"
+    _trim "$@"
+    [ -n "$_TRIM" ] && printf "%s\n" "$_TRIM"
 }

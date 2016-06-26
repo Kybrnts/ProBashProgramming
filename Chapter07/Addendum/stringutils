@@ -18,13 +18,13 @@ __val2decint() { #@ DESCRIPTION: Primitive function. Turns valid decimal integer
     local ref_intstr=${1:?"${FUNCNAME[1]}: Missing name argument"}      ## ${FUNCNAME[1]} Expands to callling name
     local intstr=${2:?"${FUNCNAME[1]}: Missing valid integer argument"} ##
     shift $#
-    ## NOTE: This "Primitive" is meant to be called only by a few "derived" wrappers, which assume that their header
-    ##       will be handled by this primitive. This method provides heder reuse. Also Notice the reference to calling
-    ##       function in above sustitutions.
+    ## NOTE: This "Primitive" is meant to be INDIRECTLY called, ONLY by a few "derived" wrappers, which assume their 
+    ##       header will be handled by this primitive. This method provides heder reuse. Also Notice the reference to
+    ##       calling function in above sustitutions.
 
     ## First keep hyphen character if present (negative integers);
     ## Then replace unsigned $integer w/its decimal representation
-    printf -v $ref_intstr "%s" ${intstr%%[^-+]*}$(( 10#${intstr#[-+]} ))
+    printf -v $ref_intstr "%s" ${intstr%%[^-]*}$(( 10#${intstr#[-+]} ))
 }
 _val2decint() { #@ DESCRIPTION: Derived. valid decimal integer string $2 into decimal arithmetic evaluable using
                 #@              __val2decint, and writes result in $1. (Wrapper)
