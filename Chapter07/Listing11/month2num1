@@ -6,8 +6,8 @@
 #:             : Return position of one string inside another
 
 ## Inclusions
-source "${BASH_SOURCE%/*}/../Listing05/upword1" || exit 1
-source "${BASH_SOURCE%/*}/../Listing10/index1" || exit 1
+, "${BASH_SOURCE%/*}/../Listing05/upword1" || exit 1
+. "${BASH_SOURCE%/*}/../Listing10/index1" || exit 1
 
 
 ## Global variables

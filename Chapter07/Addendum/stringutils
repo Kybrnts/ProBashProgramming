@@ -7,24 +7,33 @@
 #: Options     : N/A
 
 ## Global variables
-declare -ri _INSERT_STRING_DFLT=2  ## Default insert string location
-declare -ri _OVERLAY_START_DFLT=1  ## Default overlay string location
+                                                              ## $_MISS_ARG_ERR_MSG error messages:
+declare -r _MISS_ARG_ERR_MSG="Missing argument"               ## Arg
+declare -r _MISS_NMA_ERR_MSG="Missing name argument"          ## Name arg
+declare -r _MISS_NEA_ERR_MSG="Missing nonempty argument"      ## Nonempty arg
+declare -r _MISS_VIA_ERR_MSG="Missing valid integer argument" ## Integer arg
+                                 ## Default optional values
+declare -ri _INSRT_STR_DFLT=2    ## Default insert string location
+declare -ri _OVRLY_STRT_DFLT=1   ## Default overlay string location
+declare -ri _TRM_STR_DFLT=$' \t' ## Defalut string to be trimmed
 
 ## Function declarations
 __val2decint() { #@ DESCRIPTION: Primitive function. Turns valid decimal integer string $2 into decimal arithmetic
                  #@              evaluable by removing its leading zeros (sign skipped), and writes result in $1. 
                  #@              Otherwise it will be treated as octal inside an arithmetic evaluation.
                  #@ USAGE: __val2decint NAME '[ INT_STRING ]' (usable only inside intended wrappers)
-    local ref_intstr=${1:?"${FUNCNAME[1]}: Missing name argument"}      ## ${FUNCNAME[1]} Expands to callling name
-    local intstr=${2:?"${FUNCNAME[1]}: Missing valid integer argument"} ##
+    local ref_intstr=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"} ## ${FUNCNAME[1]} Expands to callling name
+    local intstr=${2:?"${FUNCNAME[1]}: $_MISS_VIA_ERR_MSG"}     ##
     shift $#
-    ## NOTE: This "Primitive" is meant to be INDIRECTLY called, ONLY by a few "derived" wrappers, which assume their 
+    ## NOTE: This "Primitive" is meant to be ONLY INDIRECTLY called by a few "derived" wrappers, which assume their
     ##       header will be handled by this primitive. This method provides heder reuse. Also Notice the reference to
     ##       calling function in above sustitutions.
-
-    ## First keep hyphen character if present (negative integers);
-    ## Then replace unsigned $integer w/its decimal representation
-    printf -v $ref_intstr "%s" ${intstr%%[^-]*}$(( 10#${intstr#[-+]} ))
+    ##
+    ## We don't want leading +,- or zeros, so keep them separately to later remove them
+    ## To store the above, remove from back any different characters
+    local unwntd=${intstr%%[^+\-0]*}
+    ## Then keep hyphen character if present (for negatives), and then remove the unwanted from the beginning
+    printf -v $ref_intstr "%s" ${intstr%%[^-]*}${intstr#$unwntd}
 }
 _val2decint() { #@ DESCRIPTION: Derived. valid decimal integer string $2 into decimal arithmetic evaluable using
                 #@              __val2decint, and writes result in $1. (Wrapper)
@@ -44,8 +53,8 @@ val2decint() { #@ DESCRIPTION: Derived. Turns valid decimal integer string $2 in
 __repeat() { #@ DESCRIPTION: Primitive. Repeat $2 string N times and write it to name $1
              #@ USAGE: __repeat NAME '[ STRING ]' [ NUMBER ]
     ## Function header
-    local ref_rep=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local repstr=${2?"${FUNCNAME[1]}: Missing argument"}
+    local ref_rep=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local repstr=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
     local -i num=${3:-1}
     shift $#
 
@@ -68,8 +77,8 @@ repeat() { #@ DESCRIPTION: Derived. Repeat a repstr N times
 }
 
 stdalert() { #@ DESCRIPTION: Prints in-box-alert-message
-          #@ USAGE: alert '[ MESSAGE ]' [ BORDER ]
-    local message=${1?"$FUNCNAME: Missing argument"}
+             #@ USAGE: alert '[ MESSAGE ]' [ BORDER ]
+    local message=${1?"$FUNCNAME: $_MISS_ARG_ERR_MSG"}
     local border=${2:-#}
     shift $#
     
@@ -82,7 +91,7 @@ stdalert() { #@ DESCRIPTION: Prints in-box-alert-message
 
 __revstr() { #@ DESCRIPTION: Functio core. Reverse $1 string order and store results
              #@ USAGE: revstr NAME [ STRING ]
-    local ref_str=${1:?"${FUNCNAME[1]}: Missing argument as name"}
+    local ref_str=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
     local string=$2
     shift $#
 
@@ -108,14 +117,69 @@ revstr() { #@ DESCRIPTION: Print reverse version of the string $1
     printf "%s\n" "$___rvstr"  ## Print it to STDOUT
 }
 
+__lower() { #@ DESCRIPTION:
+            #@ USAGE:
+    local ref_c=${1:?"$FUNCNAME: $_MISS_NMA_ERR_MSG"}
+    local str=${2?"$FUNCNAME: $_MISS_ARG_ERR_MSG"}
+    shift $#
+
+    local lwr=
+    case $str in
+	A*) lwr=a ;; B*) lwr=b ;; C*) lwr=c ;; D*) lwr=d ;;
+	E*) lwr=e ;; F*) lwr=f ;; G*) lwr=g ;; H*) lwr=h ;;
+	I*) lwr=i ;; J*) lwr=j ;; K*) lwr=k ;; L*) lwr=l ;;
+	M*) lwr=m ;; N*) lwr=n ;; Ñ*) lwr=ñ ;; O*) lwr=o ;;
+	P*) lwr=p ;; Q*) lwr=q ;; R*) lwr=r ;; S*) lwr=s ;;
+	T*) lwr=t ;; U*) lwr=u ;; V*) lwr=v ;; W*) lwr=w ;;
+	X*) lwr=x ;; Y*) lwr=y ;; Z*) lwr=z ;; Á*) lwr=á ;;
+	É*) lwr=é ;; Í*) lwr=í ;; Ó*) lwr=ó ;; Ú*) lwr=ú ;;
+	*) lwr=${str%"${str#?}"} ;;
+    esac
+    printf -v $ref_c "%s" "$lwr"
+}
+_lower() { #@ DESCRIPTION: 
+           #@ USAGE:
+    set -- "${@:1:2}"
+    __lower "$@"
+}
+lower() { #@ DESCRIPTION: 
+          #@ USAGE:
+    set -- "${@:1:1}"
+    local ___lwr=
+    __lower ___lwr "$@"
+    [ -n  "$___lwr" ] && printf "%s\n" "$___lwr"
+}
+
+__to_lower() { #@ DESCRIPTION:
+               #@ USAGE:
+    local ref_wrd=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local word=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    shift $#
+
+    local __lower=
+    _lower __lower "$word"
+    printf -v $ref_word "%s%s" "$__lower" "${word#?}"
+}
+_to_lower() { #@ DESCRIPTION:
+              #@ USAGE:
+    set -- "${@:1:2}"
+    __to_lower "$@"
+}
+to_lower() { #@ DESCRIPTION:
+             #@ USAGE:
+    set -- "${@:1:1}"
+    local ___t_lower=
+    __to_lower ___t_lower "$@"
+    [ -n "$___t_lower" ] && printf "%s\n" "$___t_lower"
+}
+
 __upper() { #@ DESCRIPTION: 
             #@ USAGE:
-    local ref_c=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local str=${2?"${FUNCNAME[1]}: Missing argument"}
+    local ref_c=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local str=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
     shift $#
 
     local upr=
-
     case $str in
 	a*) upr=A ;; b*) upr=B ;; c*) upr=C ;; d*) upr=D ;;
 	e*) upr=E ;; f*) upr=F ;; g*) upr=G ;; h*) upr=H ;;
@@ -139,18 +203,18 @@ upper() { #@ DESCRIPTION:
     set -- "${@:1:1}"
     local ___uppr=
     __upper ___uppr "$@"
-    [ -n "$___uppr" ] && printf "%s\n" $___uppr
+    [ -n "$___uppr" ] && printf "%s\n" "$___uppr"
 }
 
 __to_upper() { #@ DESCRIPTION: 
                #@ USAGE:
-    local ref_wrd=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local word=${2?"${FUNCNAME[1]}: Missing argument"}
+    local ref_wrd=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local word=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
     shift $#
     
     local __uppr=
     _upper __uppr "$word"
-    printf -v $ref_word "%s%s" $__uppr "${word#?}"
+    printf -v $ref_word "%s%s" "$__uppr" "${word#?}"
 }
 _to_upper() {
     set -- "${@:1:2}"
@@ -164,10 +228,20 @@ to_upper() { #@ DESCRIPTION:
     [ -n "$___t_uppr" ] && printf "%s\n" "$___t_uppr"
 }
 
+__loword() {
+    :
+}
+_loword() {
+    :
+}
+loword() {
+    :
+}
+
 __upword() { #@ DESCRIPTION:
              #@ USAGE:
-    local ref_word=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local word=${2?"${FUNCNAME[1]}: Missing argument"}
+    local ref_word=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local word=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
     shift $#
 
     local __uppr= upword=
@@ -193,10 +267,10 @@ upword() { #@ DESCRIPTION:
 
 __insert_string() { #@ DESCRIPTION:
                     #@ USAGE:
-    local ref_insert_string=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local string=${2?"${FUNCNAME[1]}: Missing argument"}   ## String container
-    local i_string=${3?"${FUNCNAME[1]}: Missing argument"} ## String to be inserted
-    local -i i_pos=${4:-$_INSERT_STRING_DFLT}              ## Insert location
+    local ref_insert_string=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}   ## String container
+    local i_string=${3?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"} ## String to be inserted
+    local -i i_pos=${4:-$_INSRT_STR_DFLT}                    ## Insert location
     shift $#
 
     local left=${string:0:i_pos - 1}                         ## Now using arithmetic expansion directly
@@ -217,11 +291,11 @@ insert_string() { #@ DESCRIPTION:
 }
 
 __overlay() { #@ DESCRIPTION: 
-             #@ USAGE:
-    local ref_overlay=${1:?"${FUNCNAME[1]}: Missing name argument"}
-    local string=${2?"${FUNCNAME[1]}: Missing argumeng"}
-    local sub=${3?"${FUNCNAME[1]}: Missing argumeng"}
-    local -i start=${4:-$_OVERLAY_START_DFLT}
+              #@ USAGE:
+    local ref_overlay=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
+    local string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local sub=${3?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local -i start=${4:-$_OVRLY_STRT_DFLT}
     shift $#
     
     local left=${string:0:start - 1}
@@ -240,38 +314,75 @@ overlay() { #@ DESCRIPTION:
     [ -n "$___overlay" ] && printf "%s\n" "$___overlay"
 }
 
-__trim() { #@ DESCRIPTION: 
-          #@ USAGE:
-    local ref_trstr=${1:?"$FUNCNAME: Missing argument"}
-    local trim_string=$2  ## Input string
-    local to_trim=${3:- } ## Part to be removed (default to space)
+__ltrim() { #@ DESCRIPTION:
+            #@ USAGE:
+    local ref_trstr=${1:?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local trim_string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local to_trim=${3:-"$_TRM_STR_DFLT"}
     shift $#
 
     local trim=$trim_string
-    ## Remove all from beginning, up to the first character different to trim, and store it in trim_string
-    trim_string=${trim##*[^"$to_trim"]} ## Not just single chars but entire strings are supported by negation
-    ## Keep what we didn't remove before in trim
-    trim=${trim%"$trim_string"}
-    ## Remove all from back, up to the first character different to trim
-    trim_string=${trim%%[^"$to_trim"]*} ## Quote to preven reinterpretation of specials
-    ## Keep what we didn't remove before in trim
+    trim_string=${trim%%[^"$to_trim"]*}
     printf -v $ref_trstr "%s" "${trim#"$trim_string"}"
 }
-__trim() {
+_ltrim() { #@ DESCRIPTION:
+           #@ USAGE:
     set -- "${@:1:3}"
-    __trim "$@"
+    __ltrim "$@"
 }
-trim() { #@ DESCRIPCION:
+ltrim() { #@ DESCRIPTION:
+          #@ USAGE:
+    set -- "${@:1:2}"
+    local ___ltrim=
+    __ltrim ___ltrim "$@"
+    [ -n "$___ltrim" ] && printf "%s\n" "$___ltrim"
+}
+__rtrim() { #@ DESCRIPTION:
+            #@ USAGE:
+    local ref_trstr=${1:?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local trim_string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local to_trim=${3:-"$_TRM_STR_DFLT"}
+    shift $#
+
+    local trim=$trim_string
+    trim_string=${trim##*[^"$to_trim"]}
+    printf -v $ref_trstr "%s" "${trim%"$trim_string"}"
+}
+_rtrim() { #@ DESCRIPTION:
+           #@ USAGE:
+    set -- "${@:1:3}"
+    __rtrim "$@"
+}
+rtrim() { #@ DESCRIPTION:
+          #@ USAGE:
+    set -- "${@:1:2}"
+    local ___rtrim=
+    __rtrim ___rtrim "$@"
+    [ -n "$___rtrim" ] && printf "%s\n" "$___rtrim"
+}
+__trim() { #@ DESCRIPTION:
+           #@ USAGE:
+    local ref_trstr=${1:?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local trim_string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
+    local to_trim=${3:-"$_TRM_STR_DFLT"}
+    shift $#
+
+    local __trim=
+    _ltrim __trim "$trim_string" "$to_trim"
+    _rtrim __trim "$__trim" "$to_trim"
+    printf -v $ref_trstr "%s" "$__trim"
+}
+trim() { #@ DESCRIPTION:
          #@ USAGE:
     set -- "${@:1:2}"
-    local ___trm=
-    __trim ___trm "$@"
-    [ -n "$___trm" ] && printf "%s\n" "$___trm"
+    local ___trim=
+    __trim ___trim "$@"
+    [ -n "$___trim" ] && printf "%s\n" "$___trim"
 }
 
-__index() { #@ DESCRIPTION: Store position of $2 in $1 in $_INDEX
+__index() { #@ DESCRIPTION: Store position (Use possition or index???) of $2 in $1 in $_INDEX
             #@ USAGE:
-    local ref_index=${1:?"${FUNCNAME[1]}: Missing name argument"}
+    local ref_index=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
     local string=${2:?"${FUNCNAME[1]}: Missing nonnull argument"} ## A random string
     local substr=${3:?"${FUNCNAME[1]}: Missing nonnull argument"} ## A substring of the previous one
     shift $# ## NOTE: Passing unset or null arguments makes no sense. No index could be retrieved
@@ -304,7 +415,7 @@ index() { #@ DESCRIPTION:
 
 __month2num() { #@ DESCRIPTION:
                 #@ USAGE:
-    local ref_num=${1:?"${FUNCNAME[1]}: Missing name argument"}
+    local ref_num=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"}
     local monthname=${2:?"${FUNCNAME[1]}: Missing nonnull argument"}
     shift $#
     

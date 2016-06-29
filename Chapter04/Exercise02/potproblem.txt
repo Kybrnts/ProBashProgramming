@@ -15,12 +15,20 @@ Question:
   minute=$( date +%M )
   second=$( date +%S )
 
-Quote: 
-  "If teh command substitution is not quoted, word splitting and pathname expansion are performed on the results."
+Quotes:
+  1. "Well, it is not exactly the same, because I ran the first command shortly before midnight and the second sortly
+      after"
+  2. "If teh command substitution is not quoted, word splitting and pathname expansion are performed on the results."
 
 Answer:
-  Therefore the potential problem may be the result of undesired subsecuent word splitting and pathname expansion of
-  proposed command substitutions.
+  Firstly, there seems to be an efficiency issue, since that way we are issuing date several times.
+  In addition, as per above first statement there is a big potential issue if above snippet is issued by a script that
+  runs close enough to midnight.
+  Finally, as per the second statement, an additional potential problem may be the result of undesired subsecuent word
+  splitting and pathname expansion of proposed command substitutions.
   A better example would be to contrast the execution of the following two sinppets:
   # echo $( echo './*' )
   # echo "$( echo './*' )"
+
+  We recommend using something like this instead:
+  read year month day hour minute second < <( date +'%Y %m %d %H %M %S' )

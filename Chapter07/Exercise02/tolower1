@@ -31,5 +31,5 @@ _lwr() { #@ DESCRIPTION:
 to_lower() {
     set -- "${@:1:1}"
     _lwr "$@"
-    [ -n "$_LWR" ] && printf "%s%s\n" $_LWR "${@#?}"
+    [ -n "$_LWR" ] && printf "%s%s\n" "$_LWR" "${@#?}" ## Is important to quote _LWR, in case it is a space
 }

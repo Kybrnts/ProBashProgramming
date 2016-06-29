@@ -6,8 +6,8 @@
 #:             : Return position of one string inside another
 
 ## Inclusions
-source "${BASH_SOURCE%/*}/../Listing05/upword2" || exit 1
-source "${BASH_SOURCE%/*}/../Listing10/index2" || exit 1
+. "${BASH_SOURCE%/*}/../Listing05/upword2" || exit 1
+. "${BASH_SOURCE%/*}/../Listing10/index2" || exit 1
 
 ## Function declarations
 _month2num() { #@ DESCRIPTION:

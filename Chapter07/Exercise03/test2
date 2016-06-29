@@ -1,0 +1,31 @@
+#!/bin/bash
+#: Title       : Test
+#: Date        : 2016-06-29
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : 
+#: Options     : N/A
+
+## Inclusions
+. "${BASH_SOURCE%/*}/palindrome2" || exit 1
+
+## Function declarations
+main() {
+    shift $#
+
+    palindrome ""
+    palindrome "A but tuba"
+    palindrome "This is not a palindrome"
+    palindrome "A car, a man, a maraca."
+    palindrome "A dog, a plan, a canal: pagoda!"
+    palindrome "88000000000088"
+    palindrome "A Santa at Nasa"
+    palindrome "NOT a palindrome"
+    palindrome "A Toyota’s a Toyota"
+    palindrome "ÑÑaññ"
+    palindrome "Are we not drawn onward, we few, drawn onward to new era?"
+    palindrome                                    ## Execution fails here
+}
+
+## Run!
+main "$@"

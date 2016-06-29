@@ -28,5 +28,5 @@ upword() {
     set -- "${@:1:1}"
 
     _upword "$@"
-    [ -n "$$_UPWORD" ] && printf "%s\n" "$_UPWORD"
+    [ -n "$_UPWORD" ] && printf "%s\n" "$_UPWORD"
 }

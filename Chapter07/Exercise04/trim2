@@ -1,0 +1,58 @@
+#: Title       : Trim
+#: Date        : 2016-06-21
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declarations file
+#:             : Write two functions, ltrim and rtrim, which trim characters in the same manner as trim but from only
+#:             : one side of the string, left and right, respectively
+
+## Function declarations
+_ltrim() {
+    local ref_trstr=${1:?"$FUNCNAME: Missing argument"}
+    local trim_string=${2?"$FUNCNAME: Missing argument"}
+    local to_trim=${3:-$' \t'}
+    shift $#
+
+    local trim=$trim_string
+    trim_string=${trim%%[^"$to_trim"]*}
+    printf -v $ref_trstr "%s" "${trim#"$trim_string"}"
+}
+ltrim() {
+    set -- "${@:1:2}"
+    local __ltrim=
+    _ltrim __ltrim "$@"
+    [ -n "$__ltrim" ] && printf "%s\n" "$__ltrim"
+}
+_rtrim() {
+    local ref_trstr=${1:?"$FUNCNAME: Missing argument"}
+    local trim_string=${2?"$FUNCNAME: Missing argument"}
+    local to_trim=${3:-$' \t'}
+    shift $#
+
+    local trim=$trim_string
+    trim_string=${trim##*[^"$to_trim"]}
+    printf -v $ref_trstr "%s" "${trim%"$trim_string"}"
+}
+rtrim() {
+    set -- "${@:1:2}"
+    local __rtrim=
+    _rtrim __rtrim "$@"
+    [ -n "$__rtrim" ] && printf "%s\n" "$__rtrim"
+}
+_trim() {
+    local ref_trstr=${1:?"$FUNCNAME: Missing argument"}
+    local trim_string=${2?"$FUNCNAME: Missing argument"}
+    local to_trim=${3:-$' \t'}
+    shift $#
+
+    local __xtrim=
+    _ltrim __xtrim "$trim_string" "$to_trim"
+    _rtrim __xtrim "$__xtrim" "$to_trim"
+    printf -v $ref_trstr "%s" "$__xtrim"
+}
+trim() {
+    set -- "${@:1:2}"
+    local __trim=
+    _trim __trim "$@"
+    [ -n "$__trim" ] && printf "%s\n" "$__trim"
+}

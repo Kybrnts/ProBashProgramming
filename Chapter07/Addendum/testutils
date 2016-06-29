@@ -58,6 +58,12 @@ isnotnull() { #@ DESCRIPTION: Tests if $1 string is NOT the null string
     ## Check if received string is NOT null
     ! isnull "$string"
 }
+isalnum() {
+    local string=${1?:"$FUNCNAME: Missing argument"}
+    case $string in
+	"" | [^A-Za-z0-9]) return 1 ;;
+    esac
+}
 validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
               #@ USAGE: validname '[ STRING ]'
     local name=${1?"$FUNCNAME:Missing argument"}
@@ -89,7 +95,7 @@ valdecint() { #@ DESCRIPTION:
     digitsonly "${integer#[-+]}"
 }
 validipv4() { #@ DESCRIPTION: test for a valid IP address string
-            #@ USAGE: validip '[ DOTTED-QUAD ]'
+              #@ USAGE: validip '[ DOTTED-QUAD ]'
     local dttd_quad=${1?"$FUNCNAME: Missing argument"}
     shift $#
 

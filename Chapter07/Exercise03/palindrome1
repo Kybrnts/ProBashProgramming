@@ -1,0 +1,55 @@
+#: Title       : Test
+#: Date        : 2016-06-28
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0
+#: Description : Bash function declaration file
+#:             : Write a function, palindrome, which checks whether its command-line argument is a palindrome (that is,
+#:             : a word or phrase that is spelled the same backward and forward). Note that spaces and punctuation are
+#:             : ignored in the test. Exit successfully if it is a palindrome. Include an option to print a message as
+#:             : well as set the return code.
+#: Options     : N/A
+
+## Globals
+declare _PALINDROME=
+
+## Inclusions
+. "${BASH_SOURCE%/*}/../Listing03/revstr1" || exit 1
+. "${BASH_SOURCE%/*}/../Listing04/toupper1" || exit 1
+
+## Function declarations
+isalnum() {
+    local string=${1?:"$FUNCNAME: Missing argument"}
+    case $string in
+	"" | [^A-Za-z0-9]) return 1 ;;
+    esac
+}
+
+_palindrome() {
+    local string=${1?:"$FUNCNAME: Missing argument"}
+    shift $#
+    
+    local temp= char= teststr=
+    while [ -n "$string" ]; do
+	temp=${string#?}                  ## Everything but the first char
+	char=${string%"$temp"}            ## Remove everyghing but the first char
+	if isalnum "$char"; then          ## If char is alphanumeric, 
+	    _upr "$char"                  ## Turn it tu uppercase
+	    teststr+=$_UPR                ## Append it to the test string
+	fi 
+	string=$temp                      ## Remove frist char from string
+    done
+    _revstr "$teststr"                    ## Reverse the teststring
+    if [ "$_REVSTR" != "$teststr" ]; then ## Is it the same as before?
+	_PALINDROME="is NOT palindrome"   ## No, so it is not palindrome
+	return 1                          
+    fi
+    _PALINDROME="is palindrome"           ## yes, so it is palindrome
+}
+palindrome() {
+    set -- "${@:1:1}"
+    if ! _palindrome "$@"; then
+	printf "%s\n" "$_PALINDROME"
+	return 1;
+    fi
+    printf "%s\n" "$_PALINDROME"
+}
