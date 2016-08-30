@@ -8,6 +8,10 @@
 
 ## Includes
 . ${BASH_SOURCE%/*}/../Listing01/repeat1 || exit 1 ## Include repeat functions declarations
+## One improvement over the above is to use the following two lines:
+## declare -r _FAILED_SOURCE=
+## . ${BASH_SOURCE%/*}/../Listing01/repeat1 || ${_FAILED_SOURCE:?repeat1}
+## In that case, even if we were to source the current file w will be allowed to see the error message
 
 ## Function declarations
 alert() { #@ DESCRIPTION: Prints in-box-alert-message

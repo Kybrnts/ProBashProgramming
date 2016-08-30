@@ -74,7 +74,7 @@ validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
 	## * Is the null string;
 	## * begins w/anything other than letter or underscore;
 	## * contains anything other than a letter, a number or underscore.
-	"" | [^a-zA-Z_]* | *[^a-zA-z0-9_]*) return 1 ;;
+	"" | [^a-zA-Z_]* | *[^a-zA-Z0-9_]*) return 1 ;;
     esac
 }
 digitsonly() { #@ DESCRIPTION:
@@ -84,7 +84,7 @@ digitsonly() { #@ DESCRIPTION:
     
     ## Test if the string is null or contains nondigit chars
     case $string in
-	"" | *[0-9]*) return 1 ;;
+	"" | *[^0-9]*) return 1 ;;
     esac
 }
 valdecint() { #@ DESCRIPTION:

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+declare _KJV=$HOME/kjv.txt # Path to Kjv text file book
+
+main() {    
+    shift $#
+    
+    local kjv=$_KJV
+    local read= book= chapter= verse= text= firstword=
+    ## Placing an assignment in front of a command causes it to be local to that command and does not change its value
+    ## elsewhere in the script
+    while IFS=: read book chapter verse text; do
+	firstword=${text%% *}
+	printf "%s %s:%s %s\n" "$book" "$chapter" "$verse" "$firstword"
+    done < "$kjv"
+    ##
+    ## NOTE: 
+    ##
+}
+
+main "$@"
