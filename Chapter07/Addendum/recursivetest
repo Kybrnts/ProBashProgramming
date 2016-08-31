@@ -21,8 +21,8 @@ declare _MSNG_INA_ERR_MSG=$_MSNG_INA_ERR_MSG_DFLT  ## Missing integer arg
 
 ## Function declarations
 ## Auxiliary functions -------------------------------------------------------------------------------------------------
-## This functions provide sanity checks useful when applied against variables that will become inputs of the recursive
-## functions.
+## This functions provide sanity checks useful when applied on variables that will become inputs of the recursive funcs,
+## as they accept only non-negative integers as input.
 digitsonly() { #@ DESCRIPTION: Tests if $1 is a digits only string
                #@ USAGE: digitsonly '[ TEST_STRING ]'
     local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
@@ -72,11 +72,11 @@ val2decint() { #@ DESCRIPTION: Derived. Turns valid decimal integer string $2 in
     printf "%d\n" $___vl2dcnt
 }
 ## Primal recursive functions ------------------------------------------------------------------------------------------
-## We will define two primitive functions: one for the addtion and other for the product of two positive integers; then
-## Additional recursive functions will be build on the top of them.
+## We will define two primitive functions: one for the addtion and other for the product of two nonnegative integers;
+## then additional recursive functions will be build on the top of them.
 ##
-__sum() { #@ DESCRIPTION: Primitive function. Writes the sum of the two positive integers $2 + $3 in $1 name.
-          #@ USAGE: __sum NAME POSINT1 POSINT2 (Usable only by intended derived wrappers)
+__sum() { #@ DESCRIPTION: Primitive function. Writes the sum of the two nonnegative integers $2 + $3 in $1 name.
+          #@ USAGE: __sum NAME NONEGINT1 NONEGINT2 (Usable only by intended derived wrappers)
           #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
@@ -93,20 +93,20 @@ __sum() { #@ DESCRIPTION: Primitive function. Writes the sum of the two positive
 	printf -v $ref_num "%d" $(( ${!ref_num} + 1 )) ## Finally add 1 before printing the definitive value in the
     fi                                                 ## referenced name.
 }
-_sum() { #@ DESCRIPTION: Derived. Writes the sum of the two positive integres $2 + $3 in $1 using __sum() (wrapper).
+_sum() { #@ DESCRIPTION: Derived. Writes the sum of the two nonnegative integres $2 + $3 in $1 using __sum() (wrapper).
          #@ USAGE: _sum [ __sum() args ]
-    set -- "${@:1:3}"
+    set -- "${@:1:3}" ## Keep only the first 3 positional parameters, rewriting "$@"
     __sum "$@"
 }
-sum() { #@ DESCRIPTION: Derived. Writes the sum of the two positive integers $1 + $2 in STDOUT using __sum() (wrapper).
-        #@ USAGE: sum POSINT1 POSTINT2
-    set -- "${@:1:2}"
+sum() { #@ DESCRIPTION: Derived. Writes the sum of the two nonnegative integers $1 + $2 in STDOUT using __sum().
+        #@ USAGE: sum NONEGINT1 POSTINT2
+    set -- "${@:1:2}" ## Keep only the first 2 positional pars, rewriting "$@"
     local -i ___sm=0
     __sum ___sm "$@"
     printf "%d\n" $___sm
 }
-__prod() { #@ DESCRIPTION: Primitive. Writes teh product of the two positive integres $2*$3 in $1 referenced name.
-           #@ USAGE: __prod NAME POSINT1 POSINT2 (Usable only by intended wrappers)
+__prod() { #@ DESCRIPTION: Primitive. Writes the product of the two nonnegative integres $2*$3 in $1 referenced name.
+           #@ USAGE: __prod NAME NONEGINT1 NONEGINT2 (Usable only by intended wrappers)
            #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
@@ -127,13 +127,13 @@ __prod() { #@ DESCRIPTION: Primitive. Writes teh product of the two positive int
 	printf -v $ref_num "%d" $__sum         ## Finally print definitive value in referenced name.
     fi
 }
-_prod() { #@ DESCRIPTION: Derived. Writes the product of the two positive integers $2*$3 in $1 name using __prod().
+_prod() { #@ DESCRIPTION: Derived. Writes the product of the two nonnegative integers $2*$3 in $1 name using __prod().
           #@ USAGE: _prod [ __prod() args ]
     set -- "${@:1:3}"
     __prod "$@"
 }
-prod() { #@ DESCRIPTION: Derived. Writes teh product of the two positive integers $1*$2 in STDOUT using __prod().
-         #@ USAGE: prod POSINT1 POSINT2
+prod() { #@ DESCRIPTION: Derived. Writes the product of the two nonnegative integers $1*$2 in STDOUT using __prod().
+         #@ USAGE: prod NONEGINT1 NONEGINT2
     set -- "${@:1:2}"
     local -i ___prd=0
     __prod ___prd "$@"
@@ -141,41 +141,82 @@ prod() { #@ DESCRIPTION: Derived. Writes teh product of the two positive integer
 }
 ## Secondary recursive functions ---------------------------------------------------------------------------------------
 ##
-__fibonacci() { #@ DESCRIPTION:
-                #@ USAGE:
+__fibonacci() { #@ DESCRIPTION: Primitive. Writes the corresponding fibonacci sequence element of $2 value in $1 name.
+                #@ USAGE: __fibonacci NAME NONEGINT
+                #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
     local -r num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
     shift $#
     
-    local -i __sum=0 temp=0                        ## Temporal values storeage
-    if ! valdecint "$num" || [ $num -lt 0 ]; then  ## Capture calls on invalid non-numeric values
-	    printf -v $ref_num "%d" -1             ## Assign a "default wrong value" of -1
-	    return 1                               ## Finish execution with faulty exit status;
+    local -i __sum=0 temp=0                       ## Temporal values storeage
+    if ! valdecint "$num" || [ $num -lt 0 ]; then ## Capture calls on invalid non-numeric values
+	    printf -v $ref_num "%d" -1            ## Assign a "default wrong value" of -1
+	    return 1                              ## Finish execution with faulty exit status;
     fi        
     case $num in
-	0|1) printf -v $ref_num "%d" 1 ;;          ## Accordgin to Fibonacci's definition: F(0) = F(1) = 1
-	*)                                         ## Remaining recursion cases will follow this path
-	    __fibonacci $ref_num $(( $num - 2 ))   ## Store first partial result in global name 
-	    temp=${!ref_num}                       ## Store partial result from previous recursive call in local var.
-	    __fibonacci $ref_num $(( $num - 1 ))   ## Store second partial result in global name
-	    _sum __sum $temp ${!ref_num}
-	    printf -v $ref_num "%d" $__sum
+	0|1) printf -v $ref_num "%d" 1 ;;         ## Accordgin to Fibonacci's definition: F(0) = F(1) = 1
+	*)                                        ## Remaining recursion cases will follow this path
+	    __fibonacci $ref_num $(( $num - 2 ))  ## Store 1st partial result F(n) in global name
+	    temp=${!ref_num}                      ## And then save it temporairly and locally 
+	    __fibonacci $ref_num $(( $num - 1 ))  ## Get second partial result F(n+1) in global name
+	    _sum __sum ${!ref_num} $temp          ## Now get final result F(n+2) = F(n+1) + F(n)
+	    printf -v $ref_num "%d" $__sum        ## Write definitive result to global name 
     esac
 }
-_fibonacci() {
+_fibonacci() { #@ DESCRIPTION: Derived. Writes the corresponding fibonacci sequence element of $2 value in $1 name using
+               #@              __fibonacci() (wrapper).
+               #@ USAGE: _fibonacci [ __fibonacci() args ]
     set -- "${@:1:2}"
     __fibonacci "$@"
 }
-fibonacci() {
+fibonacci() { #@ DESCRIPTION: Derived. Writes the corresponding fibonacci sequence element of $1 to STDOUT using
+              #@ __fibonacci() (wrapper).
+              #@ USAGE: fibonacci NONEGINT
     set -- "${@:1:1}"
-    local -i ___fbncc=0 estatus=0
-    __fibonacci ___fbncc "$@"; estatus=$?
+    local -i ___fbncc=0
+    __fibonacci ___fbncc "$@"
     printf "%d\n" $___fbncc
-    return $estatus
+}
+__ackermann() { #@ DESCRIPTION: Primitive. Writes the corresponding ackerman's sequence element of $2 and $3 values in 
+                #@              $1 referenced variable.
+                #@ USAGE: __ackermann NAME NONEGINT1 NONEGINT2
+                #@       DO NOT CALL DIRECTLY
+    ## Function header
+    local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}  ## Reference where to write the result
+    local -r num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    local -r num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    shift $#
+    
+    local -i __sum=0                                          ## Stores a _sum() result
+    if [ $num1 -eq 0 ]; then                                  ## Recursion base case A(0, N) = N + 1
+	_sum __sum $num2 1
+	printf -v $ref_num "%d" $(( $num2 + 1 ))
+	return 0
+    elif [ $num1 -gt 0 -a $num2 -eq 0 ]; then                 ## Case A(M, 0) = A(M - 1, 1)
+	__ackermann $ref_num $(( $num1 - 1 )) 1
+    else                                                      ## Case A(M, N) = A(M - 1, A(M, N - 1))
+	__ackermann $ref_num $(( $num1 )) $(( $num2 - 1 ))
+	__ackermann $ref_num $(( $num1 - 1 )) ${!ref_num}
+    fi
+    printf -v $ref_num "%d" ${!ref_num}                       ## Write result to referenced output name
+}
+_ackermann() { #@ DESCRIPTION: Derived. Writes the correspondig ackerman's sequence element of $2 and $3 values in $1
+               #@              referenced name using __ackerman() (wrapper).
+               #@ USAGE: _ackerman [ __ackerman() args ]
+    set -- "${@:1:3}"
+    __ackermann "$@"
+}
+ackermann() { #@ DESCRIPTION: Derived. Writes the correspondig ackerman's sequence element of $1 and $2 values to STDOUT
+              #@              using __ackerman() (wrapper).
+              #@ USAGE: ackerman NONEGINT1 NONEGINT2
+    set -- "${@:1:2}"
+    local -i ___ackrmn=0
+    __ackermann ___ackrmn "$@"
+    printf "%d\n" $___ackrmn
 }
 __factorial() { #@ DESCRIPTION: Primitive function. Writes the factorial of $2 in $1 name.
-                #@ USAGE: __factorial NAME INTEGER
+                #@ USAGE: __factorial NAME NONEGINT
                 #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
@@ -197,11 +238,11 @@ __factorial() { #@ DESCRIPTION: Primitive function. Writes the factorial of $2 i
 }
 _factorial() { #@ DESCRIPTION: Derived. Writes the factorial of $2 in $1 name using __factorial() (wrapper)
                #@ USAGE: _factorial [ __factorial args ]
-    set -- "${@:1:2}" ## Keep only the first two pos. pars., rewritting "$@"
+    set -- "${@:1:2}" ## Keep only the first two pos. pars., rewriting "$@"
     __factorial "$@"
 }
 factorial() { #@ DESCRIPTION: Derived. Writes the factorial of $2 to STDOUT using __factorial() (wrapper)
-              #@ USAGE: _factorial INTEGER
+              #@ USAGE: _factorial NONEGINT
     set -- "${@:1:1}"
     local -i ___fctrl=0 estatus=0
     __factorial ___fctrl "$@"; estatus=$?
