@@ -49,7 +49,7 @@ nonegdecint() { #@ DESCRIPTION: Tests if $1 contains a valid nonnegative decimal
     local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
     shift $#
     
-    valdecint "${string}" && [ $string -ge 0 ]
+    valdecint "$string" && [ $string -ge 0 ]
 }
 validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
               #@ USAGE: validname '[ STRING ]'
@@ -304,7 +304,6 @@ factorial() { #@ DESCRIPTION: Derived. Writes the factorial of $2 to STDOUT usin
               #@ USAGE: _factorial NONEGINT
     set -- "${@:1:2}"
     local -i ___fctrl=0 estatus=0
-    __factorial ___fctrl "$@"; estatus=$?
+    __factorial ___fctrl "$@"
     printf "%d\n" $___fctrl
-    return $estatus
 }
