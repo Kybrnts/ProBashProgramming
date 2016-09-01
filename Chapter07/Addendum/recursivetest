@@ -1,7 +1,7 @@
 #: Title       : Recursives
 #: Date        : 2016-08-30
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
-#: Version     : 
+#: Version     : 1.0
 #: Description : Bash function declarations file
 #:             : Recursive functions test library.
 #:             : This is mean showcase how to solve some classic recursion problems with Bash
@@ -13,11 +13,15 @@ declare -r _MSNG_ARG_ERR_MSG_DFLT=${_MSNG_ARG_ERR_MSG_DFLT:-"Missing argument"} 
 declare -r _MSNG_NMA_ERR_MSG_DFLT=${_MSNG_NMA_ERR_MSG_DFLT:-"Missing name argument"}     ## Name arg
 declare -r _MSNG_NNA_ERR_MSG_DFLT=${_MSNG_NNA_ERR_MSG_DFLT:-"Missing nonnull argument"}  ## Nonnull arg
 declare -r _MSNG_INA_ERR_MSG_DFLT=${_MSNG_INA_ERR_MSG_DFLT:-"Missing integer argument"}  ## Integer arg
+declare -r _BDNM_ARG_ERR_MSG_DFLT=${_BDNM_ARG_ERR_MSG_DFLT:-"Bad name argument"}         ## Bad name argument
+declare -r _BNNA_ARG_ERR_MSG_DFLT=${_BNNA_ARG_ERR_MSG_DFLT:-"Bad nonnegative argument"}  ## Bad nonnegative argument
 ## Runtime configuration values ----------------------------------------------------------------------------------------
-declare _MSNG_ARG_ERR_MSG=$_MSNG_ARG_ERR_MSG_DFLT  ## Missing argument error message
-declare _MSNG_NMA_ERR_MSG=$_MSNG_NMA_ERR_MSG_DFLT  ## Missing name arg
-declare _MSNG_NNA_ERR_MSG=$_MSNG_NNA_ERR_MSG_DFLT  ## Missing nonull arg
-declare _MSNG_INA_ERR_MSG=$_MSNG_INA_ERR_MSG_DFLT  ## Missing integer arg                             
+declare _MSNG_ARG_ERR_MSG=$_MSNG_ARG_ERR_MSG_DFLT ## Missing argument error message
+declare _MSNG_NMA_ERR_MSG=$_MSNG_NMA_ERR_MSG_DFLT ## Missing name arg
+declare _MSNG_NNA_ERR_MSG=$_MSNG_NNA_ERR_MSG_DFLT ## Missing nonull arg
+declare _MSNG_INA_ERR_MSG=$_MSNG_INA_ERR_MSG_DFLT ## Missing integer arg                             
+declare _BDNM_ARG_ERR_MSG=$_BDNM_ARG_ERR_MSG_DFLT ## Bad name argument
+declare _BNNA_ARG_ERR_MSG=$_BNNA_ARG_ERR_MSG_DFLT ## Bad nonnegative argument
 
 ## Function declarations
 ## Auxiliary functions -------------------------------------------------------------------------------------------------
@@ -34,11 +38,31 @@ digitsonly() { #@ DESCRIPTION: Tests if $1 is a digits only string
     esac
 }
 valdecint() { #@ DESCRIPTION: Tests if $1 contains a valid decimal integer
-              #@ USAGE: digitsonly '[ TEST_STRING ]'
+              #@ USAGE: valdecint '[ TEST_STRING ]'
     local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
     shift $#
     
     digitsonly "${string#[-+]}"
+}
+nonegdecint() { #@ DESCRIPTION: Tests if $1 contains a valid nonnegative decimal integer
+                #@ USAGE: nonegdecint '[ TEST_STRING ]'
+    local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
+    shift $#
+    
+    valdecint "${string}" && [ $string -ge 0 ]
+}
+validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
+              #@ USAGE: validname '[ STRING ]'
+    local name=${1?"$FUNCNAME:Missing argument"}
+    shift $#
+
+    case $name in 
+	## Fail if:
+	## * Is the null string;
+	## * begins w/anything other than letter or underscore;
+	## * contains anything other than a letter, a number or underscore.
+	"" | [^a-zA-Z_]* | *[^a-zA-Z0-9_]*) return 1 ;;
+    esac
 }
 __val2decint() { #@ DESCRIPTION: Primitive function. Turns valid decimal integer string $2 into decimal arithmetic
                  #@              evaluable by removing its leading zeros (sign skipped), and writes result in $1. 
@@ -75,32 +99,43 @@ val2decint() { #@ DESCRIPTION: Derived. Turns valid decimal integer string $2 in
 ## We will define two primitive functions: one for the addtion and other for the product of two nonnegative integers;
 ## then additional recursive functions will be build on the top of them.
 ##
-__sum() { #@ DESCRIPTION: Primitive function. Writes the sum of the two nonnegative integers $2 + $3 in $1 name.
-          #@ USAGE: __sum NAME NONEGINT1 NONEGINT2 (Usable only by intended derived wrappers)
+__sum() { #@ DESCRIPTION: Primitive function. Writes the sum of the two nonnegative integers $2 + $3 in $1 name. By
+          #@              default performs sanity checks on arguments, but with $4 we can disable them.
+          #@ USAGE: __sum NAME NONEGINT1 NONEGINT2 [ BE_UNSAFE ] (Usable only by intended derived wrappers)
           #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
-    local -r num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value (greater or equal than 0)
-    local -r num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value (greater or equal than 0)
-    shift $#
-    
+    local num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}    ## Numeric input value (greater or equal than 0)
+    local num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}    ## Numeric input value (greater or equal than 0)
+    local -ir safe=${4:-1}                                   ## Sanity check enabled by default
+    shift $#    
+    ## Input sanity check (disabled by default)
+    if (( $safe )); then ## This allows to disable the sanity check in subsequent recursive calls
+	validname "$ref_num" || ${1?"${FUNCNAME[1]}: $_BDNM_ARG_ERR_MSG"} ## We need a valid name in $1
+	nonegdecint "$num1" || ${2?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}  ## We need a nonnegative decilmal integer
+	nonegdecint "$num2" || ${3?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}
+	_val2decint num1 "$num1"                                          ## Turn valid strings to usable ones
+	_val2decint num2 "$num2"
+    fi
+
     if [ $num2 -eq 0 ]; then          ## Recursion base case: 
 	printf -v $ref_num "%d" $num1 ## sum = m + 0 = m
-    else                                      ## All remaining recursion cases will take this path:
-	__sum $ref_num $num1 $(( $num2 - 1 )) ## Sum = m + (n + 1) = (m + n) + 1. Start by storing m + n = $1 + ($2 - 1)
-	                                      ## in the global name provided in $1, as we can't use local vars. to pass
-	                                      ## values between subsequent recursive calls. 
+    else                                        ## All remaining recursion cases will take this path:
+	__sum $ref_num $num1 $(( $num2 - 1 )) 0 ## Sum = m + (n + 1) = (m + n) + 1. Store m + n = $1 + ($2 - 1) in the
+	                                        ## global name provided in $1, as we can't use local vars. to pass vals.
+	                                        ## between subsequent recursive calls.
+	                                        ## Also avoid redoing sanity check upon recursion
 	printf -v $ref_num "%d" $(( ${!ref_num} + 1 )) ## Finally add 1 before printing the definitive value in the
     fi                                                 ## referenced name.
 }
 _sum() { #@ DESCRIPTION: Derived. Writes the sum of the two nonnegative integres $2 + $3 in $1 using __sum() (wrapper).
          #@ USAGE: _sum [ __sum() args ]
-    set -- "${@:1:3}" ## Keep only the first 3 positional parameters, rewriting "$@"
+    set -- "${@:1:4}" ## Keep only the first 3 positional parameters, rewriting "$@"
     __sum "$@"
 }
 sum() { #@ DESCRIPTION: Derived. Writes the sum of the two nonnegative integers $1 + $2 in STDOUT using __sum().
         #@ USAGE: sum NONEGINT1 POSTINT2
-    set -- "${@:1:2}" ## Keep only the first 2 positional pars, rewriting "$@"
+    set -- "${@:1:3}" ## Keep only the first 2 positional pars, rewriting "$@"
     local -i ___sm=0
     __sum ___sm "$@"
     printf "%d\n" $___sm
@@ -110,31 +145,40 @@ __prod() { #@ DESCRIPTION: Primitive. Writes the product of the two nonnegative 
            #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
-    local -r num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value
-    local -r num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value
+    local num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value
+    local num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"} ## Numeric input value
+    local -ri safe=${4:-1}                                ## Sanity check enabled by default
     shift $#
+    ## Input sanity check (disabled by default)
+    if (( $safe )); then ## This allows to disable the sanity check in subsequent recursive calls
+	validname "$ref_num" || ${1?"${FUNCNAME[1]}: $_BDNM_ARG_ERR_MSG"} ## We need a valid name in $1
+	nonegdecint "$num1" || ${2?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}  ## We need a nonnegative decilmal integer
+	nonegdecint "$num2" || ${3?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}
+	_val2decint num1 "$num1"                                          ## Turn valid strings to usable ones
+	_val2decint num2 "$num2"
+    fi
     
-    local -i __sum=0                           ## Stores a _sum() result locally
-    if [ $num1 -eq 0 -o $num2 -eq 0 ]; then    ## 1st base case: $2 or $3 is zero
-	printf -v $ref_num "%d" 0              ## Prod = m*0 = 0 
-    elif [ $num2 -eq 1 ]; then                 ## 2nd base case: $3 is 1
-	printf -v $ref_num "%d" $num1          ## prod = m*1 = m
-    else                                       ## All remaining recursion cases will rech this path:
-	__prod $ref_num $num1 $(( $num2 - 1 )) ## Prod = m*(n + 1) = m*n + m. So start by storing m*n = $1*($2 - 1) in
-	                                       ## the global name, as we can't use local vars to by-pass values between
-                                               ## Subsequent recursive calls.
-	_sum __sum ${!ref_num} $num1           ## Now add m using the previously defined _sum()
-	printf -v $ref_num "%d" $__sum         ## Finally print definitive value in referenced name.
+    local -i __sum=0                             ## Stores a _sum() result locally
+    if [ $num1 -eq 0 -o $num2 -eq 0 ]; then      ## 1st base case: $2 or $3 is zero
+	printf -v $ref_num "%d" 0                ## Prod = m*0 = 0 
+    elif [ $num2 -eq 1 ]; then                   ## 2nd base case: $3 is 1
+	printf -v $ref_num "%d" $num1            ## prod = m*1 = m
+    else                                         ## All remaining recursion cases will rech this path:
+	__prod $ref_num $num1 $(( $num2 - 1 )) 0 ## Prod = m*(n + 1) = m*n + m. So start by storing m*n = $1*($2 - 1) in
+	                                         ## the global name, as we can't use local vars to by-pass values between
+                                                 ## Subsequent recursive calls.
+	_sum __sum ${!ref_num} $num1 0           ## Now add m using the previously defined _sum()
+	printf -v $ref_num "%d" $__sum           ## Finally print definitive value in referenced name.
     fi
 }
 _prod() { #@ DESCRIPTION: Derived. Writes the product of the two nonnegative integers $2*$3 in $1 name using __prod().
           #@ USAGE: _prod [ __prod() args ]
-    set -- "${@:1:3}"
+    set -- "${@:1:4}"
     __prod "$@"
 }
 prod() { #@ DESCRIPTION: Derived. Writes the product of the two nonnegative integers $1*$2 in STDOUT using __prod().
          #@ USAGE: prod NONEGINT1 NONEGINT2
-    set -- "${@:1:2}"
+    set -- "${@:1:3}"
     local -i ___prd=0
     __prod ___prd "$@"
     printf "%d\n" $___prd
@@ -146,34 +190,37 @@ __fibonacci() { #@ DESCRIPTION: Primitive. Writes the corresponding fibonacci se
                 #@       DO NOT CALL DIRECTLY
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
-    local -r num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    local num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    local -ri safe=${3:-1}
     shift $#
-    
-    local -i __sum=0 temp=0                       ## Temporal values storeage
-    if ! valdecint "$num" || [ $num -lt 0 ]; then ## Capture calls on invalid non-numeric values
-	    printf -v $ref_num "%d" -1            ## Assign a "default wrong value" of -1
-	    return 1                              ## Finish execution with faulty exit status;
-    fi        
+    ## Input sanity check (disabled by default)
+    if (( $safe )); then ## This allows to disable the sanity check in subsequent recursive calls
+	validname "$ref_num" || ${1?"${FUNCNAME[1]}: $_BDNM_ARG_ERR_MSG"} ## We need a valid name in $1
+	nonegdecint "$num" || ${2?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}   ## We need a nonnegative decilmal integer
+	_val2decint num1 "$num"                                           ## Turn valid strings to usable ones
+    fi
+
+    local -i __sum=0 temp=0                        ## Temporal values storeage
     case $num in
-	0|1) printf -v $ref_num "%d" 1 ;;         ## Accordgin to Fibonacci's definition: F(0) = F(1) = 1
-	*)                                        ## Remaining recursion cases will follow this path
-	    __fibonacci $ref_num $(( $num - 2 ))  ## Store 1st partial result F(n) in global name
-	    temp=${!ref_num}                      ## And then save it temporairly and locally 
-	    __fibonacci $ref_num $(( $num - 1 ))  ## Get second partial result F(n+1) in global name
-	    _sum __sum ${!ref_num} $temp          ## Now get final result F(n+2) = F(n+1) + F(n)
-	    printf -v $ref_num "%d" $__sum        ## Write definitive result to global name 
+	0|1) printf -v $ref_num "%d" 1 ;;          ## Accordgin to Fibonacci's definition: F(0) = F(1) = 1
+	*)                                         ## Remaining recursion cases will follow this path
+	    __fibonacci $ref_num $(( $num - 2 )) 0 ## Store 1st partial result F(n) in global name
+	    temp=${!ref_num}                       ## And then save it temporairly and locally 
+	    __fibonacci $ref_num $(( $num - 1 )) 0 ## Get second partial result F(n+1) in global name
+	    _sum __sum ${!ref_num} $temp           ## Now get final result F(n+2) = F(n+1) + F(n)
+	    printf -v $ref_num "%d" $__sum         ## Write definitive result to global name 
     esac
 }
 _fibonacci() { #@ DESCRIPTION: Derived. Writes the corresponding fibonacci sequence element of $2 value in $1 name using
                #@              __fibonacci() (wrapper).
                #@ USAGE: _fibonacci [ __fibonacci() args ]
-    set -- "${@:1:2}"
+    set -- "${@:1:3}"
     __fibonacci "$@"
 }
 fibonacci() { #@ DESCRIPTION: Derived. Writes the corresponding fibonacci sequence element of $1 to STDOUT using
               #@ __fibonacci() (wrapper).
               #@ USAGE: fibonacci NONEGINT
-    set -- "${@:1:1}"
+    set -- "${@:1:2}"
     local -i ___fbncc=0
     __fibonacci ___fbncc "$@"
     printf "%d\n" $___fbncc
@@ -183,34 +230,43 @@ __ackermann() { #@ DESCRIPTION: Primitive. Writes the corresponding ackerman's s
                 #@ USAGE: __ackermann NAME NONEGINT1 NONEGINT2
                 #@       DO NOT CALL DIRECTLY
     ## Function header
-    local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}  ## Reference where to write the result
-    local -r num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
-    local -r num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
+    local num1=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}    ## Numeric input value
+    local num2=${3:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}    ## Numeric input value
+    local -ri safe=${4:-1}                                   ## Sanity check enabled by default
     shift $#
+    ## Input sanity check (disabled by default)
+    if (( $safe )); then ## This allows to disable the sanity check in subsequent recursive calls
+	validname "$ref_num" || ${1?"${FUNCNAME[1]}: $_BDNM_ARG_ERR_MSG"} ## We need a valid name in $1
+	nonegdecint "$num1" || ${2?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}  ## We need a nonnegative decilmal integer
+	nonegdecint "$num2" || ${3?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}
+	_val2decint num1 "$num1"                                          ## Turn valid strings to usable ones
+	_val2decint num2 "$num2"
+    fi
     
     local -i __sum=0                                          ## Stores a _sum() result
     if [ $num1 -eq 0 ]; then                                  ## Recursion base case A(0, N) = N + 1
-	_sum __sum $num2 1
+	_sum __sum $num2 1 0
 	printf -v $ref_num "%d" $(( $num2 + 1 ))
 	return 0
     elif [ $num1 -gt 0 -a $num2 -eq 0 ]; then                 ## Case A(M, 0) = A(M - 1, 1)
-	__ackermann $ref_num $(( $num1 - 1 )) 1
+	__ackermann $ref_num $(( $num1 - 1 )) 1 0
     else                                                      ## Case A(M, N) = A(M - 1, A(M, N - 1))
-	__ackermann $ref_num $(( $num1 )) $(( $num2 - 1 ))
-	__ackermann $ref_num $(( $num1 - 1 )) ${!ref_num}
+	__ackermann $ref_num $(( $num1 )) $(( $num2 - 1 )) 0
+	__ackermann $ref_num $(( $num1 - 1 )) ${!ref_num} 0
     fi
     printf -v $ref_num "%d" ${!ref_num}                       ## Write result to referenced output name
 }
 _ackermann() { #@ DESCRIPTION: Derived. Writes the correspondig ackerman's sequence element of $2 and $3 values in $1
                #@              referenced name using __ackerman() (wrapper).
                #@ USAGE: _ackerman [ __ackerman() args ]
-    set -- "${@:1:3}"
+    set -- "${@:1:4}"
     __ackermann "$@"
 }
 ackermann() { #@ DESCRIPTION: Derived. Writes the correspondig ackerman's sequence element of $1 and $2 values to STDOUT
               #@              using __ackerman() (wrapper).
               #@ USAGE: ackerman NONEGINT1 NONEGINT2
-    set -- "${@:1:2}"
+    set -- "${@:1:3}"
     local -i ___ackrmn=0
     __ackermann ___ackrmn "$@"
     printf "%d\n" $___ackrmn
@@ -221,29 +277,32 @@ __factorial() { #@ DESCRIPTION: Primitive function. Writes the factorial of $2 i
     ## Function header
     local ref_num=${1:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the result
     local -r num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}  ## Numeric input value
+    local -ri safe=${3:-1}
     shift $#
+    ## Input sanity check (disabled by default)
+    if (( $safe )); then ## This allows to disable the sanity check in subsequent recursive calls
+	validname "$ref_num" || ${1?"${FUNCNAME[1]}: $_BDNM_ARG_ERR_MSG"} ## We need a valid name in $1
+	nonegdecint "$num" || ${2?"${FUNCNAME[1]}: $_BNNA_ARG_ERR_MSG"}   ## We need a nonnegative decilmal integer
+	_val2decint num1 "$num"                                           ## Turn valid strings to usable ones
+    fi
 
     local -i __prod=0
-    if ! valdecint "$num" || [ $num -lt 0 ]; then  ## Capture calls on invalid non-numeric values
-	    printf -v $ref_num "%d" -1             ## Assign a "default wrong value" of -1
-	    return 1                               ## Finish execution with faulty exit status;
-    fi
     if [ $num -eq 0 ]; then                        ## Recursion base case:
 	printf -v $ref_num 1                       ## Bare in mind the following definition: !0 = 1
     else                                           ## Remaining recursion cases will follow this path
-	__factorial $ref_num $(( $num - 1 ))       ## AS before, use provided global name to pass values
-	_prod __prod $num ${!ref_num}              ## between subsequent recursion calls.
+	__factorial $ref_num $(( $num - 1 )) 0     ## AS before, use provided global name to pass values
+	_prod __prod $num ${!ref_num} 0            ## between subsequent recursion calls.
 	printf -v $ref_num "%d" $__prod
     fi
 }
 _factorial() { #@ DESCRIPTION: Derived. Writes the factorial of $2 in $1 name using __factorial() (wrapper)
                #@ USAGE: _factorial [ __factorial args ]
-    set -- "${@:1:2}" ## Keep only the first two pos. pars., rewriting "$@"
+    set -- "${@:1:3}" ## Keep only the first two pos. pars., rewriting "$@"
     __factorial "$@"
 }
 factorial() { #@ DESCRIPTION: Derived. Writes the factorial of $2 to STDOUT using __factorial() (wrapper)
               #@ USAGE: _factorial NONEGINT
-    set -- "${@:1:1}"
+    set -- "${@:1:2}"
     local -i ___fctrl=0 estatus=0
     __factorial ___fctrl "$@"; estatus=$?
     printf "%d\n" $___fctrl
