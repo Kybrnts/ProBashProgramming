@@ -1,0 +1,69 @@
+#: Title       : Fileutils
+#: Date        : 2017-05-09
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0.0
+#: Description : Bash function declarations file
+#:             : Adds usefull string-test functions
+#: Options     : N/A
+
+##
+## Includes and needed externals
+. /usr/local/lib/msngargerrs || exit 1 ## Missing argument error message strings
+. /usr/local/lib/badargerrs || exit 1  ## Bad argument error message strings
+##
+##
+if [ ! "$_DEF_FILEUTILS" ]; then ## Do not include if already included
+    ## Already included test flag
+    declare -r _DEF_FILEUTILS=:
+    
+    fdclose() { #@ DESCRIPTION: Closes the $1 input file descriptor. It might be used to close system's STDIN fd.
+        #@ USAGE: fdclose FILE_DSCRPTR
+	local fdnum=${1:?"$FUNCNAME: Missing index argument"}               ## File descriptor number to close
+	shift $#
+
+	digitsonly "$fdnum" || ${1?"$FUNCNAME: Bad index argument"}         ## Check for valid file descriptor
+	eval "exec $fdnum<&-"                                               ## Close the file descriptor. We need eval to
+        ## expand variables before exec redirection
+    }    
+    _fdopen() {
+	local num=${1:?"$FUNCNAME: Missing index argument"} ## File descriptor number to assign
+	local mde=${2:?"$FUNCNAME: Missing argument"}       ## Open file mode
+	local pth=$3                                        ## File-to-open's path
+	shift $#
+	
+	local oper= tmp=$((num + 3))                              ## Redirect operator and temporary file descriptor
+	digitsonly "$num" || ${1?"$FUNCNAME: Bad index argument"} ## Check for valid file descriptor
+	case $mde in                                              ## Check for valid mode
+            [Rr] | [Ww] | [Rr][Ww] | [Wr][Rr]) ;;                 ## Provide support several combinations w/capitals
+            *) ${3:"$FUNCNAME: Bad file mode provided"} ;;
+	esac
+	case $pth in
+            "") pth=">(:)" ;;
+            *) pth=\"$pth\" ;;
+	esac
+	case $mde in
+            [Rr]) mde=r oper="<" ;;
+            [Ww]) mde=w oper=">" ;;
+            [Rr][Ww]|[Ww][Rr]) mde=rw oper="<>";;
+	esac
+	eval "exec $tmp>&2 2>&-"                                       ## Remove next's command STDERR by closing it
+	if ! eval "exec $num$oper $pth"; then                          ## Try to open file
+            eval "exec 2>&$tmp $tmp>&1 >&2"                            ## If failed, reopen STDERR and swap w/STDOUT and..
+            printf "Error! %s\n" "Unable to open fd $num in $mde mode" ## Write error message
+            case $mde in
+		rw)
+                    eval "[ -r $pth -a -w $pth ]" \
+			&& printf "       %s\n" "Unknown error" \
+                            || printf "       %s\n" "permission denied" ;;
+		*)
+                    eval "[ -$mde $pth ]" \
+			&& printf "       %s\n" "Unknown error" \
+                            || printf "       %s\n" "permission denied" ;;
+            esac
+            return 1                                                 
+	fi                                                           ## End if failed to open.
+	eval "exec 2>&$tmp $tmp>&1 >&2"                              ## Reopen STDERR and swap w/STDOUT
+    }
+
+fi
+

@@ -1,0 +1,17 @@
+alertmsg() { #@ DESCRIPTION: Prints in-box-alert-message, and sounds alert (if available).
+             #@ USAGE: alertmsg '[ MESSAGE ]' [ BORDER ] [ BE_UNSAFE ]
+    ## Function header
+    local message=${1?"$FUNCNAME: $_MISS_ARG_ERR_MSG"}
+    local border=${2:-#}
+    local -ir unsafe=${3:+1}                                 ## Sanity check is enabled by default
+    shift $#
+    ## Argument check section
+    if ! (( $unsafe )); then
+	
+    fi    
+    local ___rpt=
+    _repeat ___rpt "$border" $(( ${#message} + 6 ))
+    printf '\a%s\n' "$___rpt" ## \a = BEL
+    printf '%2.2s %s %2.2s\n' "$___rpt" "$message" "$___rpt"
+    printf '%s\n' "$___rpt"
+}

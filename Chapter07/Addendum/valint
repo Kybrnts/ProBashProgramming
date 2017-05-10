@@ -1,0 +1,43 @@
+## Global variables
+                                                              ## $_MISS_ARG_ERR_MSG error messages:
+declare -r _MISS_ARG_ERR_MSG="Missing argument"               ## Arg
+declare -r _MISS_NMA_ERR_MSG="Missing name argument"          ## Name arg
+declare -r _MISS_NEA_ERR_MSG="Missing nonempty argument"      ## Nonempty arg
+declare -r _MISS_VIA_ERR_MSG="Missing valid integer argument" ## Integer arg
+                                 ## Default optional values
+declare -ri _INSRT_STR_DFLT=2    ## Default insert string location
+declare -ri _OVRLY_STRT_DFLT=1   ## Default overlay string location
+declare -ri _TRM_STR_DFLT=$' \t' ## Defalut string to be trimmed
+
+## Function declarations
+__val2decint() { #@ DESCRIPTION: Primitive function. Turns valid decimal integer string $2 into decimal arithmetic
+                 #@              evaluable by removing its leading zeros (sign skipped), and writes result in $1. 
+                 #@              Otherwise it will be treated as octal inside an arithmetic evaluation.
+                 #@ USAGE: __val2decint NAME '[ INT_STRING ]' (usable only inside intended wrappers)
+    local ref_intstr=${1:?"${FUNCNAME[1]}: $_MISS_NMA_ERR_MSG"} ## ${FUNCNAME[1]} Expands to callling name
+    local intstr=${2:?"${FUNCNAME[1]}: $_MISS_VIA_ERR_MSG"}     ##
+    shift $#
+    ## NOTE: This "Primitive" is meant to be ONLY INDIRECTLY called by a few "derived" wrappers, which assume their
+    ##       header will be handled by this primitive. This method provides heder reuse. Also Notice the reference to
+    ##       calling function in above sustitutions.
+    ##
+    ## We don't want leading +,- or zeros, so keep them separately to later remove them
+    ## To store the above, remove from back any different characters
+    local unwntd=${intstr%%[^+\-0]*}
+    ## Then keep hyphen character if present (for negatives), and then remove the unwanted from the beginning
+    printf -v $ref_intstr "%s" ${intstr%%[^-]*}${intstr#$unwntd}
+}
+_val2decint() { #@ DESCRIPTION: Derived. valid decimal integer string $2 into decimal arithmetic evaluable using
+                #@              __val2decint, and writes result in $1. (Wrapper)
+                #@ USAGE: _val2decint [ __val2decint args ]
+    set -- "${@:1:2}" ## Keep only the first two positional pars. and rewrite "$@"
+    __val2decint "$@"
+}
+val2decint() { #@ DESCRIPTION: Derived. Turns valid decimal integer string $2 into decimal arithmetic evaluable using
+               #@              __val2decint, and writes result in STDOUT. (Wrapper)
+               #@ USAGE: val2decint [ __val2decint args ]
+    set -- "${@:1:1}" ## Keep only first positional par., and rewrite "$@"
+    local ___vl2dcnt= ## Variable to be written by __val2decint
+    __val2decint ___vl2dcnt "$@"
+    printf "%d\n" $___vl2dcnt
+}

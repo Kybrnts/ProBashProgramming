@@ -10,7 +10,7 @@
 isunset() { #@ DESCRIPTION: Tests if NAME contained in $1 is unset (i.e. expands to null pointer)
             #@ USAGE: isunset NAME
     local name=${1:?"$FUNCNAME: Missing name argument"}
-    shift $#
+    shift $#    
 
     ## Check if referenced value is unset
     ## Expanded to "x" only if name is unset, in that case expansion will became a NOT null string
