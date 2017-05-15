@@ -1,0 +1,124 @@
+#: Title       : Fileutils
+#: Date        : 2017-05-09
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0.0
+#: Description : Bash function declarations file
+#:             : Adds usefull string-test functions
+#: Options     : N/A
+
+##
+## Includes and needed externals
+. /usr/local/lib/msngargerrs || exit 1 ## Missing argument error message strings
+. /usr/local/lib/badargerrs || exit 1  ## Bad argument error message strings
+. /usr/local/lib/strngtests || exit 1  ## Bad argument error message strings
+##
+##
+if [ ! "$_DEF_FILEUTILS" ]; then ## Do not include if already included
+    ## Already included test flag
+    declare -r _DEF_FILEUTILS=:    
+
+    _isopen() {
+        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be un safe flag. Enables parameters sanity check
+        local num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}   ## File descriptor number
+        shift $#n
+        
+        case $unsf in ## Arguments sanity check
+            0) digitsonly "$num" || ${1?"${FUNCNAME[1]}: $_BAD_IDA_ERR_MSG"} ;; ## Check for valid file descriptor
+        esac
+        eval "{ >&$num; } 2>&-"
+    }
+    isopen() {
+        set -- "$1"
+        _isopen 0 "$@"
+    }
+    isopen_u() {
+        set -- "$1"
+        _isopen 1 "$@"
+    }
+    _fdclose() { #@ DESCRIPTION: Closes the $1 input file descriptor. It might be used to close system's STDIN fd.
+                 #@ USAGE: fdclose FILE_DSCRPTR
+        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be un safe flag. Enables parameters sanity check
+        local num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}     ## File descriptor number to close
+        shift $#
+
+        case $unsf in ## Arguments sanity check
+            0) digitsonly "$num" || ${1?"${FUNCNAME[1]}: $_BAD_IDA_ERR_MSG"} ;; ## Check for valid file descriptor
+        esac
+        eval "exec $num<&- $num>&-" ## Close fd for read and write. Eval needed to expand variables before exec call
+    }
+    fdclose() {
+        set -- "$1"
+        _fdclose 0 "$@"
+    }
+    fdclose_u() {
+        set -- "$1"
+        _fdclose 1 "$@"
+    }
+    _fdopen() { #@ DESCRIPTION:
+                #@ USAGE:
+        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be un safe flag. Enables parameters sanity check
+        local num=${2:?"${FUNCNAME[1]}: $_MSNG_INA_ERR_MSG"}     ## File descriptor number to assign
+        local mde=${3:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}     ## Open file mode
+        local pth=$4                                             ## File-to-open's path
+        shift $#
+
+        local oper= tmp=                                         ## Redirect operator and temporary file descriptor
+        case $unsf in ## Arguments sanity check
+            0)
+                digitsonly "$num" || ${1:?"${FUNCNAME[1]}: $_BAD_IDA_ERR_MSG"}  ## Check for valid file descriptor
+                isopen_u "$num" || ${1:?"${FUNCNAME[1]}: Fd $num already open"} ## Check for already open fd
+                case $mde in                                                    ## Check for valid mode
+                    [Rr] | [Ww] | [Aa] | [Rr]+ | [Ww]+) ;;                      ## 
+                    *) ${3:?"${FUNCNAME[1]}: Bad open mode provided"} ;;
+                esac
+        esac
+        tmp=$((num + 3))       ## Avoid using standard file descriptors for the temporary fd
+        case $pth in           ## Set path accordingly
+            "") pth=">(:)" ;;  ## If path is empty, create a anonymous pipe This is not the same as using ${4:-">(:)"} above
+            *) pth=\"$pth\" ;; ## Otherwise use provided path, but quoted
+        esac
+        case $mde in                   ## Set redirect operator accordingly. Also normalize mode value
+            [Rr]) mde=r oper="<" ;;    ## for read modes use "<"  (single mode open)            
+            [Ww]) mde=w oper=">" ;;    ## For write modes use ">" (single mode open)
+            [Aa]) mde=a oper=">>" ;;   ##
+            [Rr]+) mde=r+ oper="<>" ;; ##
+            *) mde=w+ oper="<>";;      ## Use "<>" for            (double mode open)
+        esac
+        case $mde in
+            r*)
+                if eval "[ \"$pth\" != \">(:)\" -a $pth ]"; then
+                    printf "Error! %s\n" "File not found" >&2
+                    return 1
+                fi ;;
+        esac
+        eval "exec $tmp>&2 2>&-"                                       ## Remove next's command STDERR by closing it
+        if ! eval "exec $num$oper $pth"; then                          ## Try to open file
+            eval "exec 2>&$tmp $tmp>&1 >&2"                            ## If failed, reopen STDERR and swap w/STDOUT
+            printf "Error! %s\n" "Unable to open fd $num in $mde mode" ## Write error message (OUT is now sent to ERR)
+            if [ "$pth" != ">(:)" ]; then                              ## If fd do not point to anon pipe
+                case $mde in                                           ## Check for missing permissions upon mode
+                    r) eval "[ -r $pth ]" || printf "       %s\n" "Not allowed to read from path" ;;
+                    [wa]) eval "[ -r $pth ]" || printf "       %s\n" "Not allowed to write to path" ;;
+                    *)
+                        eval "[ -r $pth ]" || printf "       %s\n" "Not allowed to read from path"
+                        eval "[ -w $pth ]" || printf "       %s\n" "Not allowed to write to path" ;;
+                esac
+                eval "exec >&$tmp $tmp>&-"
+                return 2
+            fi
+            printf "       %s\n" "Unknown error"
+            eval "exec >&tmp $tmp>&-"
+            return 3
+        fi                                                           ## End if failed to open.
+        eval "exec 2>&$tmp $tmp>&-"                                  ## Reopen STDERR and close 
+    }
+    fdopen() {
+        set -- "${@:1:3}"
+        _fdopen 0 "$@"
+    }
+    fdopen_u() {
+        set -- "${@:1:3}"
+        _fdopen 1 "$@"
+    }
+
+fi

@@ -18,149 +18,157 @@ if [ ! "$_DEF_STRNGTESTS" ]; then ## Do not include if already included
     ##
     ## Function headers  -----------------------------------------------------------------------------------------------
     validname() { #@ DESCRIPTION: Tests if $1 string is a valid shell variable name
-                  #@ USAGE: validname '[ STRING ]'
-	## Function header
-	local name=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
+        #@ USAGE: validname '[ STRING ]'
+        ## Function header
+        local name=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
 
-	case $name in
-	    ## Fail if:
-	    ## * Is the null string;
-	    ## * begins w/anything other than letter or underscore;
-	    ## * contains anything other than a letter, a number or underscore.
-	    "" | [^a-zA-Z_]* | *[^a-zA-Z0-9_]*) return 1 ;;
-	esac
+        case $name in
+            ## Fail if:
+            ## * Is the null string;
+            ## * begins w/anything other than letter or underscore;
+            ## * contains anything other than a letter, a number or underscore.
+            "" | [^a-zA-Z_]* | *[^a-zA-Z0-9_]*) return 1 ;;
+        esac
     }
     
     _isunset() { #@ DESCRIPTION: Primitive. Tests if NAME present in $1 is unset (i.e. expands to null pointer) SAFELY.
-	         #@              Safety ensures that $1 has a valid name, and it can be disabled to avoid overhead and
-	         #@              and to write one safe, and one unsafe of the derived function.
-	         #@ USAGE: _isunset BE_UNSAFE NAME
-	         #@       DO NOT CALL DIRECTLY, call through below derived wrappers instead
-	## Function header
-	local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be safe flag. Enables parameters validation
-	local name=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}    ## The name whose parameter expansion is to be tested
-	shift $#
-	case $unsf in ## Arguments sanity check
-	    0) validname "$name" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;;
-	esac
-	## Check if referenced value is unset
-	## Expanded to "x" only if name is unset, in that case expansion will became a NOT null string
-	[ -z ${!name+x} ]
+                 #@              Safety ensures that $1 has a valid name, and it can be disabled to avoid overhead and
+                 #@              and to write one safe, and one unsafe of the derived function.
+                 #@ USAGE: _isunset BE_UNSAFE NAME
+                 #@       DO NOT CALL DIRECTLY, call through below derived wrappers instead
+        ## Function header
+        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be safe flag. Enables parameters validation
+        local name=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}    ## The name whose parameter expansion is to be tested
+        shift $#
+        case $unsf in ## Arguments sanity check
+            0) validname "$name" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;;
+        esac
+        ## Check if referenced value is unset
+        ## Expanded to "x" only if name is unset, in that case expansion will became a NOT null string
+        [ -z ${!name+x} ]
     }        
     isunset() { #@ DESCRIPTION: Derived. Tests if NAME contained in $1 is unset safely
                 #@ USAGE: isunset NAME
-	set -- "${@:1:1}"
-	_isunset 0 "$@"
+        set -- "${@:1:1}"
+        _isunset 0 "$@"
     }
     isunset_u() { #@ DESCRIPTION: Derived. Tests if NAME contained in $1 is unset unsafely, avoding argument check work
-                  #@ USAGE: isunset NAME	
-	set -- "${@:1:1}"
-	_isunset 1 "$@"
+                  #@ USAGE: isunset NAME    
+        set -- "${@:1:1}"
+        _isunset 1 "$@"
     }
     isset() { #@ DESCRIPTION: Tests if NAME contained in $1 is set safely
               #@ USAGE: isset NAME
-	set -- "${@:1:1}"	
-	! _isunset 0 "$@"
+        set -- "${@:1:1}"    
+        ! _isunset 0 "$@"
     }
     isset_u() {
-	set -- "${@:1:1}"
-	! _isunset 1 "$@"
+        set -- "${@:1:1}"
+        ! _isunset 1 "$@"
     }
 
     substring() { #@ DESCRIPTION: Tests if $1 string is contained by string $2
                   #@ USAGE: substring '[ STRING1 ]' '[ STRING2 ]'
-	local substring=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	local string=${2?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
+        local substring=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        local string=${2?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
 
-	case $string in                 ## Does string match substring w/additional left or right chars?
-	    *"$substring"*) return 0 ;; ## Yes, then it is a substring
-	esac                            ##
-	return 1                        ## No, hence it is not a substring
+        case $string in                 ## Does string match substring w/additional left or right chars?
+            *"$substring"*) return 0 ;; ## Yes, then it is a substring
+        esac                            ##
+        return 1                        ## No, hence it is not a substring
     }
     supstring() { #@ DESCRIPTION: Tests if $1 string contains string $2
                   #@ USAGE: supstring '[ STRING1 ]' '[ STRING2 ]'
-	local superstring=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	local string=${2?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $# 
-	
-	substring "$string" "$superstring"
+        local superstring=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        local string=${2?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $# 
+        
+        substring "$string" "$superstring"
     }
 
     isnull() { #@ DESCRIPTION: Tests if $1 string contains characters (other than '\0')
                #@ USAGE: isnull '[ STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
-	
-	## Check if received string is susbstring of the null string
-	substring "$string" ""
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+        
+        ## Check if received string is susbstring of the null string
+        substring "$string" ""
     }
     isnotnull() { #@ DESCRIPTION: Tests if $1 string is NOT the null string
                   #@ USAGE: isnotnull '[ STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
-	
-	## Check if received string is NOT null
-	! isnull "$string"
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+        
+        ## Check if received string is NOT null
+        ! isnull "$string"
     }
 
     digitsonly() { #@ DESCRIPTION: Tests if $1 string contains only decimal digit characters
                    #@ USAGE: digitsonly '[ STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
-	
-	## Test if the string is null or contains nondigit chars
-	case $string in
-	    "" | *[^0-9]*) return 1 ;;
-	esac
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+        
+        ## Test if the string is null or contains nondigit chars
+        case $string in
+            "" | *[^0-9]*) return 1 ;;
+        esac
     }
     alphaonly() { #@ DESCRIPTION: Tests if $1 string contains only alphabetic characters
-                  #@ USAGE alphaonly '[ STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
-	## Test fails if string is null or contain nona alphabetic chars
-	case $string in
-	    "" | *[^A-Za-z]*) return 1 ;;
-	esac    
+        #@ USAGE alphaonly '[ STRING ]'
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+        ## Test fails if string is null or contain nona alphabetic chars
+        case $string in
+            "" | *[^A-Za-z]*) return 1 ;;
+        esac    
     }
     isalnum() { #@ DESCRIPTION: Tests if $1 string is alphanumeric
-                #@ USAGE: isalnum '[ STRING ]'
-	local string=${1?:"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	case $string in
-	    "" | *[^A-Za-z0-9]*) return 1 ;;
-	esac
+        #@ USAGE: isalnum '[ STRING ]'
+        ## Function header
+        local string=${1?:"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+
+        case $string in ## Test for non alphabetic characters
+            "" | *[^A-Za-z0-9]*) return 1 ;;
+        esac
     }
     
     valdecint() { #@ DESCRIPTION: Tests if $1 string is a valid base10 integer
-                  #@ Remember that, in Bash:
-                  #@ * Constants with a leading 0 are interpreted as octal numbers;
-                  #@ * A leading 0x or 0X denotes hexadecimal;
-                  #@ * Otherwise, numbers take the form [base#]n, where base is a decimal number between 2 and 64
-                  #@   representing the arithmetic base, and n is a number in that base.
-                  #@ USAGE: valdecint '[ STRING ]'
-	## Function header
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
-	case ${string#"${string%%[^\-+]*}"} in    ## Remove from string's end all chars up to the first +/-
-	                                          ## And remove above's complement from string.
-	    "" | *[^0-9]* | 0*[^0]*)  return 1 ;; ## Then fail the test if the remaining string is null;
-	                                          ## Contains any non-digit chars;
-	                                          ## Or starts with 0 also followed by non-zeroes;
-	esac
+        #@ Remember that, in Bash:
+        #@ * Constants with a leading 0 are interpreted as octal numbers;
+        #@ * A leading 0x or 0X denotes hexadecimal;
+        #@ * Otherwise, numbers take the form [base#]n, where base is a decimal number between 2 and 64
+        #@   representing the arithmetic base, and n is a number in that base.
+        #@ USAGE: valdecint '[ STRING ]'
+        ## Function header
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+
+        case ${string#"${string%%[^\-+]*}"} in    ## Remove from string's end all chars up to the first +/-
+            ## And remove above's complement from string.
+            "" | *[^0-9]* | 0*[^0]*)  return 1 ;; ## Then fail the test if the remaining string is null;
+            ## Contains any non-digit chars;
+            ## Or starts with 0 also followed by non-zeroes;
+        esac
     }
     valindex() { #@ DESCRIPTION: Tests if $1 contains a valid nonnegative decimal integer (i.e. an index)
-                 #@ USAGE: valindex '[ TEST_STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
-	shift $#
-	valdecint "$string" && (( $string >= 0 ))
+        #@ USAGE: valindex '[ TEST_STRING ]'
+        ## Function header
+        local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
+        shift $#
+        
+        valdecint "$string" && (( $string >= 0 ))
     }
 
     valfloat() { #@ DESCRIPTION: Tests if $1 contains a valid floating point number (also spporting sci notation)
-                 #@ USAGE: valfloat '[ TEST_STRING ]'
-	local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
-	shift $#
+        #@ USAGE: valfloat '[ TEST_STRING ]'
+        ## Function header
+        local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"} ## String to be tested
+        local LC_NUMERIC=${2:-$LC_NUMERIC}                ## Global lclztn for dec separator as dflt but allow override
+        shift $#
 
-	printf "%f" "$string" >/dev/null 2>&1
+        printf "%f" "$string" >/dev/null 2>&1
     }
 fi 
