@@ -116,7 +116,7 @@ if [ ! "$_DEF_STRNGTESTS" ]; then ## Do not include if already included
         esac
     }
     alphaonly() { #@ DESCRIPTION: Tests if $1 string contains only alphabetic characters
-        #@ USAGE alphaonly '[ STRING ]'
+                  #@ USAGE alphaonly '[ STRING ]'
         local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
         shift $#
         ## Test fails if string is null or contain nona alphabetic chars
@@ -125,7 +125,7 @@ if [ ! "$_DEF_STRNGTESTS" ]; then ## Do not include if already included
         esac    
     }
     isalnum() { #@ DESCRIPTION: Tests if $1 string is alphanumeric
-        #@ USAGE: isalnum '[ STRING ]'
+                #@ USAGE: isalnum '[ STRING ]'
         ## Function header
         local string=${1?:"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
         shift $#
@@ -136,25 +136,25 @@ if [ ! "$_DEF_STRNGTESTS" ]; then ## Do not include if already included
     }
     
     valdecint() { #@ DESCRIPTION: Tests if $1 string is a valid base10 integer
-        #@ Remember that, in Bash:
-        #@ * Constants with a leading 0 are interpreted as octal numbers;
-        #@ * A leading 0x or 0X denotes hexadecimal;
-        #@ * Otherwise, numbers take the form [base#]n, where base is a decimal number between 2 and 64
-        #@   representing the arithmetic base, and n is a number in that base.
-        #@ USAGE: valdecint '[ STRING ]'
+                  #@ Remember that, in Bash:
+                  #@ * Constants with a leading 0 are interpreted as octal numbers;
+                  #@ * A leading 0x or 0X denotes hexadecimal;
+                  #@ * Otherwise, numbers take the form [base#]n, where base is a decimal number between 2 and 64
+                  #@   representing the arithmetic base, and n is a number in that base.
+                  #@ USAGE: valdecint '[ STRING ]'
         ## Function header
         local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
         shift $#
 
-        case ${string#"${string%%[^\-+]*}"} in    ## Remove from string's end all chars up to the first +/-
-            ## And remove above's complement from string.
+        case ${string#"${string%%[^\-+]*}"} in    ## Remove from string's back all chars up to the first +/-
+                                                  ## And remove above's front complement from string.
             "" | *[^0-9]* | 0*[^0]*)  return 1 ;; ## Then fail the test if the remaining string is null;
-            ## Contains any non-digit chars;
-            ## Or starts with 0 also followed by non-zeroes;
+                                                  ## Contains any non-digit chars;
+                                                  ## Or begins with 0 also followed by non-zeros.
         esac
     }
     valindex() { #@ DESCRIPTION: Tests if $1 contains a valid nonnegative decimal integer (i.e. an index)
-        #@ USAGE: valindex '[ TEST_STRING ]'
+                 #@ USAGE: valindex '[ TEST_STRING ]'
         ## Function header
         local string=${1?"$FUNCNAME: $_MSNG_NNA_ERR_MSG"}
         shift $#
@@ -163,12 +163,71 @@ if [ ! "$_DEF_STRNGTESTS" ]; then ## Do not include if already included
     }
 
     valfloat() { #@ DESCRIPTION: Tests if $1 contains a valid floating point number (also spporting sci notation)
-        #@ USAGE: valfloat '[ TEST_STRING ]'
+                 #@ USAGE: valfloat '[ TEST_STRING ]'
         ## Function header
         local string=${1?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"} ## String to be tested
         local LC_NUMERIC=${2:-$LC_NUMERIC}                ## Global lclztn for dec separator as dflt but allow override
         shift $#
 
-        printf "%f" "$string" >/dev/null 2>&1
+        printf "%f" "$string" >&- 2>&-
     }
-fi 
+    
+    leapyr() { #@ DESCRIPTION: Checks if the year string number in $1 is a leap year.
+               #@ USAGE: leapyr '[ YYYY ]'
+        local ystr=${1:?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"}
+        shift $#
+
+        ystr=${ystr#"${ystr%%[^0]*}"}  ## Remove leading zeros (if any) // Not even a valid year
+        digitsonly "$ystr" || return 1 ## Must be a digits only         // Not even a valid year 
+        if ((ystr%4)); then            ## Not a multiple of 4?
+            return 2                   ## Not leap
+        elif ((ystr%100)); then        ## Neither a multiple of 4 nor of 100?
+            return 0                   ## Leap
+        elif ((ystr%400)); then        ## Neither a multiple of 4 nor of 100 nor of 400?
+            return 2                   ## Not leap
+        fi                             ## Leap in any other case
+    }
+    valdate() { #@ DESCRIPTION: Checks if the string value of $1 is a valid date string of the format yyyymmdd
+                #@ USAGE: valdate '[ YYYYYmmdd ]'
+        local dtestr=${1:?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"} ## String to test
+        shift $#
+
+        local mm=0 dd=0 mdd=0               ## Month, days and max month days containers respectively
+        dtestr=${dtestr#"${dtestr%%[^0]*}"} ## Remove leading zeros from date string
+        ((${#dtestr} > 4)) || return 1      ## 00010101 is the minimum, 5 digits needed after trimming leading zeros
+        digitsonly "$dtestr" || return 1    ## Allow digits only date
+        dd=${dtestr#"${dtestr%??}"}         ## Extract day substring from date
+        dtestr=${dtestr%"$dd"}              ## Remove day substring from date
+        dd=${dd#0}                          ## Remove the leading zero from day if any
+        mm=${dtestr#"${dtestr%??}"}         ## Extract month substr from date
+        dtestr=${dtestr%"$mm"}              ## Remove month substr from date, now dtestr contains year
+        mm=${mm#0}                          ## Remove leathing zero from month
+
+        ((0 < mm && mm < 13)) || return 2            ## Validate month
+        case $mm in                                  ## Validate day number in relationship to month and year: 
+            1|3|5|7|8|10|12) mdd=31 ;;               ## For months 1, 3, 5,.., set a maximum day number of 31;
+            4|6|9|11) mdd=30 ;;                      ## For months 4, 6, 9.., set a maximum day of 30;
+            *) leapyr $dtestr && mdd=29 || mdd=28 ;; ## For 2nd month, check for leap year
+        esac
+        ((0 < dd  && dd <= mdd)) || return 2
+    }
+    valtime() { #@ DESCRIPTION: Checks if the string value of $1 is a valid time strin gof the format HHMMSS
+                #@ USAGE: valtime '[ HHMMSS ]'
+        local tmestr=${1:?"$FUNCNAME: $_MSNG_ARG_ERR_MSG"} ## String to test
+        shift $#
+
+        local i=2 sub=                           ## A counter and substring container
+        valdecint "$tmestr" || return 1          ## Check for valid decimal integer (negative times are supported)
+        while ((i--)); do                        ## Repeat once for seconds substring and twice for minutes substring
+            sub=${tmestr#"${tmestr%??}"}         ## Extract last two digits substring
+            tmestr=${tmestr%"$sub"}              ## Remove last two digits from time string
+            sub=${sub#0}                         ## Remove leading zero if any, from substring
+            ((0 <= sub && sub < 60)) || return 2 ## Check if substring is within range
+            ((${#tmestr})) || return 0           ## If there are no more digits, succeed
+        done
+        sub=${tmestr#"${tmestr%??}"}             ## Repeat above proces one las time for hours substring
+        tmestr=${tmestr%"$sub"}
+        sub=${sub#0}
+        ((0 <= sub && sub < 25)) || return 2
+    }
+fi
