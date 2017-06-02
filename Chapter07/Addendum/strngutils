@@ -2,7 +2,7 @@
 #: Date        : 2016-06-21
 #: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
 #: Version     : 1.0.0
-#: Description : Bash function declarations file
+#: Description : Dash function declarations file
 #:             : Adds usefull string manipulation functions
 #: Options     : N/A
 
@@ -11,130 +11,183 @@
 . /usr/local/lib/msngargerrs || exit 1 # Missing argument error message strings
 . /usr/local/lib/badargerrs || exit 1  # Wrong argument error message strings
 . /usr/local/lib/strngtests || exit 1  # Basic string test functions
+. /usr/local/lib/nmeutils || exit 1   ## Utils for shell names
 
 if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
     ## Already included test flag
-    declare -r _DEF_STRNGUTILS=:
+    readonly _DEF_STRNGUTILS=:
     ##
     ## Constants for default values (Respect previously defined values, but now make them constant ---------------------
-    declare -r _TRM_STR_DFLT_DFLT=${_TRM_STR_DFLT_DFLT:-$IFS}       ## Default trim string
-    declare -r _INS_STR_IDX_DFLT_DFLT=${_INS_STR_IDX_DFLT_DFLT:-0}; ## Insert string defalut index def constant
+    readonly _TRM_STR_DFLT_DFLT=${_TRM_STR_DFLT_DFLT:-"$IFS"}       ## Default trim string
+    readonly _INS_STR_IDX_DFLT_DFLT=${_INS_STR_IDX_DFLT_DFLT:-0}; ## Insert string defalut index def constant
     ##
     ## Runtime configuration values ------------------------------------------------------------------------------------
-    declare _TRM_STR_DFLT=$_TRM_STR_DFLT_DFLT         ## Default trim string
-    declare _INS_STR_IDX_DFLT=$_INS_STR_IDX_DFLT_DFLT ## Insert string default index 
+    _TRM_STR_DFLT=$_TRM_STR_DFLT_DFLT         ## Default trim string
+    _INS_STR_IDX_DFLT=$_INS_STR_IDX_DFLT_DFLT ## Insert string default index
     ##
     ## Function declarations    
-    __ltrim() { #@ DESCRIPTION: Primitive. Trim optional $4 substring from $3 string's left side, and write remaining
-                #@              string in $2 name. Argument sanity check is disabled by setting $1 to 0. If $4 is not
-                #@              null or unset, any chars from IFS will be removed from string.
-                #@ USAGE: __ltrim BE_UNSAFE NAME '[ STRING ]' [ TO_TRIM_STRING ]
+    __ltrim() { #@ DESCRIPTION: Primitive. Trim optional $5 chars from $4 string's left side, and write remaining string
+                #@              in $3 name. Argument sanity check is disabled by setting $2 to 0. If $5 is not null or
+                #@              unset, any chars from IFS will be removed from string.
+                #@ USAGE: __ltrim "CLR_FUNC" BE_UNSAFE NAME '[ STRING ]' [ TO_TRIM_STRING ]
                 #@        DO NOT CALL DIRECTLY, call through below derivatives instead
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local clr unsf r_trstr trstr ttrm trim
+        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
+        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}    ## Be un safe flag. Enables parameters sanity check
-        local ref_trstr=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}  ## Name where to write the trimmed string
-        local trim_string=${3?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## String to be trimmed 
-        local to_trim=${4:-"$_TRM_STR_DFLT"}                        ## What to trim from left side of above string
-        shift $#
-        
-        local trim=$trim_string
+        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
+        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
+        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
+        shift $#        
         case $unsf in ## Arguments sanity check
-            0)
-                validname "$ref_trstr" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
-        esac    
-        trim_string=${trim%%[^"$to_trim"]*}                ## Remove unwanted chars from right
-        printf -v $ref_trstr "%s" "${trim#"$trim_string"}" ## Remove above's remaining chars from left
+            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
+        esac
+        trim=$trstr
+        trstr=${trim%%[!"$ttrm"]*}  ## Remove unwanted chars from right
+        trstr=${trim#"$trstr"}      ## Remove above's remaining chars from left
+        setvar -u $r_trstr "$trstr" ## Assign to referenced var
     }
-    _ltrim() { #@ DESCRIPTION:
-               #@ USAGE:
-        set -- "${@:1:3}"
-        __ltrim 0 "$@"
+    _ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Trim optional $3 substring from $2 string's left side, and
+               #@              write remaining string in $1 name. Argument sanity check is enforced. If $3 is not null
+               #@              or unset, any chars from IFS will be removed from string.
+               #@ USAGE:  _ltrim NAME '[ STRING ]' [ TO_TRIM_STRING ]
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __ltrim "_ltrim" 0 "$@"
     }
-    _ltrim_u() { #@ DESCRIPTION:
-                 #@ USAGE:
-        set -- "${@:1:3}"
-        __ltrim 1 "$@"
+    _ltrim_u() { #@ DESCRIPTION: Derived wrapper for __ltrim(). This one provides the same as above _ltrim() but in
+                 #@              unsafe mode (i.e. without sanity checks upon arguments). Usefull to avoid overhead.
+                 #@ USAGE: _ltrim_u NAME '[ STRING ]' [ TO_TRIM_STRING ]
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __ltrim "_ltrim_u" 1 "$@"
     }
-    ltrim() { #@ DESCRIPTION:
-              #@ USAGE:
-        set -- "${@:1:2}"
-        local ___ltrim=
-        __ltrim 0 ___ltrim "$@"
-        [ -n "$___ltrim" ] && printf "%s\n" "$___ltrim"
+    ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+              #@ USAGE:  ltrim NAME '[ STRING ]' [ TO_TRIM_STRING ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___ltrim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __ltrim "ltrim" 0 ___ltrim "$@"
+        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
     }
-    ltrim_u() { #@ DESCRIPTION:
-                #@ USAGE:
-        set -- "${@:1:2}"
-        local ___ltrim=
-        __ltrim 1 ___ltrim "$@"
-        [ -n "$___ltrim" ] && printf "%s\n" "$___ltrim"
+    ltrim_u() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+                #@ USAGE: ltrim_u NAME '[ STRING ]' [ TO_TRIM_STRING ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___ltrim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __ltrim "ltrim_u" 1 ___ltrim "$@"
+        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
     }
-    _unsgnstr() { #@ DESCRIPTION:
-                  #@ USAGE:
-        set -- "${@:1:2}"
-        __ltrim 0 "$1" "$2" "\-+"
+    _usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+                 #@ USAGE: _usgnstr NAME '[ STRING ]'
+        set -- ${1+"$1"} ${2+"$2"}
+        __ltrim "_usgnstr" 0 "$@" "\-+"
     }
-    _unsgnstr_u() { #@ DESCRIPTION:
-                    #@ USAGE:
-        set -- "${@:1:2}"
-        __ltrim 1 "$1" "$2" "\-+"
+    _usgnstr_u() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+                   #@ USAGE: _usgnstr_u NAME '[ STRING ]'
+        set -- ${1+"$1"} ${2+"$2"}
+        __ltrim "_usgnstr" 1 "$@" "\-+"
     }
-    unsgnstr() { #@ DESCRIPTION:
-                 #@ USAGE:
-        set -- "$1"
-        local ___ltrim=
-        __ltrim 0 ___ltrim "$1" "\-+"
-        [ -n "$___ltrim" ] && printf "%s\n" "$___ltrim"
+    usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+                #@ USAGE: usgnstr '[ STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___ltrim
+        ## Function header
+        set -- ${1+"$1"}
+        __ltrim "usgnstr" 0 ___ltrim "$@" "\-+"
+        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
     }
-    unsgnstr_u() { #@ DESCRIPTION:
-        #@ USAGE:
-        set -- "$1"
-        local ___ltrim=
-        __ltrim 1 ___ltrim "$1" "\-+"
-        [ -n "$___ltrim" ] && printf "%s\n" "$___ltrim"
-    }
-    
     __rtrim() { #@ DESCRIPTION:
                 #@ USAGE:
-        local ref_trstr=${1:?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
-        local trim_string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
-        local to_trim=${3:-"$_TRM_STR_DFLT"}
+        local clr unsf r_trstr trstr ttrm trim
+        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
+        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
+        ## Function header
+        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
+        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
+        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
         shift $#
-
-        local trim=$trim_string
-        trim_string=${trim##*[^"$to_trim"]}
-        printf -v $ref_trstr "%s" "${trim%"$trim_string"}"
+        case $unsf in ## Arguments sanity check
+            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
+        esac        
+        trim=$trstr
+        trstr=${trim##*[!"$ttrm"]}  ## Remove unwanted chars from left
+        trstr=${trim%"trstr"}       ## Remove above's remaining chars from right
+        setvar -u $r_trstr "$trstr" ## Assign to referenced name
     }
     _rtrim() { #@ DESCRIPTION:
                #@ USAGE:
-        set -- "${@:1:3}"
-        __rtrim "$@"
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __rtrim "_rtrim" 0 "$@"
+    }
+    _rtrim_u() { #@ DESCRIPTION:
+               #@ USAGE:
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __rtrim "_rtrim" 1 "$@"
     }
     rtrim() { #@ DESCRIPTION:
               #@ USAGE:
-        set -- "${@:1:2}"
-        local ___rtrim=
-        __rtrim ___rtrim "$@"
-        [ -n "$___rtrim" ] && printf "%s\n" "$___rtrim"
+        local ___rtrim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __rtrim "rtrim" 0 ___rtrim "$@"
+        [ "$___rtrim" ] && printf "%s\n" "$___rtrim"
+
+    }
+    rtrim_u() { #@ DESCRIPTION:
+                #@ USAGE:
+        local ___rtrim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __rtrim "rtrim" 1 ___rtrim "$@"
+        [ "$___rtrim" ] && printf "%s\n" "$___rtrim"
     }
     __trim() { #@ DESCRIPTION:
                #@ USAGE:
-        local ref_trstr=${1:?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
-        local trim_string=${2?"${FUNCNAME[1]}: $_MISS_ARG_ERR_MSG"}
-        local to_trim=${3:-"$_TRM_STR_DFLT"}
-        shift $#
-
-        local __trim=
-        _ltrim __trim "$trim_string" "$to_trim"
-        _rtrim __trim "$__trim" "$to_trim"
-        printf -v $ref_trstr "%s" "$__trim"
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local clr unsf r_trstr trstr ttrm __trim
+        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
+        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
+        ## Function header
+        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
+        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
+        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
+        shift $#        
+        case $unsf in ## Arguments sanity check
+            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
+        esac
+        _ltrim __trim "$trstr" "$ttrm"
+        _rtrim __trim "$__trim" "$ttrm"
+        setvar -u $r_trstr "%s" "$__trim"
+    }
+    _trim() { #@ DESCRIPTION:
+              #@ USAGE:
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __trim "_trim" 0 "$@"
+    }
+    _trim_u() { #@ DESCRIPTION:
+                #@ USAGE:
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __trim "_trim" 1 "$@"
     }
     trim() { #@ DESCRIPTION:
              #@ USAGE:
-        set -- "${@:1:2}"
-        local ___trim=
-        __trim ___trim "$@"
-        [ -n "$___trim" ] && printf "%s\n" "$___trim"
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___trim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __trim "trim" 0 ___trim "$@"
+        [ "$___trim" ] && printf "%s\n" "$___trim"
+    }
+    trim_u() { #@ DESCRIPTION:
+               #@ USAGE:
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___trim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __trim "trim" 1 ___trim "$@"
+        [ "$___trim" ] && printf "%s\n" "$___trim"
     }
     
     __repeat() { #@ DESCRIPTION: Primitive. Repeat $3 string until $4 string lenght is reached and write it to name $2.
@@ -579,4 +632,3 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
         printf "%d\n" $___indx
     }    
 fi
-

@@ -1,0 +1,152 @@
+#: Title       : Nmeutils
+#: Date        : 2016-03-06
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0.0
+#: Description : Dash function declarations file
+#:             : Adds usefull shell tools for names (references)
+#: Options     : N/A
+
+##
+## Includes and needed externals
+. /usr/local/lib/msngargerrs || exit 1 ## Missing argument error message strings
+. /usr/local/lib/badargerrs || exit 1  ## Bad argument error message strings
+##
+## Declarations
+if [ ! "$_DEF_NMEUTILS" ]; then
+    ## Already included test flag
+    readonly _DEF_NMEUTILS=:
+    ##
+    ## Function declarations
+    valnme() { #@ DESCRIPTION: Tests if $1 string is a valid variable shell name.
+               #@ USAGE: valnme '[ STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local nme
+        ## Function header
+        nme=${1?"valnme: $_MSNG_ARG_ERR_MSG"} ## Require a set string (i.e. not the NULL pointer)
+        shift $# ## Function header ends removing any aditional pos. pars.
+        case $nme in                     ## Fail if:
+            "") return 1 ;;              ## * Is the null string;
+            [^a-zA-Z_]*) return 2 ;;     ## * Begins w/any other than letter or underscore;
+            *[^a-zA-Z0-9_]*) return 3 ;; ## * Contains any other than letter, number or underscore.
+        esac
+    }
+    cnvnme() { #@ DESCRIPTION: Tests if $1 string is a valid name as per defined naming convention to avoid colisions
+               #@              between local and gloval names passed as positionsl parameters. All valid names as per
+               #@              this criterion MUST be valid variable shell names as well.
+               #@ USAGE: cnvname '[ STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local nme
+        ## Function header
+        nme=${1?"valnme: $_MSNG_ARG_ERR_MSG"} ## Require a set string (i.e. not the NULL pointer)
+        shift $# ## Function header ends removing any aditional pos. pars.       
+        case $nme in                     ## Fail if:
+            "") return 1 ;;              ## * Is the null string;
+            [^_]*) return 2 ;;           ## * Do NOT start with a leading underscore, as per defined convention;
+            *[^a-zA-Z0-9_]*) return 3 ;; ## * Contains any other than letter, number or underscore.
+        esac
+    }
+    
+    _isunset() { #@ DESCRIPTION: Primitive. Tests if NAME present in $2 is NOT set (i.e. expands to null pointer). The
+                 #@              Name required for $1 is the name of the derived function that calls it. Exit status
+                 #@              will be zero on success and greater than zero when test fails.
+                 #@ USAGE: _isunset "caller" NAME
+                 #@        DON'T CALL DIRECTLY unless sure of what you're doing. Call through below wrappers instead.
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local clr nme
+        clr=${1:?"_isunset: $_MSNG_CLR_ERR_MSG"} shift 1 ## Caller function's name (must be quoted)
+        ## Function header
+        nme=${1?"$clr: $_MSNG_NMA_ERR_MSG"}              ## Name to test (require a set string)
+        shift $# ## Function header ends removing any aditional pos. pars.
+        valnme "$nme" || ${2?"$clr: $_BAD_NMA_ERR_MSG"} ## Require valid name for test
+        ## Check if referenced value is unset
+        ## Expanded to "x" only if name is unset, in that case expansion will became a NOT null string
+        eval "[ -z \${$nme+x} ]"
+    }
+    isunset() { #@ DESCRIPTION: Derived/Wrapper. Tests if NAME present in $1 is NOT set by using _isunset(). 
+                #@ USAGE: isunset NAME
+        set -- "isunset" ${1+"$1"} ## Set quoted parameters only if they are present
+        _isunset "$@"
+    }
+    isset() { #@ DESCRIPTION: Derived/Wrapper. Tests if NAME present in $1 IS set by using _isunset().
+              #@ USAGE: isset NAME
+        set -- "isunset" ${1+"$1"} ## Set quoted parameters only if they are present
+        ! _isunset "$@"     ## Fail when _isunset() succeeds and vice-versa
+    }    
+    setvar() { #@ DESCRIPTION: Sets one or more variables to specified value by reference. At lest one name and value is
+               #@              required, using the -v switch. Additional assignments may be specified. Any given name is
+               #@              checked to be a valid shell name before the assignment takes place except when using -u,
+               #@              where check is avoided for that specific variable. Values may be null, but not unset.
+               #@ USAGE: setvar -[v|u] NAME '[ VALUE ]' [ -[v|u] NAME '[ VALUE ]' .. ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local nme val estr  ## Current name, value to assign and eval string to execute        
+        : ${1?"setvar: $_MSNG_ARG_ERR_MSG"} ## Require at least one argument
+        while [ $# -ne 0 ]; do ## While we still have arguments, process them in groups of 3
+            case $1 in
+                -u) ## First of the group must be the -u or -v switch, in this case -u (set unsafe mode)
+                    nme=${2?"setvar: $_MSNG_NMA_ERR_MSG"} ## Reuqire the following arg to be set as well (name)
+                    val=${3?"setvar: $_MSNG_NMA_ERR_MSG"} ## And the next one also (value)
+                    shift 3                               ## Clear all stored args
+                    estr=${estr:+"$estr "}"$nme=\"$val\"" ;; ## Append assignment to eval string without valname()
+                -v) ## First of the group must be the -v or -v switch, in this case -v (set safe mode)
+                    nme=${2?"setvar: $_MSNG_NMA_ERR_MSG"} ## Reuqire the following arg to be set as well (name)
+                    val=${3?"setvar: $_MSNG_NMA_ERR_MSG"} ## And the next one also (value)
+                    shift 3                               ## Clear all stored args
+                    valnme "$nme" || ${2?"setvar: $_BAD_NMA_ERR_MSG"} ## Require a valid name on second arg
+                    estr=${estr:+"$estr "}"$nme=\"$val\"" ;;          ## Append assignment to eval string
+                *)  ## Fail in any other case
+                    shift $# ## Function header ends removing any aditional pos. pars.
+                    : ${1?"setvar: $_BAD_ARG_ERR_MSG"} ;;
+            esac
+        done
+        eval "$estr" ## Evaluate and execute eval string after looping through args
+    }
+    __getvar() { #@ DESCRIPTION: Primitive. Stores $3 name's value $2 name. $1 Stores the calling function's name.
+                 #@ USAGE: __getvar CALLING_FUNCTION BE_UNSAFE NAME_WRITE NAME_READ
+                 #@        DO NOT CALL DIRECTLY, call through below derived wrappers instead
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local clr usf r_nmew r_nmer
+        clr=${1:?"__getvar: $_MSNG_CLR_ERR_MSG"}     ## Require the calling function's name
+        usf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be unsafe flag. enables parameters sanity check
+        ## Function header
+        r_nmew=${1?"$clr: $_MSNG_NMA_ERR_MSG"}   ## Require a name to write to
+        r_nmer=${2?"$clr: $_MSNG_NMA_ERR_MSG"}   ## Require a neme to rewad from
+        shift $# ## Function header ends removing any aditional pos. pars.
+
+        case $usf in ## Arguments sanity check
+            0) cnvnme "$r_nmew" || ${2?"$clr: $_BAD_CNA_ERR_MSG"}    ## Validate name to write or fail
+               valnme "$r_nmer" || ${3?"$clr: $_BAD_NMA_ERR_MSG"} ;; ## Validate name to read from
+        esac
+        eval "isset \$r_nmer" || return 1                  ## If var is unset fail gracefully
+        eval "setvar -u $r_nmew \"\$$r_nmer\""             ## Set value of to-read name into to-write one (unsafe mode)
+    }
+    _getvar() { #@ DESCRIPTION: Derived wrapper to __getvar(). Stores $2 name's value to $1 name.
+                #@ USAGE: _getvar NAMEW NAMER        
+        set --  ${1+"$1"} ${2+"$2"} ## Set quoted parameters only if they are present
+        __getvar "_getvar" 0 "$@"
+    }
+    _getvar_u() { #@ DESCRIPTION: Derived wrapper to __getvar(). Stores $2 name's value to $1 name.
+                  #@ USAGE: _getvar NAMEW NAMER
+        set --  ${1+"$1"} ${2+"$2"} ## Set quoted parameters only if they are present
+        __getvar "_getvar" 1 "$@"
+    }
+    getvar() { #@ DESCRIPTION: Derived wrapper to __getvar(). Prints $1 name's value to STDOUT
+               #@ USAGE: getvar NAME
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___gtvr
+        ## Function header
+        set -- ${1+"$1"}
+        ___gtvr=
+        __getvar "getvar" 0 ___gtvr "$@"
+        [ "$___gtvr" ] && printf "%s\n" "$___gtvr"
+    }
+    getvar_u() { #@ DESCRIPTION: Derived wrapper to __getvar(). Prints $1 name's value to STDOUT
+                 #@ USAGE: getvar NAME
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___gtvr
+        ## Function header
+        set -- ${1+"$1"}
+        ___gtvr=
+        __getvar "getvar" 1 ___gtvr "$@"
+        [ "$___gtvr" ] && printf "%s\n" "$___gtvr"
+    }
+fi

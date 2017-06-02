@@ -110,7 +110,7 @@ Function declaration rules:
   using custom and more meaningful names for arguments and so ease variable tracking throughout function's body;
 * Declare MANDATORY (non-unset) non-null arguments first, then MANDATORY that can be null and finally the optional ones
   (may be unset or null);
-* Prefix parameters that hold variable names (references) with "ref_", and make them MANDATORY and non-null;
+* Prefix parameters that hold variable names (references) with "r_", and make them MANDATORY and non-null;
 * Use the following parameter expansions right before assignment to arguments:
   * "Display error if null or unset", for MANDATORY non-null positional parameters;
   * "Display if null", for MANDATORY positional parameters that may be null strings; 
