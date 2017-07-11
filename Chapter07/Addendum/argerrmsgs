@@ -1,0 +1,64 @@
+#: Title       : Msngargerrs
+#: Date        : 2017-03-15
+#: Author      : "Kybernetes" <correodelkybernetes@gmail.com>
+#: Version     : 1.0.0
+#: Description : Dash declarations file
+#:             : Adds usefull error messages as global variables
+#: Options     : N/A
+
+##
+## Error message symbols
+if [ ! "$_DEF_ARGERRMSGS" ]; then ## Do not include if already included
+    ## Already included test flag
+    readonly _DEF_ARGERRMSGS=:
+    ##
+    ## Constants for default error messages (Respect previously defined values, but now make them constant -----------------
+    ## Error messages for missing..
+    readonly _MSNGERRDFLT_ARG="${_MSNGERRDFLT_ARG:-Missing argument}"            ## An argument (generic);
+    readonly _MSNGERRDFLT_CLA="${_MSNGERRDFLT_CLA:-Missing calling argument}"    ## A calling function name argument;
+    readonly _MSNGERRDFLT_UNA="${_MSNGERRDFLT_UNA:-Missing unsf. flag argument}" ## A be-unsafe flag argument;
+    readonly _MSNGERRDFLT_NMA="${_MSNGERRDFLT_NMA:-Missing name argument}"       ## A name argument;
+    readonly _MSNGERRDFLT_NNA="${_MSNGERRDFLT_NNA:-Missing nonnull argument}"    ## A Nonnull argument;
+    readonly _MSNGERRDFLT_INA="${_MSNGERRDFLT_INA:-Missing integer argument}"    ## An Integer argument;
+    readonly _MSNGERRDFLT_IDA="${_MSNGERRDFLT_IDA:-Missing index argument}"      ## An Index argument.
+    ##
+    ## Runtime configuration values ----------------------------------------------------------------------------------------
+    ## This are the ones meant to be used by the functions. Values may be updated during execution
+    _MSNGERR_ARG=$_MSNGERRDFLT_ARG ## Missing argument error message;
+    _MSNGERR_CLA=$_MSNGERRDFLT_CLA ## Missing calling function name;
+    _MSNGERR_UNA=$_MSNGERRDFLT_UNA ## Missing be-unsafe flag argument;
+    _MSNGERR_NMA=$_MSNGERRDFLT_NMA ## Missing name arg;
+    _MSNGERR_NNA=$_MSNGERRDFLT_NNA ## Missing nonull arg;
+    _MSNGERR_INA=$_MSNGERRDFLT_INA ## Missing integer arg;
+    _MSNGERR_IDA=$_MSNGERRDFLT_IDA ## Missing index argument;
+    ##
+    ## Constants for default error messages (Respect previously defined values, but now make them constant -------------
+    ## Error messages for bad:
+    readonly _BADERRDFLT_ARG="${_BADERRDFLT_ARG:-Bad argument}"                    ## Argument (generic);
+    readonly _BADERRDFLT_NMA="${_BADERRDFLT_NMA:-Bad name argument}"               ## Invalid name argument;
+    readonly _BADERRDFLT_RNA="${_BADERRDFLT_RNA:-Bad reference name argument}"     ## Inval. name as per convention;
+    readonly _BADERRDFLT_NNA="${_BADERRDFLT_NNA:-Bad non-null argument}"           ## Non-null argument;
+    readonly _BADERRDFLT_NOA="${_BADERRDFLT_NOA:-BAD num. only argument}"          ## Numeric only argument;
+    readonly _BADERRDFLT_AOA="${_BADERRDFLT_AOA:-BAD alpha. only argument}"        ## Alphabetic only argument;
+    readonly _BADERRDFLT_ANA="${_BADERRDFLT_ANA:-BAD alpha-numeric only argument}" ## Alpha-numeric only argument;
+    readonly _BADERRDFLT_INA="${_BADERRDFLT_INA:-Bad integer argument}"            ## Integer argument;
+    readonly _BADERRDFLT_IDA="${_BADERRDFLT_IDA:-Bad index argument}"              ## Index argument;
+    readonly _BADERRDFLT_FLA="${_BADERRDFLT_FLA:-Bad float argument}"              ## Bad floating point argument;
+    readonly _BADERRDFLT_DTA="${_BADERRDFLT_DTA:-Bad date argument}"               ## Bad date argument;
+    readonly _BADERRDFLT_TMA="${_BADERRDFLT_TMA:-Bad time argument}"               ## Bad time argument.
+    ##
+    ## Runtime configuration values ------------------------------------------------------------------------------------
+    ## This are the ones meant to be used by the functions. Values may be updated during execution
+    _BADERR_ARG=$_BADERRDFLT_ARG ## Argument (generic);
+    _BADERR_NMA=$_BADERRDFLT_NMA ## Invalid name argument;
+    _BADERR_RNA=$_BADERRDFLT_RNA ## Inval. name as per convention;
+    _BADERR_NNA=$_BADERRDFLT_NNA ## Non-null argument;
+    _BADERR_NOA=$_BADERRDFLT_NOA ## Numeric only argument;
+    _BADERR_AOA=$_BADERRDFLT_AOA ## Alphabetic only argument;
+    _BADERR_ANA=$_BADERRDFLT_ANA ## Alpha-numeric only argument;
+    _BADERR_INA=$_BADERRDFLT_INA ## Integer argument;
+    _BADERR_IDA=$_BADERRDFLT_IDA ## Index argument;
+    _BADERR_FLA=$_BADERRDFLT_FLA ## Bad floating point argument;
+    _BADERR_DTA=$_BADERRDFLT_DTA ## Bad date argument;
+    _BADERR_TMA=$_BADERRDFLT_TMA ## Bad time argument.
+fi

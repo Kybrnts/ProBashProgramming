@@ -5,33 +5,40 @@
 #: Description : Dash declarations file
 #:             : Adds usefull error messages as global variables
 #: Options     : N/A
+
 ##
+## Error messae symbols
 if [ ! "$_DEF_BADARGERRS" ]; then ## Do not include if already included
     ## Already included test flag
     readonly _DEF_BADARGERRS=:
     ##
-    ## Reserve a symbol for null constant. useful when stopping execution w/"Display Error if Null or Unset" param. exp.
-    readonly _NULL
-    ##
     ## Constants for default error messages (Respect previously defined values, but now make them constant -------------
-    ## Error messages for bad..
-    readonly _BAD_ARG_ERR_MSG_DFLT=${_BAD_ARG_ERR_MSG_DFLT:-"Bad argument"}            ## Argument (generic);
-    readonly _BAD_NMA_ERR_MSG_DFLT=${_BAD_NMA_ERR_MSG_DFLT:-"Bad name argument"}       ## Invalid name argument;
-    readonly _BAD_CNA_ERR_MSG_DFLT=${_BAD_CNA_ERR_MSG_DFLT:-"Bad conv. name argument"} ## Inval. name as per convention;
-    readonly _BAD_NNA_ERR_MSG_DFLT=${_BAD_NNA_ERR_MSG_DFLT:-"Bad null argument"}       ## A null argument;
-    readonly _BAD_INA_ERR_MSG_DFLT=${_BAD_INA_ERR_MSG_DFLT:-"Bad integer argument"}    ## A bad integer argument;
-    readonly _BAD_IDA_ERR_MSG_DFLT=${_BAD_IDA_ERR_MSG_DFLT:-"Bad index argument"}      ## A bad Index argument.
-    ##
-    ## Error message for too many arguments ----------------------------------------------------------------------------
-    readonly _EXTR_ARG_ERR_MSG_DFLT=${_EXTR_ARG_ERR_MSG_DFLT:-"Too many arguments"}
+    ## Error messages for bad:
+    readonly _BADERRDFLT_ARG="${_BADERRDFLT_ARG:-Bad argument}"                    ## Argument (generic);
+    readonly _BADERRDFLT_NMA="${_BADERRDFLT_NMA:-Bad name argument}"               ## Invalid name argument;
+    readonly _BADERRDFLT_CNA="${_BADERRDFLT_CNA:-Bad conv. name argument}"         ## Inval. name as per convention;
+    readonly _BADERRDFLT_NNA="${_BADERRDFLT_NNA:-Bad non-null argument}"           ## Non-null argument;
+    readonly _BADERRDFLT_NOA="${_BADERRDFLT_NOA:-BAD num. only argument}"          ## Numeric only argument;
+    readonly _BADERRDFLT_AOA="${_BADERRDFLT_AOA:-BAD alpha. only argument}"        ## Alphabetic only argument;
+    readonly _BADERRDFLT_ANA="${_BADERRDFLT_ANA:-BAD alpha-numeric only argument}" ## Alpha-numeric only argument;
+    readonly _BADERRDFLT_INA="${_BADERRDFLT_INA:-Bad integer argument}"            ## Integer argument;
+    readonly _BADERRDFLT_IDA="${_BADERRDFLT_IDA:-Bad index argument}"              ## Index argument;
+    readonly _BADERRDFLT_FLA="${_BADERRDFLT_FLA:-Bad float argument}"              ## Bad floating point argument;
+    readonly _BADERRDFLT_DTA="${_BADERRDFLT_DTA:-Bad date argument}"               ## Bad date argument;
+    readonly _BADERRDFLT_TMA="${_BADERRDFLT_TMA:-Bad time argument}"               ## Bad time argument.
     ##
     ## Runtime configuration values ------------------------------------------------------------------------------------
     ## This are the ones meant to be used by the functions. Values may be updated during execution
-    _BAD_ARG_ERR_MSG=$_BAD_ARG_ERR_MSG_DFLT
-    _BAD_CNA_ERR_MSG=$_BAD_CNA_ERR_MSG_DFLT
-    _BAD_NMA_ERR_MSG=$_BAD_NMA_ERR_MSG_DFLT
-    _BAD_NNA_ERR_MSG=$_BAD_NNA_ERR_MSG_DFLT
-    _BAD_INA_ERR_MSG=$_BAD_INA_ERR_MSG_DFLT
-    _BAD_IDA_ERR_MSG=$_BAD_IDA_ERR_MSG_DFLT
-    _EXTR_ARG_ERR_MSG=$_EXTR_ARG_ERR_MSG_DFLT ## Extra argument provided
+     _BADERR_ARG=$_BADERRDFLT_ARG ## Argument (generic);
+     _BADERR_NMA=$_BADERRDFLT_NMA ## Invalid name argument;
+     _BADERR_CNA=$_BADERRDFLT_CNA ## Inval. name as per convention;
+     _BADERR_NNA=$_BADERRDFLT_NNA ## Non-null argument;
+     _BADERR_NOA=$_BADERRDFLT_NOA ## Numeric only argument;
+     _BADERR_AOA=$_BADERRDFLT_AOA ## Alphabetic only argument;
+     _BADERR_ANA=$_BADERRDFLT_ANA ## Alpha-numeric only argument;
+     _BADERR_INA=$_BADERRDFLT_INA ## Integer argument;
+     _BADERR_IDA=$_BADERRDFLT_IDA ## Index argument;
+     _BADERR_FLA=$_BADERRDFLT_FLA ## Bad floating point argument;
+     _BADERR_DTA=$_BADERRDFLT_DTA ## Bad date argument;
+     _BADERR_TMA=$_BADERRDFLT_TMA ## Bad time argument.
 fi

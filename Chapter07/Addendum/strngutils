@@ -8,290 +8,471 @@
 
 ##
 ## Includes and needed externals
-. /usr/local/lib/msngargerrs || exit 1 # Missing argument error message strings
-. /usr/local/lib/badargerrs || exit 1  # Wrong argument error message strings
-. /usr/local/lib/strngtests || exit 1  # Basic string test functions
-. /usr/local/lib/nmeutils || exit 1   ## Utils for shell names
-
+. /usr/local/lib/argerrmsgs || exit 1  ## Wrong argument error message strings
+. /usr/local/lib/nmeutils || exit 1    ## Utils for shell names
+##
+## Declare the following useful symbols:
+readonly _NULL                              ## The unset value (null ptr), not to be confused w/the null string;
+[ "$_SPC" ] || readonly _SPC="${IFS%??}"    ## Space (readonly uses a word for assignment's LHS);
+[ "$_EOL" ] || readonly _EOL="${IFS#??}"    ## End of line;
+[ "$_TAB" ] || { _TAB=${IFS%?}; readonly _TAB="${_TAB#?}"; } ## And the tab.
+##
+##
 if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
-    ## Already included test flag
-    readonly _DEF_STRNGUTILS=:
+    readonly _DEF_STRNGUTILS=:    ## Already included test flag
     ##
     ## Constants for default values (Respect previously defined values, but now make them constant ---------------------
-    readonly _TRM_STR_DFLT_DFLT=${_TRM_STR_DFLT_DFLT:-"$IFS"}       ## Default trim string
-    readonly _INS_STR_IDX_DFLT_DFLT=${_INS_STR_IDX_DFLT_DFLT:-0}; ## Insert string defalut index def constant
+    readonly _TRM_CHS_DFLT="${_TRM_CHS_DFLT:-$IFS}" ## Default chars to trim
+    readonly _RPT_LEN_DFLT="${_RPT_LEN_DFLT:-80}"   ## Default length for repeat string
+    readonly _INS_IDX_DFLT="${_INS_IDX_DFLT:-0}"    ## Insert string defalut index def constant
     ##
     ## Runtime configuration values ------------------------------------------------------------------------------------
-    _TRM_STR_DFLT=$_TRM_STR_DFLT_DFLT         ## Default trim string
-    _INS_STR_IDX_DFLT=$_INS_STR_IDX_DFLT_DFLT ## Insert string default index
+    _TRM_CHS=$_TRM_CHS_DFLT ## Default chars to trim
+    _RPT_LEN=$_RPT_LEN_DFLT ## Default length to repeat string
+    _INS_IDX=$_INS_IDX_DFLT ## Insert string default index
     ##
-    ## Function declarations    
-    __ltrim() { #@ DESCRIPTION: Primitive. Trim optional $5 chars from $4 string's left side, and write remaining string
+    ## Function declarations--------------------------------------------------------------------------------------------
+    ##
+    ## String tests (validation) functions -----------------------------------------------------------------------------
+    _substr() { #@ DESCRIPTION:
+                #@ USAGE:
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local clr sub str
+        clr=${1:?"_substr: $_MSNGERR_CLN"} ## Require the calling function's name
+        shift 1
+        ## Function Header
+        sub=${1?"$clr: $_MSNGERR_ARG"}
+        str=${2?"$clr: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.
+        case $str in              ## Does string match substring w/additional left or right chars?
+            *"$sub"*) return 0 ;; ## Yes, then it is a substring
+        esac                      ##
+        return 1                  ## No, hence it is not a substring
+    }
+    substr() { #@ DESCRIPTION: Tests if $1 string is contained in string $2
+                 #@ USAGE: substr '[ STRING1 ]' '[ STRING2 ]'
+        ## Function Header
+        set -- ${1+"$1"} ${2+"$2"}
+        _substr "substr" "$@"
+    }
+    supstr() { #@ DESCRIPTION: Tests if $1 string contains string $2
+                 #@ USAGE: issupstr '[ STRING1 ]' '[ STRING2 ]'
+        ## Function Header
+        set -- ${2+"$2"} ${1+"$1"} ## Invert arguments order
+        _substr "substr" "$@"  ## Now check if $2 is substring of $1
+    }
+    isnul() { #@ DESCRIPTION: Tests if $1 string contains any characters (other than '\0')
+               #@ USAGE: null '[ TEST_STRING ]'
+        ## Function Header
+        set -- ${1+"$1"}
+        substr "$@" "" ## Is $1 substring of the null?
+    }
+    nmronly() { #@ DESCRIPTION: Tests if $1 string contains only numeric characters
+                #@ USAGE: nmronly '[ TEST_STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local str
+        ## Function header
+        str=${1?"nmronly: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.
+        case $str in              ## Test if the string is null or contains nondigit chars
+            *[!0-9]*) return 1 ;; ## Contains non numeric chars
+        esac
+    }
+    alponly() { #@ DESCRIPTION: Tests if $1 string contains only alphabetic characters
+                #@ USAGE alponly '[ STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local str
+        ## Function header
+        str=${1?"alponly: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.
+        ## Test fails if string is null or contain nona alphabetic chars
+        case $str in
+            *[!A-Za-z]*) return 1 ;; ## Non alphabetic chars found
+        esac
+    }
+    alnonly() { #@ DESCRIPTION: Tests if $1 string is alphanumeric
+                #@ USAGE: alnmronly '[ TEST_STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local str
+        ## Function header
+        str=${1?"alnonly: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.
+        case $str in ## Test for non alphabetic characters
+            *[!A-Za-z0-9]*) return 1 ;;
+        esac
+    }
+    valintf() { #@ DESCRIPTION: Tests if $1 contains a valid integer FORMATED string. Useful to check vars before using
+                #@              them within arithmetic expansion. Remember that in POSIX shell arithmetic evaluation:
+                #@              * Only signed long integer arithmetic is required;        
+                #@              * Only the decimal, octal and hexadecimal constants are required to be recognized;
+                #@              * Constants with a leading 0 are interpreted as octal numbers;
+                #@              * A leading 0x or 0X denotes hexadecimal;
+                #@ USAGE: valintf '[ TEST_STRING ]'
+                #@        This however tests only string's format and NOT its size.
+        ## Function header
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local str
+        ## Function header
+        str=${1?"valintf: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.        
+        str=${str#[\-+]}                            ## Remove single +/- sign from string's front
+        case $str in                                ## Now check on unsigned string:
+            "") return 1 ;;                         ## Fail if empty (empty strings are not supported by arithm. eval)
+            0[xX]*) case ${str#??} in               ## If hexadecimal notation is used, remove leading [o0]x
+                        *[!0-9A-Fa-f]*) return 2 ;; ## Fail if non-hexadecimal digit chars are present
+                    esac ;;
+            0*) case ${str#?} in                    ## If octal notation is used, emove leading 0
+                    *[!0-7]*) return 3 ;;           ## Fail if non-hexadecimal digit chars are present
+                esac ;;
+            *) nmronly "$str" || return 4 ;;        ## In any other case fail if non numeric chars are present
+        esac
+    }
+    valindx() { #@ DESCRIPTION: Tests if $1 contains a valid nonnegative decimal integer (i.e. an index)
+                #@ USAGE: valindx '[ TEST_STRING ]'
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local str
+        ## Function header
+        str=${1?"valindx: $_MSNGERR_ARG"}
+        shift $# ## Header ends removing any aditional pos. pars.
+        case $str in              ## Fail when:
+            "") return 1 ;;       ## * Null string;
+            *[!0-9]*) return 2 ;; ## * Contains non numeric chars;
+            0*) return 3 ;;       ## * Starts w/zero (e.g. octal notation is invalid).
+        esac
+    }
+    ##
+    ## String manipulation functions -----------------------------------------------------------------------------------
+    __ltrim() { #@ DESCRIPTION: Primitive. Trims optional $5 chars from $4 string's left side and write remaining string
                 #@              in $3 name. Argument sanity check is disabled by setting $2 to 0. If $5 is not null or
                 #@              unset, any chars from IFS will be removed from string.
-                #@ USAGE: __ltrim "CLR_FUNC" BE_UNSAFE NAME '[ STRING ]' [ TO_TRIM_STRING ]
+                #@ USAGE: __ltrim CLNG_FUNC BE_UNSAFE NAME '[ STRING ]' [ UNWANTED_CHARS ]
                 #@        DO NOT CALL DIRECTLY, call through below derivatives instead
         ## Local variables (If local is used, it should appear as the first statement of a function)
-        local clr unsf r_trstr trstr ttrm trim
-        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
-        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
+        local cln usf r_trstr trstr ttrm trim
+        cln=${1:?"__ltrim: $_MSNGERR_CLN"} ## Require the calling function's name
+        usf=${2:?"$cln: $_MSNGERR_UNA"}    ## Be un safe flag. Enables parameters sanity check
+        shift 2
         ## Function header
-        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
-        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
-        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
+        r_trstr=${1?"$cln: $_MSNGERR_NMA"} ## Name where to write the trimmed string
+        trstr=${2?"$cln: $_MSNGERR_UNA"}   ## String to be trimmed
+        ttrm=${3:-"$_TRM_CHS"}             ## What chars to trim from left side of above string
         shift $#        
-        case $unsf in ## Arguments sanity check
-            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) refnme "$r_trstr" || ${1?"$cln: $_BADERR_RNA"} ;; ## Require a valid name in $2;
         esac
         trim=$trstr
-        trstr=${trim%%[!"$ttrm"]*}  ## Remove unwanted chars from right
+        trstr=${trim%%[!"$ttrm"]*}  ## Remove unwanted chars from right (inner quoting avoid spec. chars expansion)
         trstr=${trim#"$trstr"}      ## Remove above's remaining chars from left
         setvar -u $r_trstr "$trstr" ## Assign to referenced var
     }
-    _ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Trim optional $3 substring from $2 string's left side, and
+    _ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Trims optional $3 chars from $2 string's left side, and
                #@              write remaining string in $1 name. Argument sanity check is enforced. If $3 is not null
                #@              or unset, any chars from IFS will be removed from string.
-               #@ USAGE:  _ltrim NAME '[ STRING ]' [ TO_TRIM_STRING ]
+               #@ USAGE:  _ltrim NAME '[ STRING ]' [ UNWANTED_CHARS ]
         set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __ltrim "_ltrim" 0 "$@"
+        __ltrim _ltrim 0 "$@"
     }
     _ltrim_u() { #@ DESCRIPTION: Derived wrapper for __ltrim(). This one provides the same as above _ltrim() but in
                  #@              unsafe mode (i.e. without sanity checks upon arguments). Usefull to avoid overhead.
-                 #@ USAGE: _ltrim_u NAME '[ STRING ]' [ TO_TRIM_STRING ]
+                 #@ USAGE: _ltrim_u NAME '[ STRING ]' [ UNWANTED_CHARS ]
         set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __ltrim "_ltrim_u" 1 "$@"
+        __ltrim _ltrim_u 1 "$@"
     }
-    ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim().
-              #@ USAGE:  ltrim NAME '[ STRING ]' [ TO_TRIM_STRING ]
+    ltrim() { #@ DESCRIPTION: Derived wrapper for __ltrim(). This one trims optional $2 chars from $1, and prints
+              #@              remaining string to STDOUT rather than storing it in a name. Argument check is enabled.
+              #@ USAGE:  ltrim NAME '[ STRING ]' [ UNWANTED_CHARS ]
         ## Local variables (If local is used, it should appear as the first statement of a function)
         local ___ltrim
         ## Function header
         set -- ${1+"$1"} ${2+"$2"}
-        __ltrim "ltrim" 0 ___ltrim "$@"
-        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
+        ___ltrim=                     ## Left side trimmed string storage
+        __ltrim ltrim 0 ___ltrim "$@"
+        isnul "$___ltrim" || printf "%s\n" "$___ltrim"
     }
-    ltrim_u() { #@ DESCRIPTION: Derived wrapper for __ltrim().
-                #@ USAGE: ltrim_u NAME '[ STRING ]' [ TO_TRIM_STRING ]
+    ltrim_u() { #@ DESCRIPTION: Derived wrapper for __ltrim(). This one provides same as above ltrim() but w/argument
+                #@              check disabled.
+                #@ USAGE: ltrim_u NAME '[ STRING ]' [ UNWANTED_CHARS ]
         ## Local variables (If local is used, it should appear as the first statement of a function)
         local ___ltrim
         ## Function header
         set -- ${1+"$1"} ${2+"$2"}
-        __ltrim "ltrim_u" 1 ___ltrim "$@"
-        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
+        ___ltrim=                       ## Left side trimmed string storage
+        __ltrim ltrim_u 1 ___ltrim "$@"
+        isnul "$___ltrim" || printf "%s\n" "$___ltrim"
     }
-    _usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+    _usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Intended to be used w/numeric strings, it safely Removes
+                 #@              any +\- chars from the front of the string $2 string storing the result to $1 name.
                  #@ USAGE: _usgnstr NAME '[ STRING ]'
         set -- ${1+"$1"} ${2+"$2"}
-        __ltrim "_usgnstr" 0 "$@" "\-+"
+        __ltrim _usgnstr 0 "$@" "\-+"
     }
-    _usgnstr_u() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+    _usgnstr_u() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Same as above _usgnstr() but without sanity check upon
+                   #@              parameters.
                    #@ USAGE: _usgnstr_u NAME '[ STRING ]'
         set -- ${1+"$1"} ${2+"$2"}
-        __ltrim "_usgnstr" 1 "$@" "\-+"
+        __ltrim _usgnstr_u 1 "$@" "\-+"
     }
-    usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim().
+    usgnstr() { #@ DESCRIPTION: Derived wrapper for __ltrim(). Same as above _usgnstr() but printing results to STDOUT
+                #@              rather than storing it in a name. No sanity check upon args is required.
                 #@ USAGE: usgnstr '[ STRING ]'
         ## Local variables (If local is used, it should appear as the first statement of a function)
         local ___ltrim
         ## Function header
         set -- ${1+"$1"}
-        __ltrim "usgnstr" 0 ___ltrim "$@" "\-+"
-        [ "$___ltrim" ] && printf "%s\n" "$___ltrim"
+        ___ltrim=                       ## Left side trimmed string storage
+        __ltrim usgnstr 0 ___ltrim "$@" "\-+"
+        isnul "$___ltrim" || printf "%s\n" "$___ltrim"
     }
-    __rtrim() { #@ DESCRIPTION:
-                #@ USAGE:
-        local clr unsf r_trstr trstr ttrm trim
-        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
-        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
+    __rtrim() { #@ DESCRIPTION: Primitive. Trims optional $5 chars from $4 string's right side, and write remaining
+                #@              string in $3 name. Argument sanity check is disabled by setting $2 to 0. If $5 is not
+                #@              null or unset, any chars from IFS will be removed from string.
+                #@ USAGE: __rtrim CLN_FUNC BE_UNSAFE NAME '[ STRING ]' [ UNWANTED_CHARS ]
+                #@        DO NOT CALL DIRECTLY, call through below derivatives instead
+        ## Local variables (If local is used, it should appear as the first statement of a function)        
+        local cln usf r_trstr trstr ttrm trim
+        cln=${1:?"__rtrim: $_MSNGERR_CLN"} ## Require the calling function's name
+        usf=${2:?"$cln: $_MSNGERR_UNA"}    ## Be un safe flag. Enables parameters sanity check
+        shift 2
         ## Function header
-        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
-        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
-        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
+        r_trstr=${1?"$cln: $_MSNGERR_NMA"} ## Name where to write the trimmed string
+        trstr=${2?"$cln: $_MSNGERR_UNA"}   ## String to be trimmed
+        ttrm=${3:-"$_TRM_CHS"}             ## What to trim from left side of above string
         shift $#
-        case $unsf in ## Arguments sanity check
-            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) refnme "$r_trstr" || ${1?"$cln: $_BADERR_RNA"} ;; ## Require a valid name in $2;
         esac        
         trim=$trstr
         trstr=${trim##*[!"$ttrm"]}  ## Remove unwanted chars from left
-        trstr=${trim%"trstr"}       ## Remove above's remaining chars from right
+        trstr=${trim%"$trstr"}      ## Remove above's remaining chars from right
         setvar -u $r_trstr "$trstr" ## Assign to referenced name
     }
-    _rtrim() { #@ DESCRIPTION:
-               #@ USAGE:
+    _rtrim() { #@ DESCRIPTION: Derived wrapper for __rtrim(). Trims optional $3 substring from $2 string's left side and
+               #@              write remaining string in $1 name. Argument sanity check is enforced. If $3 is not null
+               #@              or unset, any chars from IFS will be removed from string.
+               #@ USAGE:  _rtrim NAME '[ STRING ]' [ UNWANTED_CHARS ]
         set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __rtrim "_rtrim" 0 "$@"
+        __rtrim _rtrim 0 "$@"
     }
-    _rtrim_u() { #@ DESCRIPTION:
-               #@ USAGE:
+    _rtrim_u() { #@ DESCRIPTION: Derived wrapper for __rtrim(). This one provides the same as above _rtrim() but in
+                 #@              unsafe mode (i.e. without sanity checks upon arguments). Usefull to avoid overhead.
+                 #@ USAGE: _rtrim_u NAME '[ STRING ]' [ UNWANTED_CHARS ]
         set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __rtrim "_rtrim" 1 "$@"
+        __rtrim _rtrim_u 1 "$@"
     }
-    rtrim() { #@ DESCRIPTION:
-              #@ USAGE:
+    rtrim() { #@ DESCRIPTION: Derived wrapper for __rtrim(). This one trims optional $2 chars from $1, but prints
+              #@              remaining string to STDOUT rather than storing it in a name. Argument check is enabled.
+              #@ USAGE:  rtrim NAME '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___rtrim
+        ## Function header
+        ___rtrim=
+        set -- ${1+"$1"} ${2+"$2"}
+        __rtrim rtrim 0 ___rtrim "$@"
+        isnul "$___rtrim" || printf "%s\n" "$___rtrim"
+    }
+    rtrim_u() { #@ DESCRIPTION: Derived wrapper for __rtrim(). This one provides same as above rtrim() but w/argument
+                #@              check disabled.
+                #@ USAGE: rtrim_u NAME '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
         local ___rtrim
         ## Function header
         set -- ${1+"$1"} ${2+"$2"}
-        __rtrim "rtrim" 0 ___rtrim "$@"
-        [ "$___rtrim" ] && printf "%s\n" "$___rtrim"
+        ___rtrim=
+        __rtrim rtrim_u 1 ___rtrim "$@"
+        isnul "$___rtrim" || printf "%s\n" "$___rtrim"
+    }
+    _trim() { #@ DESCRIPTION: Trims optional $3 chars from $2 string's front and back, and write remaining string in $1
+              #@              referenced name. Argument sanity check is enforced.
+              #@ USAGE: _trim NAME '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __ltrim _trim 0 "$@"                    ## Start by removing unwanted chars from the front
+        eval "_rtrim_u $1 \"\$$1\" ${3+\"$3\"}" ## Same name to write to, but use result of previous as trim string
+    }
+    _trim_u() { #@ DESCRIPTION: Provides the same as above but without sanity checks upon arguments.
+                #@ USAGE: _trim_u NAME '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __ltrim _trim_u 1 "$@"
+        eval "_rtrim_u $1 \"\$$1\" ${3+\"$3\"}"
+    }
+    trim() { #@ DESCRIPTION: Trims $2 optional chars from $1 string's front and back, writting result to STDOUT.
+             #@              Argument sanity check is enabled.
+             #@ USAGE: trim '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___trim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        ___trim=
+        __ltrim trim 0 ___trim "$@"
+        rtrim_u "$___trim" ${2+"$2"}
+    }
+    trim_u() { #@ DESCRIPTION: Trims $2 optional chars from $1 string's front and back, writting result to STDOUT.
+               #@              Argument sanity check is disabled.
+               #@ USAGE: trim_u '[ STRING ]' [ UNWANTED_CHARS ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___trim
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        ___trim=
+        __ltrim trim_u 1 ___trim "$@"
+        set -- "$___trim" ${2+"$2"}
+        rtrim_u "$@"
+    }
 
-    }
-    rtrim_u() { #@ DESCRIPTION:
-                #@ USAGE:
-        local ___rtrim
-        ## Function header
-        set -- ${1+"$1"} ${2+"$2"}
-        __rtrim "rtrim" 1 ___rtrim "$@"
-        [ "$___rtrim" ] && printf "%s\n" "$___rtrim"
-    }
-    __trim() { #@ DESCRIPTION:
-               #@ USAGE:
+    __repeat() { #@ DESCRIPTION: Primitive. Repeat $4 string until $5 string lenght is reached and write it to name $3.
+                 #@              By default it performs check on each argument, but by setting $2 to 0 it is disabled.
+                 #@ USAGE: __repeat CLNG_FUNC BE_UNSAFE NAME '[ STRING ]' [ LENGTH ]
+                 #@       DO NOT CALL DIRECTLY, call through below derivatives instead.
         ## Local variables (If local is used, it should appear as the first statement of a function)
-        local clr unsf r_trstr trstr ttrm __trim
-        clr=${1:?"__ltrim: $_MSNG_CLR_ERR_MSG"}       ## Require the calling function's name
-        unsf=${2:?"$clr: $_MSNG_ARG_ERR_MSG"} shift 2 ## Be un safe flag. Enables parameters sanity check
+        local cln usf r_rptd rpstr len olen ostr tmp
+        cln=${1:?"__rtrim: $_MSNGERR_CLN"} ## Require the calling function's name
+        usf=${2:?"$cln: $_MSNGERR_UNA"}    ## Be un safe flag. Enables parameters sanity check
+        shift 2
         ## Function header
-        r_trstr=${1:?"$clr: $_MSNG_NMA_ERR_MSG"} ## Name where to write the trimmed string
-        trstr=${2?"$clr: $_MSNG_ARG_ERR_MSG"}    ## String to be trimmed
-        ttrm=${3:-"$_TRM_STR_DFLT"}              ## What to trim from left side of above string
-        shift $#        
-        case $unsf in ## Arguments sanity check
-            0) cnvnme "$r_trstr" || ${1?"$clr: $_BAD_CNA_ERR_MSG"} ;; ## Require a valid name in $2;
-        esac
-        _ltrim __trim "$trstr" "$ttrm"
-        _rtrim __trim "$__trim" "$ttrm"
-        setvar -u $r_trstr "%s" "$__trim"
-    }
-    _trim() { #@ DESCRIPTION:
-              #@ USAGE:
-        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __trim "_trim" 0 "$@"
-    }
-    _trim_u() { #@ DESCRIPTION:
-                #@ USAGE:
-        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
-        __trim "_trim" 1 "$@"
-    }
-    trim() { #@ DESCRIPTION:
-             #@ USAGE:
-        ## Local variables (If local is used, it should appear as the first statement of a function)
-        local ___trim
-        ## Function header
-        set -- ${1+"$1"} ${2+"$2"}
-        __trim "trim" 0 ___trim "$@"
-        [ "$___trim" ] && printf "%s\n" "$___trim"
-    }
-    trim_u() { #@ DESCRIPTION:
-               #@ USAGE:
-        ## Local variables (If local is used, it should appear as the first statement of a function)
-        local ___trim
-        ## Function header
-        set -- ${1+"$1"} ${2+"$2"}
-        __trim "trim" 1 ___trim "$@"
-        [ "$___trim" ] && printf "%s\n" "$___trim"
-    }
-    
-    __repeat() { #@ DESCRIPTION: Primitive. Repeat $3 string until $4 string lenght is reached and write it to name $2.
-                 #@              By default it performs check on each argument, but by setting $1 to 0 it is disabled.
-                 #@ USAGE: __repeat BE_UNSAFE NAME '[ STRING ]' [ LENGTH ]
-                 #@       DO NOT CALL DIRECTLY, call through below derivatives
-        ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be un safe flag. Enables parameters sanity check
-        local ref_rep=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"} ## Reference where to write the repeated string
-        local repstr=${3?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}   ## The string to be repeated
-        local len=${4:-1}                                        ## Maximum length in characters
+        r_rptd=${1:?"$cln: $_MSNGERR_NMA"} ## Reference where to write the repeated string
+        rpstr=${2?"$cln: $_MSNGERR_UNA"}   ## The string to be repeated
+        len=${3:-"$_RPT_LEN"}              ## Maximum (desired) length in characters
         shift $#
-        
-        case $unsf in ## Arguments sanity check
-            0)
-                validname "$ref_rep" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ## We require a valid name in $2;
-                isnull "$repstr" && ${3?"${FUNCNAME[1]}: $_BAD_NNA_ERR_MSG"}     ## A non-null string to repeat;
-                valindex "$len" || ${4?"${FUNCNAME[1]}: $_BAD_IDA_ERR_MSG"} ;;   ## And a non-negative decimal.
+        case $usf in ## Arguments sanity check
+            0)  refnme "$r_rptd" || ${1?"$cln: $_BADERR_RNA"}   ## We require a valid name in $2;
+                valindx "$len" || ${3?"$cln: $_BADERR_IDA"} ;;  ## And a non-negative decimal.
         esac
-        (( ${#repstr} )) && while (( ${#repstr} < $len )); do ## Loop until string exceeds desired length
-            repstr+=$repstr$repstr                            ## 3 seems to be the optimum number
-        done
-        printf -v $ref_rep "%s" "${repstr:0:$len}"            ## Trim to desired length & write result
+        if [ "$rpstr" ]; then               ## Do we have anything at all to repeat?
+            ostr= olen=0                    ## Output string and its length respectively
+            while :; do                     ## Concat. repeat-str in output stopping before ouput's lenght > Maximum
+                olen=$((olen + ${#rpstr}))  ## Get ouput's length plus one more repeat-str
+                [ $olen -gt $len ] && break ## If we are going to exceed max, stop.
+                ostr=$ostr$rpstr            ## Otherwise concat one more repeat-str
+            done                            ## Now we canNOT add one more whole repeat-str to output
+            while [ ${#ostr} -lt $len ]; do ## Add one char from repeat-str until max is reached
+                tmp=${rpstr#?}              ## Remove repeat-string's first char and store it temporairly
+                ostr=$ostr${rpstr%"$tmp"}   ## Remove accumulate repeat-str's first char in output
+                rpstr=$tmp                  ## Refresh repeat-str's by removing its first char
+            done
+        fi
+        setvar -u $r_rptd "$ostr"           ## Store output in referenced string
     }
     _repeat() { #@ DESCRIPTION: Derived
                 #@ USAGE:
-        set -- "${@:1:3}"
-        __repeat 0 "$@"
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __repeat _repeat 0 "$@"
     }
     _repeat_u() { #@ DESCRIPTION: Derived
                   #@ USAGE:
-        set -- "${@:1:3}"
-        __repeat 1 "$@"
+        set -- ${1+"$1"} ${2+"$2"} ${3+"$3"}
+        __repeat _repeat_u 1 "$@"
     }
-    repeat() { #@ DESCRIPTION: Derived. Repeat a repstr N times
+    repeat() { #@ DESCRIPTION: Derived. Repeat a rpstr N times
                #@ USAGE: repeat [ __repeat args ]
-        set -- "${@:1:2}"                                   ## Keep only the first 2 arguments
-        local ___rpt=                                       ## Variable to be written by _repeat
-        __repeat 0 ___rpt "$@"
-        [ -n "$___rpt" ] && printf "%s\n" "$___rpt"
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___rpt
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        ___rpt=
+        __repeat repeat 0 ___rpt "$@"
+        isnul "$___rpt" || printf "%s\n" "$___rpt"
     }
-    repeat_u() { #@ DESCRIPTION: Derived
-                 #@ USAGE:
-        set -- "${@:1:2}"                                   ## Keep only the first two arguments
-        local ___rpt=                                       ## Variable to be written by _repeat
-        __repeat 1 ___rpt "$@"
-        [ -n "$___rpt" ] && printf "%s\n" "$___rpt"
+    repeat_u() { #@ DESCRIPTION: Derived. Repeat a rpstr N times
+                 #@ USAGE: repeat [ __repeat args ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___rpt
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        ___rpt=
+        __repeat repeat_u 1 ___rpt "$@"
+        isnul "$___rpt" || printf "%s\n" "$___rpt"
     }
 
     __revstr() { #@ DESCRIPTION: Functio core. Reverse $2 string order and store results
                  #@ USAGE: revstr BE_UNSAFE NAME [ STRING ]
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local cln usf r_str strng tmp rvstr
+        cln=${1:?"__rtrim: $_MSNGERR_CLN"} ## Require the calling function's name
+        usf=${2:?"$cln: $_MSNGERR_UNA"}    ## Be un safe flag. Enables parameters sanity check
+        shift 2
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"} ## Be safe flag. Enables parameters validation
-        local ref_str=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
-        local string=$3
+        r_str=${1?"$cln: $_MSNGERR_NMA"}
+        strng=$2
         shift $#
-
-        local temp= revstr=                 ## Now revstr is a local variable       
-        case $unsf in ## Arguments sanity check
-            0) validname "$ref_str" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) refnme "$r_str" || ${2?"$cln: $_BADERR_RNA"} ;; ## We require a valid name in $2;
         esac
-        while [ -n "$string" ]; do          ## While string's size is not zero..
-            temp=${string#?}                ## Get everything but first char on temp
-            revstr=${string%"$temp"}$revstr ## Then get first char only, and place it at the beginning of global
-            string=$temp                    ## Replace string with temp (remove its first char)
+        tmp= rvstr=                        ## A temporary storage and reversed string
+        while [ "$strng" ]; do             ## While string's size is not zero..
+            tmp=${strng#?}                 ## Get everything but first char on temp
+            rvstr=${strng%"$tmp"}$rvstr    ## Then get first char only, and place it at the beginning of reversed string
+            strng=$tmp                     ## Replace string with temp (remove its first char)
         done
-        printf -v $ref_str "%s" "$revstr"   ## Print reversed string to referenced variable
+        setvar -u $r_str "$rvstr"          ## Print reversed string to referenced variable
     }
     _revstr() { #@ DESCRIPTION:
                 #@ USAGE:
-        set -- "${@:1:2}"
-        __revstr 0 "$@"
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __revstr _revstr 0 "$@"
     }
     _revstr_u() { #@ DESCRIPTION:
                   #@ USAGE:
-        set -- "${@:1:2}"
-        __revstr 1 "$@"
+        ## Function header
+        set -- ${1+"$1"} ${2+"$2"}
+        __revstr _revstr_u 1 "$@"
     }
     revstr() { #@ DESCRIPTION: Print reverse version of the string $1
                #@ USAGE: revstr [ STRING ]
-        set -- "${@:1:1}"
-        local ___rvstr=           ## Storage for refstr output
-        __revstr 0 ___rvstr "$@"  ## Revert string into above storage
-        [ -n "$___rvstr" ] && printf "%s\n" "$___rvstr" ## Print it to STDOUT
+        ## Local variables (If local is used, it should appear as the first statement of a function)
+        local ___rvstr
+        set -- ${1+"$1"}
+        ___rvstr=                        ## Storage for refstr output
+        __revstr revstr 0 ___rvstr "$@"  ## Revert string into above storage
+        isnul "$___rvstr" || printf "%s\n" "$___rvstr" ## Print it to STDOUT
     }
     revstr_u() { #@ DESCRIPTION:
                  #@ USAGE:
         set -- "${@:1:1}"
-        local ___rvstr=           ## Storage for refstr output
-        __revstr 1 ___rvstr "$@"  ## Revert string into above storage
-        [ -n "$___rvstr" ] && printf "%s\n" "$___rvstr" ## Print it to STDOUT
+        local ___rvstr=                    ## Storage for refstr output
+        __revstr refstr_u 1 ___rvstr "$@"  ## Revert string into above storage
+        isnul "$___rvstr" || printf "%s\n" "$___rvstr" ## Print it to STDOUT
     }
 
+    dec2oct() {
+        local cln usf r_oct dec oct
+        cln=${1:?"__rtrim: $_MSNGERR_CLN"} ## Require the calling function's name
+        usf=${2:?"$cln: $_MSNGERR_UNA"}    ## Be un safe flag. Enables parameters sanity check
+        shift 2
+        ## Function header
+        r_oct=${1:?"$cln: $_MSNGERR_NMA"}
+        
+        while [ $dec -ne 0 ]; do
+            oct=$((dec%8))$oct
+            dec=$((dec/8))
+        done
+        
+    }
+    
+    chr() {
+        
+        
+        [ "$1" -lt 256 ] || return 1
+        printf "\\$(printf '%03o' "$1")"
+    }
+
+    ord() {
+        LC_CTYPE=C printf '%d' "'$1"
+    }
+
+    
     __lower() { #@ DESCRIPTION:
                 #@ USAGE:
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}
-        local ref_c=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}
+        local ref_c=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}
         local str=$3
         shift $#
 
         local lwr=
-        case $unsf in ## Arguments sanity check
-            0) validname "$ref_c" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) validname "$ref_c" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"} ;; ## We require a valid name in $2;
         esac
         case $str in
             A*) lwr=a ;; B*) lwr=b ;; C*) lwr=c ;; D*) lwr=d ;;
@@ -333,14 +514,14 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
     __to_lower() { #@ DESCRIPTION:
                    #@ USAGE:
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}
-        local ref_wrd=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}
+        local ref_wrd=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}
         local word=$3
         shift $#
 
         local __lwr=
-        case $unsf in ## Arguments sanity check
-            0) validname "$ref_wrd" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) validname "$ref_wrd" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"} ;; ## We require a valid name in $2;
         esac
         _lower __lwr "$word"
         printf -v $ref_wrd "%s%s" "$__lwr" "${word#?}"
@@ -372,15 +553,15 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
     __loword() { #@ DESCRIPTION:
                  #@ USAGE:
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}
-        local ref_word=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}
+        local ref_word=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}
         local word=$3
         shift $#
 
         local __lwr= loword=
         ## 
-        case $unsf in
-            0) validname "$ref_word" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in
+            0) validname "$ref_word" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"} ;; ## We require a valid name in $2;
         esac
         while [ -n "$word" ]; do   ## Loop until nothing is left in $word
             _lower_u __lwr "$word" ## Change to uppercase word's first char, storing it in __lwr
@@ -413,14 +594,14 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
     __upper() { #@ DESCRIPTION: 
                 #@ USAGE:
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}
-        local ref_c=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}
+        local ref_c=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}
         local str=$3
         shift $#
 
         local upr=
-        case $unsf in ## Arguments sanity check
-            0) validname "$ref_c" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in ## Arguments sanity check
+            0) validname "$ref_c" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"} ;; ## We require a valid name in $2;
         esac
         case $str in
             a*) upr=A ;; b*) upr=B ;; c*) upr=C ;; d*) upr=D ;;
@@ -482,15 +663,15 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
     }
     __upword() { #@ DESCRIPTION:
                  #@ USAGE:
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}
-        local ref_word=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}
+        local ref_word=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}
         local word=$3
         shift $#
 
         local __uppr= upword=
         ##
-        case $unsf in
-            0) validname "$ref_word" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"} ;; ## We require a valid name in $2;
+        case $usf in
+            0) validname "$ref_word" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"} ;; ## We require a valid name in $2;
         esac
         while [ -n "$word" ]; do  ## Loop until nothing is left in $word
             _upper __uppr "$word" ## Change to uppercase word's first char, storing it in _t_uppr
@@ -529,18 +710,18 @@ if [ ! "$_DEF_STRNGUTILS" ]; then ## Do not include if already included
                         #@ USAGE: __insert_string BE_UNSAFE NAME STRING '[ STRING ]' [ INDEX ]
                         #@       DO NOT CALL DIRECTLY, call through below derivative wrappers
         ## Function header
-        local -r unsf=${1:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}   ## Be un safe flag. Enables parameters sanity check
-        local ref_cstr=${2:?"${FUNCNAME[1]}: $_MSNG_NMA_ERR_MSG"}  ## Name where to write inserted string
-        local string=${3:?"${FUNCNAME[1]}: $_MSNG_ARG_ERR_MSG"}    ## Input string
-        local instr=${4?"${FUNCNAME[1]}: $_MSNG_NNA_ERR_MSG_DFLT"} ## String to be inserted to input
-        local idx=${5:-$_INS_STR_IDX_DFLT}                         ## Insert default index value (from 0 to length - 1)
+        local -r usf=${1:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}   ## Be un safe flag. Enables parameters sanity check
+        local ref_cstr=${2:?"${FUNCNAME[1]}: $_MSNGERR_NMA"}  ## Name where to write inserted string
+        local string=${3:?"${FUNCNAME[1]}: $_MSNGERR_ARG"}    ## Input string
+        local instr=${4?"${FUNCNAME[1]}: $_MSNGERR_NNA"} ## String to be inserted to input
+        local idx=${5:-$_INS_STR_IDX}                         ## Insert default index value (from 0 to length - 1)
         shift $#
 
         local uidx=0
-        case $unsf in ## Arguments sanity check
+        case $usf in ## Arguments sanity check
             0)
-                validname "$ref_cstr" || ${2?"${FUNCNAME[1]}: $_BAD_NMA_ERR_MSG"}
-                valdecint "$idx" || ${5?"${FUNCNAME[1]}: $_BAD_IDA_ERR_MSG"}
+                validname "$ref_cstr" || ${2?"${FUNCNAME[1]}: $_BADERR_NMA"}
+                valdecint "$idx" || ${5?"${FUNCNAME[1]}: $_BADERR_IDA"}
                 _unsgnstr_u uidx "$idx"
                 if (( ${#string} < $uidx )); then
                     printf "%s\n" "${FUNCNAME[1]}: Insertion index out of range" >&2

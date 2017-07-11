@@ -5,28 +5,30 @@
 #: Description : Dash declarations file
 #:             : Adds usefull error messages as global variables
 #: Options     : N/A
+
 ##
+## Error message symbols
 if [ ! "$_DEF_MSNGARGERRS" ]; then ## Do not include if already included
     ## Already included test flag
     readonly _DEF_MSNGARGERRS=:
     ##
-    ## Reserve a symbol for null constant. useful when stopping execution w/"Display  Error if Null or Unset" param. exp.
-    readonly _NULL
-    ##
     ## Constants for default error messages (Respect previously defined values, but now make them constant -----------------
     ## Error messages for missing..
-    readonly _MSNG_ARG_ERR_MSG_DFLT=${_MSNG_ARG_ERR_MSG_DFLT:-"Missing argument"}         ## An argument;
-    readonly _MSNG_NMA_ERR_MSG_DFLT=${_MSNG_NMA_ERR_MSG_DFLT:-"Missing name argument"}    ## A name argument;
-    readonly _MSNG_NNA_ERR_MSG_DFLT=${_MSNG_NNA_ERR_MSG_DFLT:-"Missing nonnull argument"} ## A Nonnull argument;
-    readonly _MSNG_INA_ERR_MSG_DFLT=${_MSNG_INA_ERR_MSG_DFLT:-"Missing integer argument"} ## An Integer argument;
-    readonly _MSNG_IDA_ERR_MSG_DFLT=${_MSNG_IDA_ERR_MSG_DFLT:-"Missing index argument"}   ## An Index argument;
-    readonly _MSNG_CLR_ERR_MSG_DFLT=${_MSNG_CLR_ERR_MSG_DFLT:-"Missing caller argument"}  ## A caller function name.
+    readonly _MSNGERRDFLT_ARG="${_MSNGERRDFLT_ARG:-Missing argument}"            ## An argument (generic);
+    readonly _MSNGERRDFLT_CLA="${_MSNGERRDFLT_CLA:-Missing calling argument}"    ## A calling function name argument;
+    readonly _MSNGERRDFLT_UNA="${_MSNGERRDFLT_UNA:-Missing unsf. flag argument}" ## A be-unsafe flag argument;
+    readonly _MSNGERRDFLT_NMA="${_MSNGERRDFLT_NMA:-Missing name argument}"       ## A name argument;
+    readonly _MSNGERRDFLT_NNA="${_MSNGERRDFLT_NNA:-Missing nonnull argument}"    ## A Nonnull argument;
+    readonly _MSNGERRDFLT_INA="${_MSNGERRDFLT_INA:-Missing integer argument}"    ## An Integer argument;
+    readonly _MSNGERRDFLT_IDA="${_MSNGERRDFLT_IDA:-Missing index argument}"      ## An Index argument.
     ##
     ## Runtime configuration values ----------------------------------------------------------------------------------------
     ## This are the ones meant to be used by the functions. Values may be updated during execution
-    _MSNG_ARG_ERR_MSG=$_MSNG_ARG_ERR_MSG_DFLT ## Missing argument error message
-    _MSNG_NMA_ERR_MSG=$_MSNG_NMA_ERR_MSG_DFLT ## Missing name arg
-    _MSNG_NNA_ERR_MSG=$_MSNG_NNA_ERR_MSG_DFLT ## Missing nonull arg
-    _MSNG_INA_ERR_MSG=$_MSNG_INA_ERR_MSG_DFLT ## Missing integer arg
-    _MSNG_CLR_ERR_MSG=$_MSNG_CLR_ERR_MSG_DFLT ## Missing caller functio name
+    _MSNGERR_ARG=$_MSNGERRDFLT_ARG ## Missing argument error message;
+    _MSNGERR_CLA=$_MSNGERRDFLT_CLA ## Missing calling function name;
+    _MSNGERR_UNA=$_MSNGERRDFLT_UNA ## Missing be-unsafe flag argument;
+    _MSNGERR_NMA=$_MSNGERRDFLT_NMA ## Missing name arg;
+    _MSNGERR_NNA=$_MSNGERRDFLT_NNA ## Missing nonull arg;
+    _MSNGERR_INA=$_MSNGERRDFLT_INA ## Missing integer arg;
+    _MSNGERR_IDA=$_MSNGERRDFLT_IDA ## Missing index argument;
 fi
